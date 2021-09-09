@@ -4,3 +4,5 @@
 
 layout: home
 ---
+
+This is a testing site for sharing short notes and visualizations.
