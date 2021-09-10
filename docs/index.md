@@ -8,4 +8,5 @@ layout: home
 This is a testing site for sharing short notes on music visualization.
 
 [Melody and Voice Alignment](./melody.md)<br/>
+[Tempo](./tempo.md)<br/>
 [Instrumentation](./instrumentation.md)
