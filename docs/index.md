@@ -5,6 +5,6 @@
 layout: home
 ---
 
-This is a testing site for sharing short notes and visualizations.
+This is a testing site for sharing short notes on music visualization.
 
 [Instrumentation](./instrumentation.md)
