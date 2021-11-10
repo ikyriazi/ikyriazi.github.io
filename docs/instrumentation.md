@@ -4,14 +4,14 @@ title: "Instrumentation"
 permalink: /instrumentation/
 ---
 
-This is a visualization of orchestra instruments. Each instrument has its own color; additionaly, instruments of the same family have colors of similar hue. As the following animations show, the goal of the visualization is to visualize instruments according to the following characteristics:
+This is a visualization of orchestra instruments. Each instrument is colored differently, but instruments of the same family have colors of similar hue. As exemplified by the animations below, the goal is to visualize instruments according to the following characteristics:
 - <b>color</b> to represent instrument and instrumental family
 - <b>length of line</b> to represent instrument's prominence / duration within the whole piece
 - <b>speed of animation</b> to represent tempo / rhythmical patterns of each instrument 
 
 <img src="../assets/instrumentation1.png" style="max-width:57.6%; min-width: 265px;"/>
 
-Instrumentation visualization with GUI (still image)
+<div>[Still image | Instrumentation visualization with GUI]</div>
 <br/><br/>
 
 <div>
@@ -26,4 +26,4 @@ Instrumentation visualization with GUI (still image)
 	</div>
 </div>
 <div style="clear:both"></div>
-<div>Final processing sketch, instrumentation comparisons with GUI</div>
+<div>[Processing sketch | Instrumentation comparisons with GUI]</div>
