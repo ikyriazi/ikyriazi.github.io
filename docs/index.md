@@ -8,12 +8,13 @@ layout: home
 This is a small site for sharing short demos on music visualization or related work.<br/>
 
 Explorations:<br/>
-[Melody and Voice Alignment](./melody.md)<br/>
+[Melodic Contours](./melodic-contours.md)<br/>
 [Tempo](./tempo.md)<br/>
 [Instrumentation](./instrumentation.md)<br/>
 
 Short notes:<br/>
 [Dynamics and Waveforms](./dynamics-waveforms.md)<br/>
+[Melody and Voice Alignment](./melody-voice-alignment.md)<br/>
 
 Presentations:<br/>
 <a href="https://www.slideshare.net/IliasKyriazis1/content-visualization-for-music-browsing" target="_blank">Content Visualization for Music Browsing | IAML 2018</a><br/>
