@@ -11,11 +11,11 @@ permalink: /melody-voice-alignment/
 		<p>Fig. 1 (License: CC BY-SA 4.0)</p>
 	</div>
 	<div>
-		The sequence of notes and the trace they leave in our memory constitute core elements of sound and music perception. Melody, the "pitched sounds arranged in musical time,”<sup>1</sup> is key in identifying works of music. Beyond the general definition above, there is also another definition, that of a prominent sequence of sounds that can be easily distinguished from other synchronous sequences, which are often of supporting nature (being known as accompaniment).
+		The sequence of notes and the trace they leave in our memory constitute core elements of sound and music perception. Melody, the "pitched sounds arranged in musical time,”<sup>1</sup> is key in work identification. Moreover, there is another definition of melody, that of a prominent sequence of sounds that can be easily distinguished from other synchronous sequences (often of a supporting nature and known as accompaniment).
 		<br/><br/>
-		The exact, note-to-note representation of melody is not prerequisite for discerning musical patterns and contours. As a side note, before the invention of modern music notation (that is, before Guido von Arezzo's Micrologus de disciplina artis musicae in 1025),<sup>2</sup> notation itself was used as an approximate indication of melody, consisting of neumes that didn't provide an exact representation of pitch but rather an indication of movement in up- or downwards directions.
+		The exact, note-to-note representation of melodies is not prerequisite for extracting musical patterns and contours. As a side note, before the invention of modern music notation (that is, before Guido von Arezzo's Micrologus de disciplina artis musicae in 1025),<sup>2</sup> notation itself was used as an approximate indication of melody, consisting of neumes that didn't provide an exact representation of pitch but rather an indication of movement in up- or downwards directions.
 		<br/><br/>
-		Moreover, apart from the horizontal sequence of sounds, there is also a vertical dimension across the different voices or instruments, which defines the work's texture and has an impact on its perception. The ways these voices / instruments<sup>3</sup> connect to each other can be various and the following list summarizes the most predominant of them:<sup>4</sup>
+		Moreover, apart from the horizontal sequence of sounds, there is also a vertical dimension across the different voices or instruments of a work, which defines its texture and has an impact on its perception. The ways the voices / instruments<sup>3</sup> connect to each other can be various and the following list summarizes the most predominant of them:<sup>4</sup>
 		<br/><br/>
 		<ul>
 		<li><i>monophonic type/alignment</i>: a single melodic line with no accompaniment</li>
