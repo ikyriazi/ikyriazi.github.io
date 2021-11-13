@@ -7,7 +7,7 @@ layout: home
 
 This is a small site for sharing short demos on music visualization or related work.<br/>
 
-Explorations:<br/>
+Concept explorations:<br/>
 [Melodic Contours](./melodic-contours.md)<br/>
 [Tempo](./tempo.md)<br/>
 [Instrumentation](./instrumentation.md)<br/>
@@ -18,6 +18,9 @@ Short notes:<br/>
 
 Projects:<br/>
 [Sound of Bremen](./sound-of-bremen.md)<br/>
+[e-Rite](./e-rite.md)<br/>
+[Fugue BWV 846](./bwv-846.md)<br/>
+[Manfred Mohr's P-197 Cubic Limit II](./mohr-p197.md)<br/>
 
 Presentations:<br/>
 <a href="https://www.slideshare.net/IliasKyriazis1/content-visualization-for-music-browsing" target="_blank">Content Visualization for Music Browsing | IAML 2018</a><br/>

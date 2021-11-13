@@ -22,7 +22,7 @@ permalink: /dynamics-waveforms/
 <br/><br/><br/>
 Visual precedents and sketches
 
-<img src="../assets/dynamicsPrecedents.png" style="max-width:57.6%; min-width: 265px;"/>
+<img src="../assets/dynamicsPrecedents.jpg" style="max-width:57.6%; min-width: 265px;"/>
 
 
 

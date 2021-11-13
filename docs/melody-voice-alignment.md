@@ -31,7 +31,7 @@ permalink: /melody-voice-alignment/
 <br/><br/><br/>
 Visual precedents and sketches
 
-<img src="../assets/voicePrecedents.png" style="max-width:57.6%; min-width: 265px;"/>
+<img src="../assets/voicePrecedents.jpg" style="max-width:57.6%; min-width: 265px;"/>
 
 
 
