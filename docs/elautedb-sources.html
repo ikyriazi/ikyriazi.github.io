@@ -1,0 +1,210 @@
+---
+layout: elautedb
+permalink: /elautedb-sources/
+custom_css:
+  - https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css
+  - https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap
+  - /assets/css/ex15.css
+custom_js:
+  - https://code.jquery.com/jquery-3.7.1.min.js
+  - https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js
+  - https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js
+  - /assets/js/ex15.js
+---
+
+<!-- Top Controls Group -->
+<div class="top-controls-group">
+  <!-- Global search bar -->
+  <div class="global-search-container">
+    <input id="globalSearch" type="text" placeholder="Search..." autocomplete="off">
+  </div>
+
+  <!-- Filter Button -->
+  <button id="filterBtn" class="filter-button" aria-label="Open Filters">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="4" y1="21" x2="4" y2="14"></line>
+      <line x1="4" y1="10" x2="4" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12" y2="3"></line>
+      <line x1="20" y1="21" x2="20" y2="16"></line>
+      <line x1="20" y1="12" x2="20" y2="3"></line>
+      <line x1="1" y1="14" x2="7" y2="14"></line>
+      <line x1="9" y1="8" x2="15" y2="8"></line>
+      <line x1="17" y1="16" x2="23" y2="16"></line>
+    </svg>
+    <span>Filters</span>
+  </button>
+
+  <!-- Reset Button -->
+  <button id="resetBtn" class="reset-button" aria-label="Reset All">
+    <span>Reset</span>
+  </button>
+</div>
+
+<!-- Modal Overlay -->
+<div id="filterModal" class="filter-modal">
+  <div class="filter-modal-content">
+    <!-- Modal Header -->
+    <div class="filter-modal-header">
+      <h2>Filters</h2>
+      <button id="closeModal" class="close-modal" aria-label="Close Filters">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div id="filterCount" style="display: none;"></div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="filter-modal-body">
+      <!-- Physical type Segmented Button -->
+      <div id="physicalTypeContainer">
+        <div class="filter-label">Physical type</div>
+        <div class="segmented-control">
+          <button class="segment-btn active" data-value="both">Both</button>
+          <button class="segment-btn" data-value="print">Print</button>
+          <button class="segment-btn" data-value="manuscript">Manuscript</button>
+        </div>
+      </div>
+      
+      <!-- Fundamenta Segmented Button -->
+      <div id="fundamentaContainer">
+        <div class="filter-label">Fundamenta</div>
+        <div class="segmented-control">
+          <button class="segment-btn active" data-value="both">Both</button>
+          <button class="segment-btn" data-value="yes">Yes</button>
+          <button class="segment-btn" data-value="no">No</button>
+        </div>
+      </div>
+      
+      <div id="filterContainer"></div>
+
+      <!-- Shelfmarks Filter Accordion -->
+      <div id="shelfmarksAccordion" class="filter-accordion">
+        <div class="filter-accordion-header">
+          <span class="filter-accordion-title">Shelfmarks</span>
+          <svg class="filter-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="filter-accordion-content">
+          <input type="text" id="shelfmarksSearch" class="persons-search shelfmarks-search-full" placeholder="Search shelfmarks">
+          <div id="shelfmarksCheckboxList" class="checkbox-list"></div>
+        </div>
+      </div>
+
+      <!-- Short Titles Filter Accordion -->
+      <div id="shortTitlesAccordion" class="filter-accordion">
+        <div class="filter-accordion-header">
+          <span class="filter-accordion-title">Short titles</span>
+          <svg class="filter-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="filter-accordion-content">
+          <input type="text" id="shortTitlesSearch" class="persons-search" placeholder="Search short titles">
+          <div id="shortTitlesCheckboxList" class="checkbox-list"></div>
+        </div>
+      </div>
+      
+      <!-- Persons Filter Accordion -->
+      <div id="personsAccordion" class="filter-accordion">
+        <div class="filter-accordion-header">
+          <span class="filter-accordion-title">Persons</span>
+          <svg class="filter-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="filter-accordion-content">
+          <div class="search-with-toggle">
+            <input type="text" id="personsSearch" class="persons-search" placeholder="Search persons">
+            <div class="logic-toggle">
+              <span class="logic-label">AND</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="personsLogic" data-filter="persons">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="logic-label">OR</span>
+            </div>
+          </div>
+          <div id="personsCheckboxList" class="checkbox-list"></div>
+        </div>
+      </div>
+      
+      <!-- Places Filter Accordion -->
+      <div id="placesAccordion" class="filter-accordion">
+        <div class="filter-accordion-header">
+          <span class="filter-accordion-title">Printing places / Provenance</span>
+          <svg class="filter-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="filter-accordion-content">
+          <div class="search-with-toggle">
+            <input type="text" id="placesSearch" class="persons-search" placeholder="Search places">
+            <div class="logic-toggle">
+              <span class="logic-label">AND</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="placesLogic" data-filter="places">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="logic-label">OR</span>
+            </div>
+          </div>
+          <div id="placesCheckboxList" class="checkbox-list"></div>
+        </div>
+      </div>
+      
+      <!-- Functions Filter Accordion -->
+      <div id="functionsAccordion" class="filter-accordion">
+        <div class="filter-accordion-header">
+          <span class="filter-accordion-title">Functions</span>
+          <svg class="filter-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="filter-accordion-content">
+          <div class="search-with-toggle">
+            <input type="text" id="functionsSearch" class="persons-search" placeholder="Search functions">
+            <div class="logic-toggle">
+              <span class="logic-label">AND</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="functionsLogic" data-filter="functions">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="logic-label">OR</span>
+            </div>
+          </div>
+          <div id="functionsCheckboxList" class="checkbox-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="filter-modal-footer">
+      <button id="clearFilters" class="btn-secondary">Clear All</button>
+      <button id="applyFilters" class="btn-primary">Apply Filters</button>
+    </div>
+  </div>
+</div>
+
+<!-- Page heading -->
+<h1>Sources</h1>
+
+<table id="sourcesTable" class="display" style="width:100%">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Shelfmark</th>
+      <th>Title</th>
+      <th>Short title</th>
+      <th>Dates</th>
+      <th>Author / Editor</th>
+      <th>Publisher</th>
+      <th>Printing place</th>
+      <th>RISM</th>
+      <th>VD16</th>
+    </tr>
+  </thead>
+</table>
