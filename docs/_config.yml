@@ -18,7 +18,8 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: Mini portfolio - Ilias Kyriazis
+# title: Mini portfolio - Ilias Kyriazis
+title: Testing portfolio - elautedb
 email: 
 description: >- # this means to ignore newlines until "baseurl:"
   A site used for demonstration purposes.
