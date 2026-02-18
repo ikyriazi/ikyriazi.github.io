@@ -148,15 +148,15 @@ $(document).ready(function() {
         const parts = ['description', 'comment'].filter(type => item[type]);
         
         // Check if search term exists in description or comment
-        const searchTerm = currentSearchTerm.toLowerCase().trim();
+        const searchTerm = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
         const hasSearchMatch = searchTerm && parts.some(type => {
-          const text = stripHtml(item[type]).toLowerCase();
+          const text = normalizeUmlauts(stripHtml(item[type]).toLowerCase());
           return text.includes(searchTerm);
         });
         
         // Generate badges with active class if match found
         const badges = parts.map(type => {
-          const text = stripHtml(item[type]).toLowerCase();
+          const text = normalizeUmlauts(stripHtml(item[type]).toLowerCase());
           const isActive = searchTerm && text.includes(searchTerm);
           const iconName = isActive ? 'minus-circle' : 'plus-circle';
           return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
@@ -168,7 +168,7 @@ $(document).ready(function() {
 
         // Add expandable content for each part, auto-expanded if search match
         parts.forEach(type => {
-          const text = stripHtml(item[type]).toLowerCase();
+          const text = normalizeUmlauts(stripHtml(item[type]).toLowerCase());
           const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
           const isActive = searchTerm && text.includes(searchTerm);
           const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : (isActive ? 'block' : 'none');
@@ -272,6 +272,29 @@ $(document).ready(function() {
     });
   }
 
+  // Helper to escape regex special characters
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Helper to create regex pattern that matches umlaut variants
+  // Handles: ü/ue/u, ä/ae/a, ö/oe/o in all directions
+  function createUmlautPattern(searchTerm) {
+    // First escape special regex characters
+    const escaped = escapeRegex(searchTerm);
+    // Replace in specific order: longer patterns first, then shorter
+    return escaped
+      .replace(/ü/gi, '(?:ü|Ü|ue|Ue|UE|u|U)')
+      .replace(/ä/gi, '(?:ä|Ä|ae|Ae|AE|a|A)')
+      .replace(/ö/gi, '(?:ö|Ö|oe|Oe|OE|o|O)')
+      .replace(/ue/gi, '(?:ue|Ue|UE|ü|Ü|u|U)')
+      .replace(/ae/gi, '(?:ae|Ae|AE|ä|Ä|a|A)')
+      .replace(/oe/gi, '(?:oe|Oe|OE|ö|Ö|o|O)')
+      .replace(/u/gi, '(?:u|U|ü|Ü|ue|Ue|UE)')
+      .replace(/a/gi, '(?:a|A|ä|Ä|ae|Ae|AE)')
+      .replace(/o/gi, '(?:o|O|ö|Ö|oe|Oe|OE)');
+  }
+
   // Highlight helper: wrap matches with <mark class="search-highlight">
   // Preserves HTML tags in the content (e.g., <i> for italics)
   function highlightText(text, term) {
@@ -286,20 +309,25 @@ $(document).ready(function() {
       tempDiv.innerHTML = str;
       
       // Get plain text content (without HTML tags)
-      const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+      const plainText = (tempDiv.textContent || tempDiv.innerText || '');
       
-      // Check if the search term exists as a phrase in the plain text
-      if (!plainText.includes(t.toLowerCase())) {
+      // Create regex pattern that matches the search term with umlaut variants
+      const pattern = createUmlautPattern(t);
+      const regex = new RegExp(pattern, 'gi');
+      
+      // Check if the search term exists using the regex
+      if (!regex.test(plainText)) {
         return str; // Term not found, return original
       }
       
-      // Find ALL occurrences of the search term in plain text
-      const searchLower = t.toLowerCase();
+      // Find ALL occurrences of the search term in plain text using regex
+      regex.lastIndex = 0; // Reset regex after test()
       const matches = [];
-      let pos = 0;
-      while ((pos = plainText.indexOf(searchLower, pos)) !== -1) {
-        matches.push({ start: pos, end: pos + t.length });
-        pos += 1; // Move forward by 1 to find overlapping matches
+      let match;
+      while ((match = regex.exec(plainText)) !== null) {
+        matches.push({ start: match.index, end: match.index + match[0].length });
+        // Move position forward by 1 to find overlapping matches
+        regex.lastIndex = match.index + 1;
       }
 
       if (matches.length === 0) return str;
@@ -591,6 +619,19 @@ $(document).ready(function() {
     return '';
   }
 
+  // Helper to normalize German umlauts for search matching
+  // Converts ü/ue→u, ä/ae→a, ö/oe→o so that all variants match
+  function normalizeUmlauts(text) {
+    if (!text) return '';
+    return text
+      .replace(/ü/gi, 'u')
+      .replace(/ä/gi, 'a')
+      .replace(/ö/gi, 'o')
+      .replace(/ue/gi, 'u')
+      .replace(/ae/gi, 'a')
+      .replace(/oe/gi, 'o');
+  }
+
   // Helper to build searchable text from row data fields
   function buildSearchableText(rowData, detailOnly = false) {
     const fields = detailOnly ? [
@@ -602,7 +643,8 @@ $(document).ready(function() {
       'provenance', 'function', 'codicology', 'brown', 'otherShelfmark',
       'referencedBy', 'relatedResource'
     ];
-    return fields.map(field => extractText(rowData[field])).join(' ').toLowerCase();
+    const text = fields.map(field => extractText(rowData[field])).join(' ').toLowerCase();
+    return normalizeUmlauts(text);
   }
 
   // Global search variable
@@ -721,7 +763,7 @@ $(document).ready(function() {
 
   // Shared filter function (excludeShortTitles/excludePersons/excludePlaces/excludeFunctions/excludeShelfmarks: whether to skip those filters)
   function applyFilters(row, excludeShortTitles = false, excludePersons = false, excludePlaces = false, excludeFunctions = false, excludeShelfmarks = false) {
-    const searchTerm = currentSearchTerm.toLowerCase().trim();
+    const searchTerm = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
     if (searchTerm && !buildSearchableText(row).includes(searchTerm)) {
       return false;
     }
@@ -911,7 +953,7 @@ $(document).ready(function() {
           updateFunctions.forEach(fn => setTimeout(fn, 0));
 
           // Expand matching rows if there's a search term from URL
-          const term = currentSearchTerm.toLowerCase().trim();
+          const term = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
           if (term) {
             setTimeout(function() {
               expandDetailRowsWithMatches(term);
@@ -1067,8 +1109,8 @@ $(document).ready(function() {
           $subgroupContent.each(function() {
             const $contentRow = $(this);
             // Check visible text and also CD-content divs
-            const visibleText = $contentRow.clone().find('.CD-content').remove().end().text().toLowerCase();
-            const cdText = $contentRow.find('.CD-content').text().toLowerCase();
+            const visibleText = normalizeUmlauts($contentRow.clone().find('.CD-content').remove().end().text().toLowerCase());
+            const cdText = normalizeUmlauts($contentRow.find('.CD-content').text().toLowerCase());
             if (visibleText.includes(term) || cdText.includes(term)) {
               hasMatch = true;
               return false; // break
@@ -1191,7 +1233,7 @@ $(document).ready(function() {
         
         table.rows().invalidate();
 
-        const term = currentSearchTerm.toLowerCase().trim();
+        const term = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
 
         if (!term) {
           collapseAllDetails();
