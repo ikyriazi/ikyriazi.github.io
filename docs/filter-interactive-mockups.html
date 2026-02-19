@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filter — Interactive Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px 80px;
+      color: #2c2c2c;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .page-note {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      max-width: 720px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-top: 40px;
+    }
+
+    .section-label:first-of-type { margin-top: 0; }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #ebebeb;
+      margin: 20px 0;
+    }
+
+    /* ── Builder rows ── */
+    .builder-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .builder-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .field-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #f9f7f4;
+      color: #2c2c2c;
+      outline: none;
+      min-width: 190px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 34px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .field-select:focus { border-color: #2c2c2c; }
+
+    .builder-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      outline: none;
+      color: #2c2c2c;
+      transition: border-color 0.2s;
+    }
+
+    .builder-input::placeholder { color: #bbb; }
+    .builder-input:focus { border-color: #2c2c2c; }
+
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #bbb;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .remove-btn:hover { border-color: #2c2c2c; color: #2c2c2c; }
+
+    .remove-btn:disabled {
+      opacity: 0.25;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .remove-btn svg { display: block; flex-shrink: 0; }
+
+    /* ── Bottom row: add + logic ── */
+    .bottom-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+      padding-right: 38px;
+    }
+
+    .add-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c2c2c;
+      border: 1.5px dashed #d0d0d0;
+      background: transparent;
+      border-radius: 50px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .add-btn:hover { border-color: #2c2c2c; }
+
+    .add-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .logic-section {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logic-between-label {
+      font-size: 0.8rem;
+      color: #bbb;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    /* ── AND [slider] OR toggle ── */
+    .site-logic-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .site-logic-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+
+    .site-logic-label.active { color: #2c2c2c; }
+
+    .site-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .site-toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .site-toggle-slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2c2c2c;
+      border-radius: 24px;
+      transition: 0.3s;
+    }
+
+    .site-toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .site-toggle-switch input:checked + .site-toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* ── Filters button ── */
+    .filter-button {
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+      background: #2c2c2c;
+      color: #ffffff;
+      border: none;
+    }
+
+    .filter-button:hover {
+      background: #1a1a1a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+    }
+
+    /* ── Filter panel ── */
+    .filter-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      animation: fadeSlideIn 0.2s ease;
+    }
+
+    .filter-panel.open { display: flex; }
+
+    /* ── Row enter animation ── */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .builder-row.new { animation: fadeSlideIn 0.2s ease; }
+
+    /* ── Filter value tag ── */
+    .filter-value-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 50px;
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    .phys-tag-x {
+      font-size: 0.7rem;
+      opacity: 0.55;
+      cursor: pointer;
+    }
+
+    /* ── Physical type accordion ── */
+    .phys-accordion {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .phys-accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .phys-accordion-header:hover { opacity: 0.75; }
+
+    .phys-chevron {
+      color: #2c2c2c;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .phys-accordion.expanded .phys-chevron {
+      transform: rotate(180deg);
+    }
+
+    .phys-accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .phys-accordion.expanded .phys-accordion-content {
+      max-height: 80px;
+    }
+
+    /* ── Split-click header ── */
+    .phys-accordion-header.header-split {
+      cursor: default;
+      justify-content: flex-start;
+    }
+
+    .phys-accordion-header.header-split:hover { opacity: 1; }
+
+    .phys-toggle-zone {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .phys-toggle-zone:hover { opacity: 0.75; }
+
+    /* ── Radio list ── */
+    .dot-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: #888;
+      min-width: 0;
+    }
+
+    .phys-radio-list {
+      display: flex;
+      flex-direction: column;
+      margin: 4px 0 12px;
+    }
+
+    .phys-radio-list--row {
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    .phys-radio-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #f4f4f4;
+    }
+
+    .phys-radio-row:last-child { border-bottom: none; }
+
+    .phys-radio-list--row .phys-radio-row {
+      border-bottom: none;
+      padding: 6px 0;
+    }
+
+    .phys-radio-circle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid #ccc;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .phys-radio-row.active .phys-radio-circle {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+      box-shadow: inset 0 0 0 3px #fff;
+    }
+
+    .phys-radio-text {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #aaa;
+      transition: color 0.2s;
+    }
+
+    .phys-radio-row:hover .phys-radio-text { color: #666; }
+    .phys-radio-row.active .phys-radio-text { color: #2c2c2c; font-weight: 600; }
+
+    /* ── Date range accordion ── */
+    .phys-accordion.expanded .phys-accordion-content.date-content {
+      max-height: 100px;
+    }
+
+    .range-slider-wrap {
+      position: relative;
+      height: 30px;
+      margin: 14px 10px 4px;
+    }
+
+    .range-track {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .range-fill {
+      position: absolute;
+      height: 100%;
+      background: #2c2c2c;
+      border-radius: 2px;
+    }
+
+    .range-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      -webkit-appearance: none;
+      appearance: none;
+      pointer-events: none;
+      outline: none;
+      margin: 0;
+      padding: 0;
+      z-index: 2;
+    }
+
+    .range-min { z-index: 3; }
+    .range-max { z-index: 4; }
+
+    .range-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      cursor: pointer;
+      pointer-events: all;
+      border: 2.5px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+
+    .range-input::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      cursor: pointer;
+      pointer-events: all;
+      border: 2.5px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      box-sizing: border-box;
+    }
+
+    .range-input::-webkit-slider-runnable-track { background: transparent; }
+    .range-input::-moz-range-track { background: transparent; }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      margin: 0 10px 12px;
+    }
+
+    .range-label-input {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+      width: 38px;
+      border: none;
+      background: transparent;
+      outline: none;
+      padding: 2px 4px;
+      border-radius: 4px;
+      cursor: text;
+      transition: background 0.15s;
+    }
+
+    .range-label-input:focus {
+      background: #f0f0f0;
+    }
+
+    .range-label-input:last-child {
+      text-align: right;
+    }
+
+    /* hide number spinners */
+    .range-label-input::-webkit-outer-spin-button,
+    .range-label-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .range-label-input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+
+<h1>Filter — interactive mockups</h1>
+<p class="page-note">Click "+ Add field" to add search rows. Click "Filters" to open the filter panel. Click the Physical type title + chevron to expand the accordion.</p>
+
+<!-- ── OPTION 1 ── -->
+<div class="section-label">1 — Radio buttons in a single row</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows1"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn1">+ Add field</button>
+    <div class="logic-section" id="logicSection1" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd1">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle1">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr1">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn1">Filters</button>
+
+  <div class="filter-panel" id="filterPanel1" style="margin-top:16px;">
+    <div class="phys-accordion" id="physAccordion1">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone1">
+          <span class="dot-label">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag1" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText1"></span>
+          <span class="phys-tag-x" id="physTagX1">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList1">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── OPTION 2 ── -->
+<div class="section-label">2 — Physical type + Date range</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows2"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn2">+ Add field</button>
+    <div class="logic-section" id="logicSection2" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd2">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle2">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr2">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn2">Filters</button>
+
+  <div class="filter-panel" id="filterPanel2" style="margin-top:16px;">
+
+    <!-- Physical type accordion -->
+    <div class="phys-accordion" id="physAccordion2">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone2">
+          <span class="dot-label">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag2" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText2"></span>
+          <span class="phys-tag-x" id="physTagX2">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList2">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date accordion -->
+    <div class="phys-accordion" id="dateAccordion2">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="dateToggleZone2">
+          <span class="dot-label">Date</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="dateTag2" style="visibility:hidden; margin-left:15px;">
+          <span id="dateTagText2"></span>
+          <span class="phys-tag-x" id="dateTagX2">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content date-content">
+        <div class="range-slider-wrap">
+          <div class="range-track">
+            <div class="range-fill" id="dateFill2"></div>
+          </div>
+          <input type="range" class="range-input range-min" id="dateMin2" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax2" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel2" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel2" value="1620" min="1450" max="1620">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const FIELDS = [
+    'Title', 'Person', 'Place', 'Identifier',
+    'Bibliography', 'Other metadata', 'Description / Comment', 'All fields'
+  ];
+
+  const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
+  const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
+
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.innerHTML = `${SVG_PLUS} Add field`;
+    btn.style.display = 'inline-flex';
+    btn.style.alignItems = 'center';
+    btn.style.gap = '6px';
+  });
+
+  function createSearchWidget({ builderRowsId, addFieldBtnId, logicSectionId,
+      logicToggleId, labelAndId, labelOrId }) {
+
+    const builderRowsEl  = document.getElementById(builderRowsId);
+    const addFieldBtnEl  = document.getElementById(addFieldBtnId);
+    const logicSectionEl = document.getElementById(logicSectionId);
+    const logicToggleEl  = document.getElementById(logicToggleId);
+    const labelAndEl     = document.getElementById(labelAndId);
+    const labelOrEl      = document.getElementById(labelOrId);
+
+    let rows = [];
+    let nextId = 0;
+
+    function getDefaultField() {
+      const used = new Set(rows.map(r => r.field));
+      return FIELDS.find(f => !used.has(f)) || FIELDS[0];
+    }
+
+    function updateUI() {
+      const count = rows.length;
+      addFieldBtnEl.disabled = count >= FIELDS.length;
+      builderRowsEl.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.disabled = count <= 1;
+      });
+      logicSectionEl.style.display = count >= 2 ? 'flex' : 'none';
+    }
+
+    function addRow(field = '', animate = true) {
+      const id = nextId++;
+      const chosenField = field || getDefaultField();
+      rows.push({ id, field: chosenField });
+
+      const div = document.createElement('div');
+      div.className = 'builder-row' + (animate ? ' new' : '');
+      div.dataset.id = id;
+
+      const select = document.createElement('select');
+      select.className = 'field-select';
+      FIELDS.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f; opt.textContent = f;
+        if (f === chosenField) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      const input = document.createElement('input');
+      input.className = 'builder-input';
+      input.type = 'text';
+      input.placeholder = 'Search…';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.innerHTML = SVG_X;
+      removeBtn.addEventListener('click', () => {
+        rows = rows.filter(r => r.id !== id);
+        div.remove();
+        updateUI();
+      });
+
+      div.appendChild(select);
+      div.appendChild(input);
+      div.appendChild(removeBtn);
+      builderRowsEl.appendChild(div);
+      updateUI();
+    }
+
+    logicToggleEl.addEventListener('change', () => {
+      labelAndEl.classList.toggle('active', !logicToggleEl.checked);
+      labelOrEl.classList.toggle('active', logicToggleEl.checked);
+    });
+
+    addFieldBtnEl.addEventListener('click', () => addRow());
+
+    addRow('Title', false);
+    addRow('Person', false);
+  }
+
+  function setupSplitAccordion(n, updateSelectionUI) {
+    createSearchWidget({
+      builderRowsId: `builderRows${n}`, addFieldBtnId: `addFieldBtn${n}`,
+      logicSectionId: `logicSection${n}`, logicToggleId: `logicToggle${n}`,
+      labelAndId: `labelAnd${n}`, labelOrId: `labelOr${n}`
+    });
+
+    const filtersBtn    = document.getElementById(`filtersBtn${n}`);
+    const filterPanel   = document.getElementById(`filterPanel${n}`);
+    const physAccordion = document.getElementById(`physAccordion${n}`);
+    const physToggle    = document.getElementById(`physToggleZone${n}`);
+    const physTag       = document.getElementById(`physTag${n}`);
+    const physTagText   = document.getElementById(`physTagText${n}`);
+    const physTagX      = document.getElementById(`physTagX${n}`);
+
+    filtersBtn.addEventListener('click', () => filterPanel.classList.toggle('open'));
+    physToggle.addEventListener('click', () => physAccordion.classList.toggle('expanded'));
+
+    function setVal(val) {
+      if (val !== 'Both') physTagText.textContent = val;
+      physTag.style.visibility = val === 'Both' ? 'hidden' : 'visible';
+      updateSelectionUI(val);
+    }
+
+    physTagX.addEventListener('click', () => setVal('Both'));
+    return setVal;
+  }
+
+  /* ── Option 1 ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList1 .phys-radio-row');
+    const setVal = setupSplitAccordion(1, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val))
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+  }
+
+  /* ── Date accordion helper ── */
+  function initDateAccordion({ n, minYear, maxYear }) {
+    const accordion  = document.getElementById(`dateAccordion${n}`);
+    const toggleZone = document.getElementById(`dateToggleZone${n}`);
+    const tag        = document.getElementById(`dateTag${n}`);
+    const tagText    = document.getElementById(`dateTagText${n}`);
+    const tagX       = document.getElementById(`dateTagX${n}`);
+    const minInput   = document.getElementById(`dateMin${n}`);
+    const maxInput   = document.getElementById(`dateMax${n}`);
+    const fill       = document.getElementById(`dateFill${n}`);
+    const minLabel   = document.getElementById(`dateMinLabel${n}`);
+    const maxLabel   = document.getElementById(`dateMaxLabel${n}`);
+
+    toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
+
+    function update() {
+      const lo   = parseInt(minInput.value);
+      const hi   = parseInt(maxInput.value);
+      const span = maxYear - minYear;
+
+      fill.style.left  = ((lo - minYear) / span * 100) + '%';
+      fill.style.width = ((hi - lo)      / span * 100) + '%';
+
+      /* only overwrite label values when the user is not actively typing in them */
+      if (document.activeElement !== minLabel) minLabel.value = lo;
+      if (document.activeElement !== maxLabel) maxLabel.value = hi;
+
+      /* raise min thumb when at same position so it can still be dragged left */
+      minInput.style.zIndex = lo >= hi ? 5 : 3;
+
+      const isDefault = lo === minYear && hi === maxYear;
+      tag.style.visibility = isDefault ? 'hidden' : 'visible';
+      if (!isDefault) tagText.textContent = `${lo}–${hi}`;
+    }
+
+    minInput.addEventListener('input', () => {
+      if (parseInt(minInput.value) > parseInt(maxInput.value))
+        minInput.value = maxInput.value;
+      update();
+    });
+
+    maxInput.addEventListener('input', () => {
+      if (parseInt(maxInput.value) < parseInt(minInput.value))
+        maxInput.value = minInput.value;
+      update();
+    });
+
+    /* select-all on focus so the user can immediately type a new value */
+    minLabel.addEventListener('focus', () => minLabel.select());
+    maxLabel.addEventListener('focus', () => maxLabel.select());
+
+    function applyLabel(labelEl, isMin) {
+      let val = parseInt(labelEl.value);
+      if (isNaN(val)) val = isMin ? minYear : maxYear;
+      val = Math.max(minYear, Math.min(maxYear, val));
+      if (isMin) {
+        val = Math.min(val, parseInt(maxInput.value));
+        minInput.value = val;
+      } else {
+        val = Math.max(val, parseInt(minInput.value));
+        maxInput.value = val;
+      }
+      update();
+    }
+
+    minLabel.addEventListener('change', () => applyLabel(minLabel, true));
+    minLabel.addEventListener('blur',   () => applyLabel(minLabel, true));
+    maxLabel.addEventListener('change', () => applyLabel(maxLabel, false));
+    maxLabel.addEventListener('blur',   () => applyLabel(maxLabel, false));
+
+    tagX.addEventListener('click', () => {
+      minInput.value = minYear;
+      maxInput.value = maxYear;
+      update();
+    });
+
+    update();
+  }
+
+  /* ── Option 2 ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList2 .phys-radio-row');
+    const setVal = setupSplitAccordion(2, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val))
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+
+    initDateAccordion({ n: 2, minYear: 1450, maxYear: 1620 });
+  }
+</script>
+
+</body>
+</html>

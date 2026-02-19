@@ -464,6 +464,122 @@
     }
 
     .phys-toggle-zone:hover { opacity: 0.75; }
+
+    /* ── Option 7: radio-style rows ── */
+    .phys-radio-list {
+      display: flex;
+      flex-direction: column;
+      margin: 4px 0 12px;
+    }
+
+    .phys-radio-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #f4f4f4;
+    }
+
+    .phys-radio-row:last-child { border-bottom: none; }
+
+    .phys-radio-list--row {
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    .phys-radio-list--row .phys-radio-row {
+      border-bottom: none;
+      padding: 6px 0;
+    }
+
+    .phys-radio-circle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid #ccc;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .phys-radio-row.active .phys-radio-circle {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+      box-shadow: inset 0 0 0 3px #fff;
+    }
+
+    .phys-radio-text {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #aaa;
+      transition: color 0.2s;
+    }
+
+    .phys-radio-row:hover .phys-radio-text { color: #666; }
+    .phys-radio-row.active .phys-radio-text { color: #2c2c2c; font-weight: 600; }
+
+    /* ── Option 8: inline text tabs ── */
+    .phys-inline-opts {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 8px 0 14px;
+    }
+
+    .phys-inline-opt {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #ccc;
+      cursor: pointer;
+      padding-bottom: 2px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .phys-inline-opt:hover { color: #888; }
+
+    .phys-inline-opt.active {
+      color: #2c2c2c;
+      font-weight: 700;
+      border-bottom-color: #2c2c2c;
+    }
+
+    .phys-inline-sep {
+      color: #ddd;
+      font-size: 0.85rem;
+      user-select: none;
+    }
+
+    /* ── Option 9: stacked full-width buttons ── */
+    .phys-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin: 6px 0 12px;
+    }
+
+    .phys-stack-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 500;
+      padding: 9px 14px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 8px;
+      background: transparent;
+      color: #aaa;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .phys-stack-btn:hover { border-color: #bbb; color: #555; }
+
+    .phys-stack-btn.active {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+      color: #fff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -682,6 +798,212 @@
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- shared accordion header snippet (reused in 7, 8, 9) -->
+
+<!-- ── MOCKUP 7: radio-style rows ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">7 — Radio-style rows</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows7"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn7">+ Add field</button>
+    <div class="logic-section" id="logicSection7" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd7">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle7">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr7">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+  <button class="filter-button" id="filtersBtn7">Filters</button>
+  <div class="filter-panel" id="filterPanel7" style="margin-top:16px;">
+    <div class="phys-accordion" id="physAccordion7">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone7">
+          <span class="dot-label" style="color:#888; min-width:0;">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag7" style="display:none; margin-left:15px;">
+          <span id="physTagText7"></span>
+          <span class="phys-tag-x" id="physTagX7">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list" id="physRadioList7">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOCKUP 10: radio rows displayed horizontally ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">10 — Radio buttons in a single row</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows10"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn10">+ Add field</button>
+    <div class="logic-section" id="logicSection10" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd10">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle10">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr10">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+  <button class="filter-button" id="filtersBtn10">Filters</button>
+  <div class="filter-panel" id="filterPanel10" style="margin-top:16px;">
+    <div class="phys-accordion" id="physAccordion10">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone10">
+          <span class="dot-label" style="color:#888; min-width:0;">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag10" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText10"></span>
+          <span class="phys-tag-x" id="physTagX10">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList10">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOCKUP 8: inline text tabs ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">8 — Inline text options</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows8"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn8">+ Add field</button>
+    <div class="logic-section" id="logicSection8" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd8">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle8">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr8">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+  <button class="filter-button" id="filtersBtn8">Filters</button>
+  <div class="filter-panel" id="filterPanel8" style="margin-top:16px;">
+    <div class="phys-accordion" id="physAccordion8">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone8">
+          <span class="dot-label" style="color:#888; min-width:0;">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag8" style="display:none; margin-left:15px;">
+          <span id="physTagText8"></span>
+          <span class="phys-tag-x" id="physTagX8">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-inline-opts" id="physInlineOpts8">
+          <span class="phys-inline-opt active" data-val="Both">Both</span>
+          <span class="phys-inline-sep">·</span>
+          <span class="phys-inline-opt" data-val="Print">Print</span>
+          <span class="phys-inline-sep">·</span>
+          <span class="phys-inline-opt" data-val="Manuscript">Manuscript</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOCKUP 9: stacked full-width buttons ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">9 — Stacked buttons</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows9"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn9">+ Add field</button>
+    <div class="logic-section" id="logicSection9" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd9">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle9">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr9">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+  <button class="filter-button" id="filtersBtn9">Filters</button>
+  <div class="filter-panel" id="filterPanel9" style="margin-top:16px;">
+    <div class="phys-accordion" id="physAccordion9">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone9">
+          <span class="dot-label" style="color:#888; min-width:0;">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag9" style="display:none; margin-left:15px;">
+          <span id="physTagText9"></span>
+          <span class="phys-tag-x" id="physTagX9">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-stack" id="physStack9">
+          <button class="phys-stack-btn active" data-val="Both">Both</button>
+          <button class="phys-stack-btn" data-val="Print">Print</button>
+          <button class="phys-stack-btn" data-val="Manuscript">Manuscript</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -966,6 +1288,78 @@
   physTagX6.addEventListener('click', () => {
     setPhysValue6('Both');
   });
+
+  /* ── Shared helper for split-click accordion (mockups 7, 8, 9) ── */
+  function setupSplitAccordion(n, updateSelectionUI, useVisibility = false) {
+    createSearchWidget({
+      builderRowsId: `builderRows${n}`, addFieldBtnId: `addFieldBtn${n}`,
+      logicSectionId: `logicSection${n}`, logicToggleId: `logicToggle${n}`,
+      labelAndId: `labelAnd${n}`, labelOrId: `labelOr${n}`,
+      useSvgIcons: true
+    });
+
+    const filtersBtn    = document.getElementById(`filtersBtn${n}`);
+    const filterPanel   = document.getElementById(`filterPanel${n}`);
+    const physAccordion = document.getElementById(`physAccordion${n}`);
+    const physToggle    = document.getElementById(`physToggleZone${n}`);
+    const physTag       = document.getElementById(`physTag${n}`);
+    const physTagText   = document.getElementById(`physTagText${n}`);
+    const physTagX      = document.getElementById(`physTagX${n}`);
+
+    filtersBtn.addEventListener('click',  () => filterPanel.classList.toggle('open'));
+    physToggle.addEventListener('click',  () => physAccordion.classList.toggle('expanded'));
+
+    function setVal(val) {
+      if (useVisibility) {
+        if (val !== 'Both') physTagText.textContent = val;
+        physTag.style.visibility = val === 'Both' ? 'hidden' : 'visible';
+      } else {
+        if (val === 'Both') { physTag.style.display = 'none'; }
+        else { physTagText.textContent = val; physTag.style.display = 'inline-flex'; }
+      }
+      updateSelectionUI(val);
+    }
+
+    physTagX.addEventListener('click', () => setVal('Both'));
+    return setVal;
+  }
+
+  /* ── Mockup 10: radio rows — horizontal ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList10 .phys-radio-row');
+    const setVal = setupSplitAccordion(10, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val)),
+      true   /* useVisibility — keeps header height stable */
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+  }
+
+  /* ── Mockup 7: radio rows ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList7 .phys-radio-row');
+    const setVal = setupSplitAccordion(7, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val))
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+  }
+
+  /* ── Mockup 8: inline text tabs ── */
+  {
+    const opts   = document.querySelectorAll('#physInlineOpts8 .phys-inline-opt');
+    const setVal = setupSplitAccordion(8, val =>
+      opts.forEach(o => o.classList.toggle('active', o.dataset.val === val))
+    );
+    opts.forEach(o => o.addEventListener('click', () => setVal(o.dataset.val)));
+  }
+
+  /* ── Mockup 9: stacked buttons ── */
+  {
+    const btns   = document.querySelectorAll('#physStack9 .phys-stack-btn');
+    const setVal = setupSplitAccordion(9, val =>
+      btns.forEach(b => b.classList.toggle('active', b.dataset.val === val))
+    );
+    btns.forEach(b => b.addEventListener('click', () => setVal(b.dataset.val)));
+  }
 </script>
 
 </body>
