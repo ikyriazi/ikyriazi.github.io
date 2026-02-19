@@ -532,6 +532,156 @@
     .range-label-input::-webkit-outer-spin-button,
     .range-label-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .range-label-input[type=number] { -moz-appearance: textfield; }
+
+    /* ── Shelfmarks accordion ── */
+    .phys-accordion.expanded .phys-accordion-content.shelfmarks-content {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .shelfmarks-search {
+      width: calc(100% - 20px);
+      padding: 10px 16px;
+      margin: 4px 10px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #fff;
+      color: #2c2c2c;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .shelfmarks-search:focus { border-color: #2c2c2c; }
+    .shelfmarks-search::placeholder { color: #bbb; }
+
+    .shelfmarks-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px 16px;
+      padding-bottom: 14px;
+    }
+
+    .sm-group-heading {
+      grid-column: 1 / -1;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: #2c2c2c;
+      padding-top: 4px;
+      margin-top: 4px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .sm-group-heading:first-child { margin-top: 0; border-top: none; }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-item:hover { opacity: 0.7; }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+      margin: 0;
+      flex-shrink: 0;
+      accent-color: #2c2c2c;
+    }
+
+    .checkbox-item label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: #2c2c2c;
+      cursor: pointer;
+      margin: 0;
+      flex: 1;
+      line-height: 1.3;
+    }
+
+    /* ── Option 4: Circular checkboxes ── */
+    .checkbox-item--round {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-item--round:hover { opacity: 0.7; }
+
+    .checkbox-item--round input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid #ccc;
+      background: #fff;
+      margin: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-item--round input[type="checkbox"]:checked {
+      background-color: #2c2c2c;
+      border-color: #2c2c2c;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3 8l3 3 6-6'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+    }
+
+    .checkbox-item--round label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: #2c2c2c;
+      cursor: pointer;
+      margin: 0;
+      flex: 1;
+      line-height: 1.3;
+    }
+
+    /* ── Option 5: Pill chip checkboxes ── */
+    .sm-chip-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-bottom: 14px;
+    }
+
+    .sm-chip-grid .sm-group-heading {
+      width: 100%;
+    }
+
+    .sm-chip {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 50px;
+      border: 1px solid #d0d0d0;
+      background: #fff;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+
+    .sm-chip:hover { border-color: #999; color: #2c2c2c; }
+
+    .sm-chip.selected {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+      color: #fff;
+    }
+
   </style>
 </head>
 <body>
@@ -678,6 +828,411 @@
         <div class="range-labels">
           <input type="number" class="range-label-input" id="dateMinLabel2" value="1450" min="1450" max="1620">
           <input type="number" class="range-label-input" id="dateMaxLabel2" value="1620" min="1450" max="1620">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── OPTION 3 ── -->
+<div class="section-label">3 — Physical type + Date range + Shelfmarks</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows3"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn3">+ Add field</button>
+    <div class="logic-section" id="logicSection3" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd3">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle3">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr3">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn3">Filters</button>
+
+  <div class="filter-panel" id="filterPanel3" style="margin-top:16px;">
+
+    <!-- Physical type -->
+    <div class="phys-accordion" id="physAccordion3">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone3">
+          <span class="dot-label">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag3" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText3"></span>
+          <span class="phys-tag-x" id="physTagX3">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList3">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="phys-accordion" id="dateAccordion3">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="dateToggleZone3">
+          <span class="dot-label">Date</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="dateTag3" style="visibility:hidden; margin-left:15px;">
+          <span id="dateTagText3"></span>
+          <span class="phys-tag-x" id="dateTagX3">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content date-content">
+        <div class="range-slider-wrap">
+          <div class="range-track">
+            <div class="range-fill" id="dateFill3"></div>
+          </div>
+          <input type="range" class="range-input range-min" id="dateMin3" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax3" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel3" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel3" value="1620" min="1450" max="1620">
+        </div>
+      </div>
+    </div>
+
+    <!-- Shelfmarks -->
+    <div class="phys-accordion" id="shelfAccordion3">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="shelfToggleZone3">
+          <span class="dot-label">Shelfmarks</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="shelfTag3" style="visibility:hidden; margin-left:15px;">
+          <span id="shelfTagText3"></span>
+          <span class="phys-tag-x" id="shelfTagX3">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content shelfmarks-content">
+        <input type="text" class="shelfmarks-search" id="shelfSearch3" placeholder="Search shelfmarks…">
+        <div class="shelfmarks-list" id="shelfList3">
+
+          <div class="sm-group-heading">A — Austria</div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-a1" data-label="A-Wkm KK_5410"><label for="sm3-a1">A-Wkm KK_5410</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-a2" data-label="A-Wn 396116-A"><label for="sm3-a2">A-Wn 396116-A</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-a3" data-label="A-Wn Cod. 9704"><label for="sm3-a3">A-Wn Cod. 9704</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-a4" data-label="A-Wn Mus.Hs. 18688"><label for="sm3-a4">A-Wn Mus.Hs. 18688</label></div>
+
+          <div class="sm-group-heading">CH — Switzerland</div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-ch1" data-label="CH-Bu F IX 23"><label for="sm3-ch1">CH-Bu F IX 23</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-ch2" data-label="CH-Bu F X 1"><label for="sm3-ch2">CH-Bu F X 1</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-ch3" data-label="CH-SAM Ms. FP/M 1"><label for="sm3-ch3">CH-SAM Ms. FP/M 1</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-ch4" data-label="CH-SGs Cod. Sang. 463"><label for="sm3-ch4">CH-SGs Cod. Sang. 463</label></div>
+
+          <div class="sm-group-heading">CZ — Czech Republic</div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-cz1" data-label="CZ-Pu Hs. 223-20"><label for="sm3-cz1">CZ-Pu Hs. 223-20</label></div>
+
+          <div class="sm-group-heading">D — Germany</div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d1" data-label="D-B Ms.germ.qu. 719"><label for="sm3-d1">D-B Ms.germ.qu. 719</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d2" data-label="D-B Mus.ms. 40026"><label for="sm3-d2">D-B Mus.ms. 40026</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d3" data-label="D-B Yd 5008"><label for="sm3-d3">D-B Yd 5008</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d4" data-label="D-HEu cpg 343"><label for="sm3-d4">D-HEu cpg 343</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d5" data-label="D-Mbs 4 Mus.pr. 167"><label for="sm3-d5">D-Mbs 4 Mus.pr. 167</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d6" data-label="D-Mbs Mus.ms. 1503"><label for="sm3-d6">D-Mbs Mus.ms. 1503</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="sm3-d7" data-label="D-W Cod. Guelf. 18.8"><label for="sm3-d7">D-W Cod. Guelf. 18.8</label></div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── OPTION 4 ── -->
+<div class="section-label">4 — Shelfmarks with circular checkboxes</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows4"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn4">+ Add field</button>
+    <div class="logic-section" id="logicSection4" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd4">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle4">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr4">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn4">Filters</button>
+
+  <div class="filter-panel" id="filterPanel4" style="margin-top:16px;">
+
+    <!-- Physical type -->
+    <div class="phys-accordion" id="physAccordion4">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone4">
+          <span class="dot-label">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag4" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText4"></span>
+          <span class="phys-tag-x" id="physTagX4">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList4">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="phys-accordion" id="dateAccordion4">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="dateToggleZone4">
+          <span class="dot-label">Date</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="dateTag4" style="visibility:hidden; margin-left:15px;">
+          <span id="dateTagText4"></span>
+          <span class="phys-tag-x" id="dateTagX4">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content date-content">
+        <div class="range-slider-wrap">
+          <div class="range-track">
+            <div class="range-fill" id="dateFill4"></div>
+          </div>
+          <input type="range" class="range-input range-min" id="dateMin4" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax4" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel4" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel4" value="1620" min="1450" max="1620">
+        </div>
+      </div>
+    </div>
+
+    <!-- Shelfmarks -->
+    <div class="phys-accordion" id="shelfAccordion4">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="shelfToggleZone4">
+          <span class="dot-label">Shelfmarks</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="shelfTag4" style="visibility:hidden; margin-left:15px;">
+          <span id="shelfTagText4"></span>
+          <span class="phys-tag-x" id="shelfTagX4">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content shelfmarks-content">
+        <input type="text" class="shelfmarks-search" id="shelfSearch4" placeholder="Search shelfmarks…">
+        <div class="shelfmarks-list" id="shelfList4">
+
+          <div class="sm-group-heading">A — Austria</div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-a1"><label for="sm4-a1">A-Wkm KK_5410</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-a2"><label for="sm4-a2">A-Wn 396116-A</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-a3"><label for="sm4-a3">A-Wn Cod. 9704</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-a4"><label for="sm4-a4">A-Wn Mus.Hs. 18688</label></div>
+
+          <div class="sm-group-heading">CH — Switzerland</div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-ch1"><label for="sm4-ch1">CH-Bu F IX 23</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-ch2"><label for="sm4-ch2">CH-Bu F X 1</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-ch3"><label for="sm4-ch3">CH-SAM Ms. FP/M 1</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-ch4"><label for="sm4-ch4">CH-SGs Cod. Sang. 463</label></div>
+
+          <div class="sm-group-heading">CZ — Czech Republic</div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-cz1"><label for="sm4-cz1">CZ-Pu Hs. 223-20</label></div>
+
+          <div class="sm-group-heading">D — Germany</div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d1"><label for="sm4-d1">D-B Ms.germ.qu. 719</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d2"><label for="sm4-d2">D-B Mus.ms. 40026</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d3"><label for="sm4-d3">D-B Yd 5008</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d4"><label for="sm4-d4">D-HEu cpg 343</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d5"><label for="sm4-d5">D-Mbs 4 Mus.pr. 167</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d6"><label for="sm4-d6">D-Mbs Mus.ms. 1503</label></div>
+          <div class="checkbox-item checkbox-item--round"><input type="checkbox" id="sm4-d7"><label for="sm4-d7">D-W Cod. Guelf. 18.8</label></div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── OPTION 5 ── -->
+<div class="section-label">5 — Shelfmarks as pill chips</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows5"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn5">+ Add field</button>
+    <div class="logic-section" id="logicSection5" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd5">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle5">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr5">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn5">Filters</button>
+
+  <div class="filter-panel" id="filterPanel5" style="margin-top:16px;">
+
+    <!-- Physical type -->
+    <div class="phys-accordion" id="physAccordion5">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone5">
+          <span class="dot-label">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag5" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText5"></span>
+          <span class="phys-tag-x" id="physTagX5">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList5">
+          <div class="phys-radio-row active" data-val="Both">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Both</span>
+          </div>
+          <div class="phys-radio-row" data-val="Print">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Print</span>
+          </div>
+          <div class="phys-radio-row" data-val="Manuscript">
+            <span class="phys-radio-circle"></span>
+            <span class="phys-radio-text">Manuscript</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="phys-accordion" id="dateAccordion5">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="dateToggleZone5">
+          <span class="dot-label">Date</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="dateTag5" style="visibility:hidden; margin-left:15px;">
+          <span id="dateTagText5"></span>
+          <span class="phys-tag-x" id="dateTagX5">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content date-content">
+        <div class="range-slider-wrap">
+          <div class="range-track">
+            <div class="range-fill" id="dateFill5"></div>
+          </div>
+          <input type="range" class="range-input range-min" id="dateMin5" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax5" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel5" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel5" value="1620" min="1450" max="1620">
+        </div>
+      </div>
+    </div>
+
+    <!-- Shelfmarks -->
+    <div class="phys-accordion" id="shelfAccordion5">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="shelfToggleZone5">
+          <span class="dot-label">Shelfmarks</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="shelfTag5" style="visibility:hidden; margin-left:15px;">
+          <span id="shelfTagText5"></span>
+          <span class="phys-tag-x" id="shelfTagX5">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content shelfmarks-content">
+        <input type="text" class="shelfmarks-search" id="shelfSearch5" placeholder="Search shelfmarks…">
+        <div class="sm-chip-grid" id="shelfList5">
+
+          <div class="sm-group-heading">A — Austria</div>
+          <span class="sm-chip">A-Wkm KK_5410</span>
+          <span class="sm-chip">A-Wn 396116-A</span>
+          <span class="sm-chip">A-Wn Cod. 9704</span>
+          <span class="sm-chip">A-Wn Mus.Hs. 18688</span>
+
+          <div class="sm-group-heading">CH — Switzerland</div>
+          <span class="sm-chip">CH-Bu F IX 23</span>
+          <span class="sm-chip">CH-Bu F X 1</span>
+          <span class="sm-chip">CH-SAM Ms. FP/M 1</span>
+          <span class="sm-chip">CH-SGs Cod. Sang. 463</span>
+
+          <div class="sm-group-heading">CZ — Czech Republic</div>
+          <span class="sm-chip">CZ-Pu Hs. 223-20</span>
+
+          <div class="sm-group-heading">D — Germany</div>
+          <span class="sm-chip">D-B Ms.germ.qu. 719</span>
+          <span class="sm-chip">D-B Mus.ms. 40026</span>
+          <span class="sm-chip">D-B Yd 5008</span>
+          <span class="sm-chip">D-HEu cpg 343</span>
+          <span class="sm-chip">D-Mbs 4 Mus.pr. 167</span>
+          <span class="sm-chip">D-Mbs Mus.ms. 1503</span>
+          <span class="sm-chip">D-W Cod. Guelf. 18.8</span>
+
         </div>
       </div>
     </div>
@@ -894,6 +1449,51 @@
     update();
   }
 
+  /* ── Shelfmarks accordion helper ── */
+  function initShelfmarksAccordion({ n }) {
+    const accordion  = document.getElementById(`shelfAccordion${n}`);
+    const toggleZone = document.getElementById(`shelfToggleZone${n}`);
+    const tag        = document.getElementById(`shelfTag${n}`);
+    const tagText    = document.getElementById(`shelfTagText${n}`);
+    const tagX       = document.getElementById(`shelfTagX${n}`);
+    const searchInput = document.getElementById(`shelfSearch${n}`);
+    const list        = document.getElementById(`shelfList${n}`);
+
+    toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
+
+    function updateTag() {
+      const count = list.querySelectorAll('input[type="checkbox"]:checked').length;
+      tag.style.visibility = count === 0 ? 'hidden' : 'visible';
+      if (count > 0) tagText.textContent = count === 1 ? '1 selected' : `${count} selected`;
+    }
+
+    list.addEventListener('change', updateTag);
+
+    tagX.addEventListener('click', () => {
+      list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      updateTag();
+    });
+
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.toLowerCase();
+      list.querySelectorAll('.checkbox-item').forEach(item => {
+        const text = item.querySelector('label').textContent.toLowerCase();
+        item.style.display = text.includes(term) ? 'flex' : 'none';
+      });
+      list.querySelectorAll('.sm-group-heading').forEach(heading => {
+        let sibling = heading.nextElementSibling;
+        let anyVisible = false;
+        while (sibling && !sibling.classList.contains('sm-group-heading')) {
+          if (sibling.style.display !== 'none') anyVisible = true;
+          sibling = sibling.nextElementSibling;
+        }
+        heading.style.display = anyVisible ? '' : 'none';
+      });
+    });
+
+    updateTag();
+  }
+
   /* ── Option 2 ── */
   {
     const rows   = document.querySelectorAll('#physRadioList2 .phys-radio-row');
@@ -903,6 +1503,91 @@
     rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
 
     initDateAccordion({ n: 2, minYear: 1450, maxYear: 1620 });
+  }
+
+  /* ── Option 3 ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList3 .phys-radio-row');
+    const setVal = setupSplitAccordion(3, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val))
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+
+    initDateAccordion({ n: 3, minYear: 1450, maxYear: 1620 });
+    initShelfmarksAccordion({ n: 3 });
+  }
+
+  /* ── Chip shelfmarks accordion helper ── */
+  function initChipShelfmarksAccordion({ n }) {
+    const accordion   = document.getElementById(`shelfAccordion${n}`);
+    const toggleZone  = document.getElementById(`shelfToggleZone${n}`);
+    const tag         = document.getElementById(`shelfTag${n}`);
+    const tagText     = document.getElementById(`shelfTagText${n}`);
+    const tagX        = document.getElementById(`shelfTagX${n}`);
+    const searchInput = document.getElementById(`shelfSearch${n}`);
+    const list        = document.getElementById(`shelfList${n}`);
+
+    toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
+
+    function updateTag() {
+      const count = list.querySelectorAll('.sm-chip.selected').length;
+      tag.style.visibility = count === 0 ? 'hidden' : 'visible';
+      if (count > 0) tagText.textContent = count === 1 ? '1 selected' : `${count} selected`;
+    }
+
+    list.addEventListener('click', e => {
+      const chip = e.target.closest('.sm-chip');
+      if (!chip) return;
+      chip.classList.toggle('selected');
+      updateTag();
+    });
+
+    tagX.addEventListener('click', () => {
+      list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected'));
+      updateTag();
+    });
+
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.toLowerCase();
+      list.querySelectorAll('.sm-chip').forEach(chip => {
+        chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+      list.querySelectorAll('.sm-group-heading').forEach(heading => {
+        let sibling = heading.nextElementSibling;
+        let anyVisible = false;
+        while (sibling && !sibling.classList.contains('sm-group-heading')) {
+          if (sibling.style.display !== 'none') anyVisible = true;
+          sibling = sibling.nextElementSibling;
+        }
+        heading.style.display = anyVisible ? '' : 'none';
+      });
+    });
+
+    updateTag();
+  }
+
+  /* ── Option 4 ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList4 .phys-radio-row');
+    const setVal = setupSplitAccordion(4, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val))
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+
+    initDateAccordion({ n: 4, minYear: 1450, maxYear: 1620 });
+    initShelfmarksAccordion({ n: 4 });
+  }
+
+  /* ── Option 5 ── */
+  {
+    const rows   = document.querySelectorAll('#physRadioList5 .phys-radio-row');
+    const setVal = setupSplitAccordion(5, val =>
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val))
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+
+    initDateAccordion({ n: 5, minYear: 1450, maxYear: 1620 });
+    initChipShelfmarksAccordion({ n: 5 });
   }
 </script>
 
