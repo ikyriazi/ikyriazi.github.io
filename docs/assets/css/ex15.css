@@ -1003,13 +1003,12 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   transform: rotate(180deg);
 }
 
-/* Active filter indicator - circle around chevron with white icon */
-.filter-accordion.filter-active .filter-accordion-chevron {
-  /* background-color: #f6f6f6; */
+/* Active filter indicator - box around title */
+.filter-accordion.filter-active .filter-accordion-title {
   background-color: #f9f7f4;
-  color: #2c2c2c;
   border: 1px solid #d0d0d0;
-  stroke-width: 2.5px;
+  border-radius: 6px;
+  padding: 1px 6px;
 }
 
 .filter-accordion-content {
