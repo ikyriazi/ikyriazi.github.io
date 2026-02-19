@@ -1004,6 +1004,14 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
 }
 
 /* Active filter indicator - box around title */
+.filter-active .filter-label {
+  background-color: #f9f7f4;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 1px 6px;
+  width: fit-content;
+}
+
 .filter-accordion.filter-active .filter-accordion-title {
   background-color: #f9f7f4;
   border: 1px solid #d0d0d0;

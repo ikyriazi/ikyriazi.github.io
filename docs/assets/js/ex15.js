@@ -1866,7 +1866,8 @@ $(document).ready(function() {
           'placesAccordion': selectedPlaces.size > 0,
           'functionsAccordion': selectedFunctions.size > 0,
           'physicalTypeContainer': physicalTypeFilter !== 'both',
-          'fundamentaContainer': fundamentaFilter !== 'both'
+          'fundamentaContainer': fundamentaFilter !== 'both',
+          'dateWrapper': minDate !== minYear || maxDate !== maxYear
         };
 
         // Update each accordion
