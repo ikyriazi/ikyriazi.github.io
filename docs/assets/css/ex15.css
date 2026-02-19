@@ -785,7 +785,7 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   padding: 16px 20px;
   /* background: #f6f6f6; */
   background: #f9f7f4;
-  border-radius: 10px; /* 14px */
+  border-radius: 14px;
   border: 1px solid #d0d0d0;
 }
 
