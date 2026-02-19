@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Active Filter Title — Style Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px;
+      color: #2c2c2c;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0 0 32px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .panel-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 24px;
+    }
+
+    /* ── Shared filter-label base ── */
+    .filter-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c2c2c;
+      margin-bottom: 12px;
+    }
+
+    /* ── Segmented control ── */
+    .segmented-control {
+      display: inline-flex;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 28px;
+    }
+    .segment-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 50px;
+      background: transparent;
+      color: #666;
+      cursor: default;
+      white-space: nowrap;
+    }
+    .segment-btn.active {
+      background: #2c2c2c;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ── Accordion ── */
+    .accordion {
+      border-top: 1px solid #e0e0e0;
+    }
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0;
+      gap: 16px;
+    }
+    .accordion-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .accordion-chevron {
+      color: #2c2c2c;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION A — Symbol in box (right of title)
+       ════════════════════════════════════════ */
+    .opt-a .filter-label.active {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-a .filter-label.active::after {
+      content: '•';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      line-height: 1;
+      color: #2c2c2c;
+    }
+    .opt-a .accordion-title.active {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-a .accordion-title.active::after {
+      content: '•';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      line-height: 1;
+      color: #2c2c2c;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION B — Dot on the left (no box)
+       ════════════════════════════════════════ */
+    .opt-b .filter-label.active,
+    .opt-b .accordion-title.active {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-b .filter-label.active::before,
+    .opt-b .accordion-title.active::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION C — Underline accent
+       ════════════════════════════════════════ */
+    .opt-c .filter-label.active,
+    .opt-c .accordion-title.active {
+      border-bottom: 2px solid #2c2c2c;
+      padding-bottom: 2px;
+      width: fit-content;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION D — Left border bar
+       ════════════════════════════════════════ */
+    .opt-d .filter-label.active,
+    .opt-d .accordion-title.active {
+      border-left: 3px solid #2c2c2c;
+      padding-left: 8px;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION F — Large #f9f7f4 dot on the right
+       ════════════════════════════════════════ */
+    .opt-f .filter-label.active,
+    .opt-f .accordion-title.active {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-f .filter-label.active::after,
+    .opt-f .accordion-title.active::after {
+      content: '';
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION G — Black dot inside #f9f7f4 circle (right)
+       ════════════════════════════════════════ */
+    .opt-g .filter-label.active,
+    .opt-g .accordion-title.active {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-g .filter-label.active::after,
+    .opt-g .accordion-title.active::after {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      box-shadow: 0 0 0 4px #f9f7f4, 0 0 0 5px #d0d0d0;
+      flex-shrink: 0;
+      margin: 4px;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION H — Black dot in #f9f7f4 circle (left)
+       ════════════════════════════════════════ */
+    .opt-h .filter-label.active,
+    .opt-h .accordion-title.active {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-h .filter-label.active::before,
+    .opt-h .accordion-title.active::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      box-shadow: 0 0 0 4px #f9f7f4, 0 0 0 5px #d0d0d0;
+      flex-shrink: 0;
+      margin: 4px;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION I — Empty circle → dot-in-circle (left)
+       Inactive: plain #f9f7f4 circle
+       Active:   black dot inside #f9f7f4 ring (same as H)
+       ════════════════════════════════════════ */
+    .opt-i .filter-label,
+    .opt-i .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-i .filter-label::before,
+    .opt-i .accordion-title::before {
+      content: '';
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      flex-shrink: 0;
+    }
+    .opt-i .filter-label.active::before,
+    .opt-i .accordion-title.active::before {
+      width: 7px;
+      height: 7px;
+      background: #2c2c2c;
+      border: none;
+      box-shadow: 0 0 0 4px #f9f7f4, 0 0 0 5px #d0d0d0;
+      margin: 4px;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION J — Hollow ring → solid filled circle (left)
+       Inactive: transparent circle, #d0d0d0 border
+       Active:   fully filled #2c2c2c circle
+       ════════════════════════════════════════ */
+    .opt-j .filter-label,
+    .opt-j .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-j .filter-label::before,
+    .opt-j .accordion-title::before {
+      content: '';
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1.5px solid #d0d0d0;
+      flex-shrink: 0;
+    }
+    .opt-j .filter-label.active::before,
+    .opt-j .accordion-title.active::before {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION K — #f9f7f4 circle → solid filled circle (left)
+       Inactive: #f9f7f4 filled circle, #d0d0d0 border
+       Active:   same size, fully filled #2c2c2c
+       ════════════════════════════════════════ */
+    .opt-k .filter-label,
+    .opt-k .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .opt-k .filter-label::before,
+    .opt-k .accordion-title::before {
+      content: '';
+      display: inline-block;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      flex-shrink: 0;
+    }
+    .opt-k .filter-label.active::before,
+    .opt-k .accordion-title.active::before {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION L — Hollow diamond → filled diamond (left)
+       Inactive: hollow rotated square
+       Active:   filled #2c2c2c rotated square
+       ════════════════════════════════════════ */
+    .opt-l .filter-label,
+    .opt-l .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .opt-l .filter-label::before,
+    .opt-l .accordion-title::before {
+      content: '';
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      transform: rotate(45deg);
+      background: transparent;
+      border: 1.5px solid #d0d0d0;
+      flex-shrink: 0;
+    }
+    .opt-l .filter-label.active::before,
+    .opt-l .accordion-title.active::before {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+    }
+
+    /* ════════════════════════════════════════
+       OPTION E — Current style (wrapping box)
+       ════════════════════════════════════════ */
+    .opt-e .filter-label.active {
+      background-color: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      padding: 1px 6px;
+      width: fit-content;
+    }
+    .opt-e .accordion-title.active {
+      background-color: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      padding: 1px 6px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Active filter title — style options</h1>
+
+<div class="grid">
+
+  <!-- OPTION A -->
+  <div class="panel opt-a">
+    <div class="panel-label">A — Symbol in box (right)</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="panel opt-b">
+    <div class="panel-label">B — Dot on left (no box)</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="panel opt-c">
+    <div class="panel-label">C — Underline accent</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION D -->
+  <div class="panel opt-d">
+    <div class="panel-label">D — Left border bar</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION F -->
+  <div class="panel opt-f">
+    <div class="panel-label">F — Large #f9f7f4 dot (right)</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION G -->
+  <div class="panel opt-g">
+    <div class="panel-label">G — Black dot in #f9f7f4 circle (right)</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION H -->
+  <div class="panel opt-h">
+    <div class="panel-label">H — Black dot in #f9f7f4 circle (left)</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION I -->
+  <div class="panel opt-i">
+    <div class="panel-label">I — Empty circle → dot-in-circle</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION J -->
+  <div class="panel opt-j">
+    <div class="panel-label">J — Hollow ring → solid filled circle</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION K -->
+  <div class="panel opt-k">
+    <div class="panel-label">K — #f9f7f4 circle → solid filled circle</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION L -->
+  <div class="panel opt-l">
+    <div class="panel-label">L — Hollow diamond → filled diamond</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION E (current) -->
+  <div class="panel opt-e">
+    <div class="panel-label">E — Wrapping box (current)</div>
+
+    <div class="filter-label active">Physical type</div>
+    <div class="segmented-control">
+      <button class="segment-btn">Both</button>
+      <button class="segment-btn active">Print</button>
+      <button class="segment-btn">Manuscript</button>
+    </div>
+
+    <div class="filter-label">Fundamenta</div>
+    <div class="segmented-control">
+      <button class="segment-btn active">Both</button>
+      <button class="segment-btn">Yes</button>
+      <button class="segment-btn">No</button>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title active">Shelfmarks</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Persons</span>
+        <svg class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

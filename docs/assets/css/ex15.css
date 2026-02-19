@@ -589,6 +589,20 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   font-weight: 600;
   color: #2c2c2c;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid #d0d0d0;
+  flex-shrink: 0;
 }
 
 .segmented-control {
@@ -909,6 +923,20 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #2c2c2c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-accordion-title::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid #d0d0d0;
+  flex-shrink: 0;
 }
 
 /* Search box with toggle container */
@@ -1003,20 +1031,11 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   transform: rotate(180deg);
 }
 
-/* Active filter indicator - box around title */
-.filter-active .filter-label {
-  background-color: #f9f7f4;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  padding: 1px 6px;
-  width: fit-content;
-}
-
-.filter-accordion.filter-active .filter-accordion-title {
-  background-color: #f9f7f4;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  padding: 1px 6px;
+/* Active filter indicator - filled circle */
+.filter-active .filter-label::before,
+.filter-accordion.filter-active .filter-accordion-title::before {
+  background: #2c2c2c;
+  border-color: #2c2c2c;
 }
 
 .filter-accordion-content {
