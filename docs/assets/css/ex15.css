@@ -642,7 +642,7 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
 .filter-modal.show {
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-end;
   padding-top: 80px;
   opacity: 1;
 }
@@ -652,6 +652,7 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   background: #ffffff;
   width: 90%;
   max-width: 600px;
+  margin-right: 21px;
   max-height: 85vh;
   border-radius: 16px;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
