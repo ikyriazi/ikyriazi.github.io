@@ -594,7 +594,7 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   gap: 8px;
 }
 
-.filter-label::before {
+.filter-label::after {
   content: '';
   display: inline-block;
   width: 7px;
@@ -928,7 +928,7 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   gap: 8px;
 }
 
-.filter-accordion-title::before {
+.filter-accordion-title::after {
   content: '';
   display: inline-block;
   width: 7px;
@@ -1032,8 +1032,8 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
 }
 
 /* Active filter indicator - filled circle */
-.filter-active .filter-label::before,
-.filter-accordion.filter-active .filter-accordion-title::before {
+.filter-active .filter-label::after,
+.filter-accordion.filter-active .filter-accordion-title::after {
   background: #2c2c2c;
   border-color: #2c2c2c;
 }
