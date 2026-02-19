@@ -726,8 +726,50 @@
 
     <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
       <button class="add-btn">+ Add field</button>
-      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1; align-self:center; margin-top:4px;">Logic between active fields:</span>
-      <div class="logic-toggle" style="align-self:center; margin-top:4px;">
+      <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+        <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+        <div class="logic-toggle">
+          <button class="logic-btn active">AND</button>
+          <button class="logic-btn">OR</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <button class="add-btn" style="border-style:solid; border-color:#d0d0d0;">Filters</button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPTION G — F variant: logic next to add field button
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">G — F variant: logic toggle beside "+ Add field"</div>
+  <div class="section-desc">Same as F but the logic toggle sits immediately to the right of the "+ Add field" button, both on the left side of the row.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled>
+        <option>Title</option>
+      </select>
+      <input class="builder-input" type="text" placeholder="Search…" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+
+    <div class="builder-row">
+      <select class="field-select" disabled>
+        <option>Persons</option>
+      </select>
+      <input class="builder-input" type="text" placeholder="Search…" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1; margin-top:4px;">Logic between active fields:</span>
+      <div class="logic-toggle" style="margin-top:4px;">
         <button class="logic-btn active">AND</button>
         <button class="logic-btn">OR</button>
       </div>

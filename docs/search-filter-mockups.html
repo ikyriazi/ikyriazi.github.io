@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search + Active Filters — Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px 80px;
+      color: #2c2c2c;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .page-note {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-bottom: 48px;
+    }
+
+    .section {
+      margin-bottom: 56px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .section-desc {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      max-width: 720px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #ebebeb;
+      margin: 20px 0;
+    }
+
+    /* ── AND/OR toggle ── */
+    .logic-toggle {
+      display: inline-flex;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .logic-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 5px 14px;
+      border: none;
+      border-radius: 50px;
+      background: transparent;
+      color: #999;
+      cursor: default;
+    }
+
+    .logic-btn.active {
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    /* ── Builder rows (top search section) ── */
+    .builder-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .field-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #f9f7f4;
+      color: #2c2c2c;
+      outline: none;
+      cursor: default;
+      min-width: 160px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 34px;
+    }
+
+    .builder-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      outline: none;
+      color: #2c2c2c;
+    }
+
+    .builder-input::placeholder { color: #bbb; }
+
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #bbb;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    .add-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c2c2c;
+      border: 1.5px dashed #d0d0d0;
+      background: transparent;
+      border-radius: 50px;
+      padding: 8px 18px;
+      cursor: default;
+    }
+
+    /* ── Filters button ── */
+    .filters-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c2c2c;
+      border: 1.5px solid #d0d0d0;
+      background: transparent;
+      border-radius: 50px;
+      padding: 8px 18px;
+      cursor: default;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .filters-btn .filter-count {
+      background: #2c2c2c;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border-radius: 50px;
+      padding: 1px 7px;
+    }
+
+    /* ── Shared top section ── */
+    .top-section { margin-bottom: 0; }
+
+    .bottom-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #bbb;
+      margin-bottom: 12px;
+    }
+
+    /* ════════════════════════
+       FILTER DISPLAY VARIANTS
+       ════════════════════════ */
+
+    /* ── 1: Inline chips (label: value) ── */
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 50px;
+      border: 1px solid #d0d0d0;
+      background: #f9f7f4;
+      color: #2c2c2c;
+      white-space: nowrap;
+    }
+
+    .filter-chip .chip-label {
+      color: #aaa;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .filter-chip .chip-x {
+      color: #bbb;
+      font-size: 0.75rem;
+      margin-left: 2px;
+    }
+
+    .clear-all {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #bbb;
+      background: none;
+      border: none;
+      cursor: default;
+      padding: 0;
+      margin-left: auto;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── 2: Structured rows ── */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+
+    .filter-row:last-child { border-bottom: none; }
+
+    .filter-row-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #bbb;
+      min-width: 120px;
+    }
+
+    .filter-row-value {
+      font-weight: 500;
+      color: #2c2c2c;
+      flex: 1;
+    }
+
+    .filter-row-x {
+      color: #ccc;
+      font-size: 0.85rem;
+      cursor: default;
+    }
+
+    /* ── 3: Compact inline summary ── */
+    .filter-summary {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .filter-summary .f-key {
+      font-weight: 700;
+      color: #2c2c2c;
+    }
+
+    .filter-summary .f-sep {
+      color: #bbb;
+      margin: 0 6px;
+    }
+
+    /* ── 4: Grouped by category ── */
+    .filter-group {
+      margin-bottom: 10px;
+    }
+
+    .filter-group:last-child { margin-bottom: 0; }
+
+    .filter-group-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #bbb;
+      margin-bottom: 6px;
+    }
+
+    .filter-group-values {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .filter-value-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 50px;
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    .filter-value-tag .tag-x {
+      font-size: 0.7rem;
+      opacity: 0.55;
+    }
+
+    /* ── 5: Dot indicator rows ── */
+    .dot-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.85rem;
+    }
+
+    .dot-filter-row:last-child { border-bottom: none; }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      flex-shrink: 0;
+    }
+
+    .dot-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: #bbb;
+      min-width: 110px;
+    }
+
+    .dot-value {
+      font-weight: 500;
+      color: #2c2c2c;
+      flex: 1;
+    }
+
+    .dot-x {
+      color: #ccc;
+      font-size: 0.85rem;
+    }
+
+    /* ── Site toggle (AND [slider] OR) ── */
+    .site-logic-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .site-logic-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .site-toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      cursor: default;
+    }
+
+    .site-toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .site-toggle-slider {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2c2c2c;
+      border-radius: 24px;
+    }
+
+    .site-toggle-slider::before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fff;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Search + active filters — display mockups</h1>
+<p class="page-note">All mockups share the same search section (option G). Variants differ only in how active filter values are shown below the divider.</p>
+
+<!-- ══════════════════════════════════════════════════════
+     SHARED TOP SECTION (macro — duplicated per mockup)
+     Active filters shown: Physical type = Print,
+     Date = 1480–1560, Fundamenta = Yes, Places = Germany
+     ══════════════════════════════════════════════════════ -->
+
+<!-- VARIANT 1 — Inline chips (field label + value) -->
+<div class="section">
+  <div class="section-label">1 — Active filters as inline chips</div>
+  <div class="section-desc">Each active filter appears as a chip with a dimmed field label prefix and a value. Chips flow inline. "Clear all" sits at the far right.</div>
+  <div class="card">
+
+    <!-- Search rows -->
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Active filters -->
+    <div class="bottom-label">Active filters</div>
+    <div class="filter-chips">
+      <div class="filter-chip"><span class="chip-label">Physical type</span> Print <span class="chip-x">×</span></div>
+      <div class="filter-chip"><span class="chip-label">Date</span> 1480–1560 <span class="chip-x">×</span></div>
+      <div class="filter-chip"><span class="chip-label">Fundamenta</span> Yes <span class="chip-x">×</span></div>
+      <div class="filter-chip"><span class="chip-label">Places</span> Germany <span class="chip-x">×</span></div>
+      <button class="clear-all">Clear all</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 2 — Structured rows -->
+<div class="section">
+  <div class="section-label">2 — Active filters as structured rows</div>
+  <div class="section-desc">Each active filter is a dedicated row with a left-aligned field label, value, and a right-side × to remove it.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="filter-row"><span class="filter-row-label">Physical type</span><span class="filter-row-value">Print</span><span class="filter-row-x">×</span></div>
+    <div class="filter-row"><span class="filter-row-label">Date</span><span class="filter-row-value">1480–1560</span><span class="filter-row-x">×</span></div>
+    <div class="filter-row"><span class="filter-row-label">Fundamenta</span><span class="filter-row-value">Yes</span><span class="filter-row-x">×</span></div>
+    <div class="filter-row"><span class="filter-row-label">Places</span><span class="filter-row-value">Germany</span><span class="filter-row-x">×</span></div>
+
+  </div>
+</div>
+
+<!-- VARIANT 3 — Compact inline text summary -->
+<div class="section">
+  <div class="section-label">3 — Active filters as compact text summary</div>
+  <div class="section-desc">All active filters collapsed into a single readable sentence. The Filters button shows a count badge. A "Clear all" link resets everything.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:flex-start; gap:16px; justify-content:space-between;">
+      <div>
+        <div class="bottom-label">Active filters</div>
+        <div class="filter-summary">
+          <span class="f-key">Physical type:</span> Print
+          <span class="f-sep">·</span>
+          <span class="f-key">Date:</span> 1480–1560
+          <span class="f-sep">·</span>
+          <span class="f-key">Fundamenta:</span> Yes
+          <span class="f-sep">·</span>
+          <span class="f-key">Places:</span> Germany
+        </div>
+      </div>
+      <button class="clear-all" style="margin-left:0; flex-shrink:0; margin-top:22px;">Clear all</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 4 — Grouped by filter category -->
+<div class="section">
+  <div class="section-label">4 — Active filters grouped by category</div>
+  <div class="section-desc">Filters are grouped under their category label. Values appear as solid dark pills. Useful when multiple values per filter are possible (e.g. multiple places).</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-label">Physical type</div>
+      <div class="filter-group-values">
+        <div class="filter-value-tag">Print <span class="tag-x">×</span></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Date</div>
+      <div class="filter-group-values">
+        <div class="filter-value-tag">1480–1560 <span class="tag-x">×</span></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Fundamenta</div>
+      <div class="filter-group-values">
+        <div class="filter-value-tag">Yes <span class="tag-x">×</span></div>
+      </div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Places</div>
+      <div class="filter-group-values">
+        <div class="filter-value-tag">Germany <span class="tag-x">×</span></div>
+        <div class="filter-value-tag">Italy <span class="tag-x">×</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 5 — Dot indicator rows (matching existing filter style) -->
+<div class="section">
+  <div class="section-label">5 — Active filters as dot indicator rows</div>
+  <div class="section-desc">Echoes the dot indicator style used in the filter panel. Each row has a filled dot on the left, a dimmed field label, and the active value.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row"><div class="dot"></div><span class="dot-label">Physical type</span><span class="dot-value">Print</span><span class="dot-x">×</span></div>
+    <div class="dot-filter-row"><div class="dot"></div><span class="dot-label">Date</span><span class="dot-value">1480–1560</span><span class="dot-x">×</span></div>
+    <div class="dot-filter-row"><div class="dot"></div><span class="dot-label">Fundamenta</span><span class="dot-value">Yes</span><span class="dot-x">×</span></div>
+    <div class="dot-filter-row"><div class="dot"></div><span class="dot-label">Places</span><span class="dot-value">Germany</span><span class="dot-x">×</span></div>
+
+  </div>
+</div>
+
+<!-- VARIANT 6 — Option 2 layout with option 5 value styling -->
+<div class="section">
+  <div class="section-label">6 — Structured rows with option 5 value styling</div>
+  <div class="section-desc">Same row layout as option 2 (no dot), but field labels and values use the exact same font styling as option 5.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row"><span class="dot-label">Physical type</span><span class="dot-value">Print</span><span class="dot-x">×</span></div>
+    <div class="dot-filter-row"><span class="dot-label">Date</span><span class="dot-value">1480–1560</span><span class="dot-x">×</span></div>
+    <div class="dot-filter-row"><span class="dot-label">Fundamenta</span><span class="dot-value">Yes</span><span class="dot-x">×</span></div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Places</span>
+      <span class="dot-value" style="display:flex; align-items:center; gap:14px;">
+        <span>Germany <span class="dot-x">×</span></span>
+        <span>Italy <span class="dot-x">×</span></span>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 7 — Option 6 with × after every filter value -->
+<div class="section">
+  <div class="section-label">7 — Structured rows, × after every value</div>
+  <div class="section-desc">Same as option 6 but every filter value has its own × — including single-value filters.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row"><span class="dot-label">Physical type</span><span class="dot-value">Print <span class="dot-x">×</span></span></div>
+    <div class="dot-filter-row"><span class="dot-label">Date</span><span class="dot-value">1480–1560 <span class="dot-x">×</span></span></div>
+    <div class="dot-filter-row"><span class="dot-label">Fundamenta</span><span class="dot-value">Yes <span class="dot-x">×</span></span></div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Places</span>
+      <span class="dot-value" style="display:flex; align-items:center; gap:14px;">
+        <span>Germany <span class="dot-x">×</span></span>
+        <span>Italy <span class="dot-x">×</span></span>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 8 — Option 7 layout with option 4 value styling (dark pills) -->
+<div class="section">
+  <div class="section-label">8 — Structured rows, values as dark pills (option 4 style)</div>
+  <div class="section-desc">Same row layout as option 7 but filter values are rendered as solid dark pills with a white × inside, matching option 4's value style.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Physical type</span>
+      <span class="dot-value"><span class="filter-value-tag">Print <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Date</span>
+      <span class="dot-value"><span class="filter-value-tag">1480–1560 <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Fundamenta</span>
+      <span class="dot-value"><span class="filter-value-tag">Yes <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Places</span>
+      <span class="dot-value" style="display:flex; align-items:center; gap:6px;">
+        <span class="filter-value-tag">Germany <span class="tag-x">×</span></span>
+        <span class="filter-value-tag">Italy <span class="tag-x">×</span></span>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 9 — Option 8 with site's AND/OR toggle -->
+<div class="section">
+  <div class="section-label">9 — Option 8 with the site's AND [slider] OR toggle</div>
+  <div class="section-desc">Same as option 8 but the logic toggle matches the exact style used in the filter modal: labelled AND and OR flanking a sliding checkbox.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+        <div class="site-logic-toggle">
+          <span class="site-logic-label">AND</span>
+          <label class="site-toggle-switch">
+            <input type="checkbox">
+            <span class="site-toggle-slider"></span>
+          </label>
+          <span class="site-logic-label">OR</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Physical type</span>
+      <span class="dot-value"><span class="filter-value-tag">Print <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Date</span>
+      <span class="dot-value"><span class="filter-value-tag">1480–1560 <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Fundamenta</span>
+      <span class="dot-value"><span class="filter-value-tag">Yes <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Places</span>
+      <span class="dot-value" style="display:flex; align-items:center; gap:6px;">
+        <span class="filter-value-tag">Germany <span class="tag-x">×</span></span>
+        <span class="filter-value-tag">Italy <span class="tag-x">×</span></span>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 10 — Option 9 with logic toggle on the left -->
+<div class="section">
+  <div class="section-label">10 — Option 9 with logic toggle beside "+ Add field"</div>
+  <div class="section-desc">Same as option 9 but the "Logic between active fields" label and AND/OR toggle sit immediately to the right of the "+ Add field" button, on the left side of the row.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+      <button class="add-btn">+ Add field</button>
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label">OR</span>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Physical type</span>
+      <span class="dot-value"><span class="filter-value-tag">Print <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Date</span>
+      <span class="dot-value"><span class="filter-value-tag">1480–1560 <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Fundamenta</span>
+      <span class="dot-value"><span class="filter-value-tag">Yes <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Places</span>
+      <span class="dot-value" style="display:flex; align-items:center; gap:6px;">
+        <span class="filter-value-tag">Germany <span class="tag-x">×</span></span>
+        <span class="filter-value-tag">Italy <span class="tag-x">×</span></span>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+<!-- VARIANT 11 — Option 9 with logic toggle right-aligned to search bar end -->
+<div class="section">
+  <div class="section-label">11 — Option 9 with logic toggle aligned to the end of the search bar</div>
+  <div class="section-desc">Same as option 9 but the right edge of the AND/OR toggle aligns with the right edge of the search input above (not the × button).</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Title</option></select>
+      <input class="builder-input" type="text" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+    <div class="builder-row">
+      <select class="field-select" disabled><option>Persons</option></select>
+      <input class="builder-input" type="text" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; margin-top:4px; padding-right:38px;">
+      <button class="add-btn">+ Add field</button>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:0.8rem; color:#bbb; font-weight:600; line-height:1;">Logic between active fields:</span>
+        <div class="site-logic-toggle">
+          <span class="site-logic-label">AND</span>
+          <label class="site-toggle-switch">
+            <input type="checkbox">
+            <span class="site-toggle-slider"></span>
+          </label>
+          <span class="site-logic-label">OR</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div class="bottom-label" style="margin-bottom:0;">Active filters</div>
+      <button class="clear-all" style="margin-left:0;">Clear all</button>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Physical type</span>
+      <span class="dot-value"><span class="filter-value-tag">Print <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Date</span>
+      <span class="dot-value"><span class="filter-value-tag">1480–1560 <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Fundamenta</span>
+      <span class="dot-value"><span class="filter-value-tag">Yes <span class="tag-x">×</span></span></span>
+    </div>
+    <div class="dot-filter-row">
+      <span class="dot-label">Places</span>
+      <span class="dot-value" style="display:flex; align-items:center; gap:6px;">
+        <span class="filter-value-tag">Germany <span class="tag-x">×</span></span>
+        <span class="filter-value-tag">Italy <span class="tag-x">×</span></span>
+      </span>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
