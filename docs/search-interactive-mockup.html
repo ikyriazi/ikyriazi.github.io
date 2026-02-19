@@ -6,6 +6,7 @@
   <title>Search Interface — Interactive Mockup</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -129,6 +130,11 @@
       opacity: 0.25;
       cursor: default;
       pointer-events: none;
+    }
+
+    .remove-btn svg {
+      display: block;
+      flex-shrink: 0;
     }
 
     /* ── Bottom row: add + logic ── */
@@ -330,222 +336,383 @@
     }
 
     .builder-row.new { animation: fadeSlideIn 0.2s ease; }
+
+    /* ── Filters button (exact site style) ── */
+    .filter-button {
+      border-radius: 50px;
+      padding: 10px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+      background: #2c2c2c;
+      color: #ffffff;
+      border: none;
+    }
+
+    .filter-button:hover {
+      background: #1a1a1a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+    }
+
+
+    /* ── Filter panel ── */
+    .filter-panel {
+      display: none;
+      flex-direction: column;
+      gap: 0;
+      animation: fadeSlideIn 0.2s ease;
+    }
+
+    .filter-panel.open { display: flex; }
+
+    /* ── Segmented control (matching site style) ── */
+    .seg-control {
+      display: inline-flex;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .seg-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 50px;
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .seg-btn:hover { color: #2c2c2c; }
+
+    .seg-btn.active {
+      background: #2c2c2c;
+      color: #fff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
 
 <h1>Search interface — interactive mockup</h1>
-<p class="page-note">Click "+ Add field" to add search rows. Select a field, type a query, and remove rows with ×. The AND/OR toggle and "Clear all" are functional.</p>
+<p class="page-note">Click "+ Add field" to add search rows. Select a field, type a query, and remove rows with ×. The AND/OR toggle is functional.</p>
 
-<div class="card">
+<!-- ── MOCKUP 1: search + active filters list ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0;">1 — Search fields + active filters list</div>
 
-  <!-- Search rows -->
-  <div class="builder-rows" id="builderRows"></div>
-
-  <!-- Add field + Logic -->
-  <div class="bottom-row" style="margin-top: 14px;">
-    <button class="add-btn" id="addFieldBtn">+ Add field</button>
-    <div class="logic-section" id="logicSection" style="display:none;">
+<div class="card" style="margin-bottom:40px;">
+  <div class="builder-rows" id="builderRows1"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn1">+ Add field</button>
+    <div class="logic-section" id="logicSection1" style="display:none;">
       <span class="logic-between-label">Logic between search fields:</span>
       <div class="site-logic-toggle">
-        <span class="site-logic-label active" id="labelAnd">AND</span>
+        <span class="site-logic-label active" id="labelAnd1">AND</span>
         <label class="site-toggle-switch">
-          <input type="checkbox" id="logicToggle">
+          <input type="checkbox" id="logicToggle1">
           <span class="site-toggle-slider"></span>
         </label>
-        <span class="site-logic-label" id="labelOr">OR</span>
+        <span class="site-logic-label" id="labelOr1">OR</span>
       </div>
     </div>
   </div>
-
   <hr class="divider">
-
-  <!-- Active filters -->
   <div class="active-filters-header">
     <div class="bottom-label">Active filters</div>
-    <button class="clear-all" id="clearAllBtn">Clear all</button>
+    <button class="clear-all" id="clearAllBtn1">Clear all</button>
   </div>
-  <div id="activeFiltersList">
+  <div id="activeFiltersList1">
     <div class="empty-filters">No filters active.</div>
   </div>
+</div>
 
+<!-- ── MOCKUP 2: search + Filters button only ── -->
+<!-- kept as-is for comparison -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0;">2 — Search fields + Filters button</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows2"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn2">+ Add field</button>
+    <div class="logic-section" id="logicSection2" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd2">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle2">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr2">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+  <button style="font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:600; background:#2c2c2c; color:#fff; border:none; border-radius:50px; padding:10px 24px; cursor:pointer;">Filters</button>
+</div>
+
+<!-- ── MOCKUP 3: copy of mockup 2 with SVG icons ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">3 — Search fields + Filters button (SVG icons)</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows3"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn3">+ Add field</button>
+    <div class="logic-section" id="logicSection3" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd3">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle3">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr3">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+  <button style="font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:600; background:#2c2c2c; color:#fff; border:none; border-radius:50px; padding:10px 24px; cursor:pointer;">Filters</button>
+</div>
+
+<!-- ── MOCKUP 4: interactive Filters button ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">4 — Search fields + interactive Filters button</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows4"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn4">+ Add field</button>
+    <div class="logic-section" id="logicSection4" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd4">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle4">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr4">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Filters button (exact site style) -->
+  <button class="filter-button" id="filtersBtn4">Filters</button>
+
+  <!-- Filter panel (hidden until Filters is clicked) -->
+  <div class="filter-panel" id="filterPanel4" style="margin-top:16px;">
+    <div class="dot-filter-row">
+      <span class="dot-label">Physical type</span>
+      <span class="dot-value">
+        <span class="filter-value-tag">Print <span class="tag-x">×</span></span>
+      </span>
+    </div>
+  </div>
 </div>
 
 <script>
   const FIELDS = [
-    'Title',
-    'Person',
-    'Place',
-    'Identifier',
-    'Bibliography',
-    'Other metadata',
-    'Description / Comment',
-    'All fields'
+    'Title', 'Person', 'Place', 'Identifier',
+    'Bibliography', 'Other metadata', 'Description / Comment', 'All fields'
   ];
-
-  const MAX_ROWS = FIELDS.length;
-
-  const builderRows  = document.getElementById('builderRows');
-  const addFieldBtn  = document.getElementById('addFieldBtn');
-  const logicSection = document.getElementById('logicSection');
-  const logicToggle  = document.getElementById('logicToggle');
-  const labelAnd     = document.getElementById('labelAnd');
-  const labelOr      = document.getElementById('labelOr');
-  const activeList   = document.getElementById('activeFiltersList');
-  const clearAllBtn  = document.getElementById('clearAllBtn');
-
-  let rows = []; // { id, field, value }
-  let nextId = 0;
-
-  /* ── Add a row ── */
-  function addRow(field = '', value = '', animate = true) {
-    const id = nextId++;
-    const defaultField = getDefaultField();
-    const chosenField = field || defaultField;
-
-    const rowObj = { id, field: chosenField, value };
-    rows.push(rowObj);
-
-    const div = document.createElement('div');
-    div.className = 'builder-row' + (animate ? ' new' : '');
-    div.dataset.id = id;
-
-    const select = document.createElement('select');
-    select.className = 'field-select';
-    FIELDS.forEach(f => {
-      const opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = f;
-      if (f === chosenField) opt.selected = true;
-      select.appendChild(opt);
-    });
-    select.addEventListener('change', () => {
-      rowObj.field = select.value;
-      renderActiveFilters();
-    });
-
-    const input = document.createElement('input');
-    input.className = 'builder-input';
-    input.type = 'text';
-    input.placeholder = 'Search…';
-    input.value = value;
-    input.addEventListener('input', () => {
-      rowObj.value = input.value.trim();
-      renderActiveFilters();
-    });
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-btn';
-    removeBtn.textContent = '×';
-    removeBtn.title = 'Remove';
-    removeBtn.addEventListener('click', () => removeRow(id));
-
-    div.appendChild(select);
-    div.appendChild(input);
-    div.appendChild(removeBtn);
-    builderRows.appendChild(div);
-
-    updateUI();
-    renderActiveFilters();
-  }
-
-  /* ── Remove a row ── */
-  function removeRow(id) {
-    rows = rows.filter(r => r.id !== id);
-    const el = builderRows.querySelector(`[data-id="${id}"]`);
-    if (el) el.remove();
-    updateUI();
-    renderActiveFilters();
-  }
-
-  /* ── Pick a sensible default field for a new row ── */
-  function getDefaultField() {
-    const used = new Set(rows.map(r => r.field));
-    return FIELDS.find(f => !used.has(f)) || FIELDS[0];
-  }
-
-  /* ── Update button states, disable × when only one row, hide logic when < 2 rows ── */
-  function updateUI() {
-    const count = rows.length;
-
-    // disable add when all fields used or at max
-    addFieldBtn.disabled = count >= MAX_ROWS;
-
-    // disable remove when only one row
-    builderRows.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.disabled = count <= 1;
-    });
-
-    // show logic toggle only when 2+ rows
-    logicSection.style.display = count >= 2 ? 'flex' : 'none';
-  }
-
-  /* ── Render active filters list ── */
-  function renderActiveFilters() {
-    const active = rows.filter(r => r.value.length > 0);
-
-    if (active.length === 0) {
-      activeList.innerHTML = '<div class="empty-filters">No filters active.</div>';
-      return;
-    }
-
-    activeList.innerHTML = '';
-    active.forEach(r => {
-      const row = document.createElement('div');
-      row.className = 'dot-filter-row';
-
-      const label = document.createElement('span');
-      label.className = 'dot-label';
-      label.textContent = r.field;
-
-      const valueWrap = document.createElement('span');
-      valueWrap.className = 'dot-value';
-
-      const tag = document.createElement('span');
-      tag.className = 'filter-value-tag';
-      tag.innerHTML = `${escapeHtml(r.value)} <span class="tag-x">×</span>`;
-      tag.querySelector('.tag-x').addEventListener('click', () => {
-        // clear the value in the corresponding input
-        const inputEl = builderRows.querySelector(`[data-id="${r.id}"] .builder-input`);
-        if (inputEl) { inputEl.value = ''; inputEl.dispatchEvent(new Event('input')); }
-      });
-
-      valueWrap.appendChild(tag);
-      row.appendChild(label);
-      row.appendChild(valueWrap);
-      activeList.appendChild(row);
-    });
-  }
-
-  /* ── Logic toggle label highlighting ── */
-  logicToggle.addEventListener('change', () => {
-    if (logicToggle.checked) {
-      labelAnd.classList.remove('active');
-      labelOr.classList.add('active');
-    } else {
-      labelAnd.classList.add('active');
-      labelOr.classList.remove('active');
-    }
-  });
-
-  /* ── Add field button ── */
-  addFieldBtn.addEventListener('click', () => addRow());
-
-  /* ── Clear all ── */
-  clearAllBtn.addEventListener('click', () => {
-    builderRows.querySelectorAll('.builder-input').forEach(input => {
-      input.value = '';
-      input.dispatchEvent(new Event('input'));
-    });
-  });
 
   function escapeHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  /* ── Init with two rows ── */
-  addRow('Title', '', false);
-  addRow('Person', '', false);
+  const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
+  const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
+
+  // Inject feather plus into all add-field buttons
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.innerHTML = `${SVG_PLUS} Add field`;
+    btn.style.display = 'inline-flex';
+    btn.style.alignItems = 'center';
+    btn.style.gap = '6px';
+  });
+
+  function createSearchWidget({ builderRowsId, addFieldBtnId, logicSectionId,
+      logicToggleId, labelAndId, labelOrId, activeListId, clearAllBtnId, useSvgIcons = false }) {
+
+    const builderRowsEl  = document.getElementById(builderRowsId);
+    const addFieldBtnEl  = document.getElementById(addFieldBtnId);
+    const logicSectionEl = document.getElementById(logicSectionId);
+    const logicToggleEl  = document.getElementById(logicToggleId);
+    const labelAndEl     = document.getElementById(labelAndId);
+    const labelOrEl      = document.getElementById(labelOrId);
+    const activeListEl   = activeListId ? document.getElementById(activeListId) : null;
+    const clearAllBtnEl  = clearAllBtnId ? document.getElementById(clearAllBtnId) : null;
+
+    let rows = [];
+    let nextId = 0;
+
+    function getDefaultField() {
+      const used = new Set(rows.map(r => r.field));
+      return FIELDS.find(f => !used.has(f)) || FIELDS[0];
+    }
+
+    function updateUI() {
+      const count = rows.length;
+      addFieldBtnEl.disabled = count >= FIELDS.length;
+      builderRowsEl.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.disabled = count <= 1;
+      });
+      logicSectionEl.style.display = count >= 2 ? 'flex' : 'none';
+    }
+
+    function renderActiveFilters() {
+      if (!activeListEl) return;
+      const active = rows.filter(r => r.value.length > 0);
+      if (active.length === 0) {
+        activeListEl.innerHTML = '<div class="empty-filters">No filters active.</div>';
+        return;
+      }
+      activeListEl.innerHTML = '';
+      active.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'dot-filter-row';
+        const label = document.createElement('span');
+        label.className = 'dot-label';
+        label.textContent = r.field;
+        const valueWrap = document.createElement('span');
+        valueWrap.className = 'dot-value';
+        const tag = document.createElement('span');
+        tag.className = 'filter-value-tag';
+        tag.innerHTML = `${escapeHtml(r.value)} <span class="tag-x">×</span>`;
+        tag.querySelector('.tag-x').addEventListener('click', () => {
+          const inputEl = builderRowsEl.querySelector(`[data-id="${r.id}"] .builder-input`);
+          if (inputEl) { inputEl.value = ''; inputEl.dispatchEvent(new Event('input')); }
+        });
+        valueWrap.appendChild(tag);
+        row.appendChild(label);
+        row.appendChild(valueWrap);
+        activeListEl.appendChild(row);
+      });
+    }
+
+    function removeRow(id) {
+      rows = rows.filter(r => r.id !== id);
+      const el = builderRowsEl.querySelector(`[data-id="${id}"]`);
+      if (el) el.remove();
+      updateUI();
+      renderActiveFilters();
+    }
+
+    function addRow(field = '', value = '', animate = true) {
+      const id = nextId++;
+      const chosenField = field || getDefaultField();
+      const rowObj = { id, field: chosenField, value };
+      rows.push(rowObj);
+
+      const div = document.createElement('div');
+      div.className = 'builder-row' + (animate ? ' new' : '');
+      div.dataset.id = id;
+
+      const select = document.createElement('select');
+      select.className = 'field-select';
+      FIELDS.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f; opt.textContent = f;
+        if (f === chosenField) opt.selected = true;
+        select.appendChild(opt);
+      });
+      select.addEventListener('change', () => { rowObj.field = select.value; renderActiveFilters(); });
+
+      const input = document.createElement('input');
+      input.className = 'builder-input';
+      input.type = 'text';
+      input.placeholder = 'Search…';
+      input.value = value;
+      input.addEventListener('input', () => { rowObj.value = input.value.trim(); renderActiveFilters(); });
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      if (useSvgIcons) {
+        removeBtn.innerHTML = SVG_X;
+      } else {
+        removeBtn.textContent = '×';
+      }
+      removeBtn.addEventListener('click', () => removeRow(id));
+
+      div.appendChild(select);
+      div.appendChild(input);
+      div.appendChild(removeBtn);
+      builderRowsEl.appendChild(div);
+
+      updateUI();
+      renderActiveFilters();
+    }
+
+    logicToggleEl.addEventListener('change', () => {
+      if (logicToggleEl.checked) {
+        labelAndEl.classList.remove('active');
+        labelOrEl.classList.add('active');
+      } else {
+        labelAndEl.classList.add('active');
+        labelOrEl.classList.remove('active');
+      }
+    });
+
+    addFieldBtnEl.addEventListener('click', () => addRow());
+
+    if (clearAllBtnEl) {
+      clearAllBtnEl.addEventListener('click', () => {
+        builderRowsEl.querySelectorAll('.builder-input').forEach(input => {
+          input.value = '';
+          input.dispatchEvent(new Event('input'));
+        });
+      });
+    }
+
+    addRow('Title', '', false);
+    addRow('Person', '', false);
+  }
+
+  createSearchWidget({
+    builderRowsId: 'builderRows1', addFieldBtnId: 'addFieldBtn1',
+    logicSectionId: 'logicSection1', logicToggleId: 'logicToggle1',
+    labelAndId: 'labelAnd1', labelOrId: 'labelOr1',
+    activeListId: 'activeFiltersList1', clearAllBtnId: 'clearAllBtn1'
+  });
+
+  createSearchWidget({
+    builderRowsId: 'builderRows2', addFieldBtnId: 'addFieldBtn2',
+    logicSectionId: 'logicSection2', logicToggleId: 'logicToggle2',
+    labelAndId: 'labelAnd2', labelOrId: 'labelOr2'
+  });
+
+  createSearchWidget({
+    builderRowsId: 'builderRows3', addFieldBtnId: 'addFieldBtn3',
+    logicSectionId: 'logicSection3', logicToggleId: 'logicToggle3',
+    labelAndId: 'labelAnd3', labelOrId: 'labelOr3',
+    useSvgIcons: true
+  });
+
+  createSearchWidget({
+    builderRowsId: 'builderRows4', addFieldBtnId: 'addFieldBtn4',
+    logicSectionId: 'logicSection4', logicToggleId: 'logicToggle4',
+    labelAndId: 'labelAnd4', labelOrId: 'labelOr4',
+    useSvgIcons: true
+  });
+
+  /* ── Mockup 4: Filters button toggle ── */
+  const filtersBtn4  = document.getElementById('filtersBtn4');
+  const filterPanel4 = document.getElementById('filterPanel4');
+
+  filtersBtn4.addEventListener('click', () => {
+    filterPanel4.classList.toggle('open');
+  });
 </script>
 
 </body>
