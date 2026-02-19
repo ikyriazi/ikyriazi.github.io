@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Interface — Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px 80px;
+      color: #2c2c2c;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .page-note {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-bottom: 48px;
+    }
+
+    /* ── Section headers ── */
+    .section {
+      margin-bottom: 56px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .section-desc {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 20px;
+    }
+
+    /* ── Card wrapper ── */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      max-width: 720px;
+    }
+
+    /* ════════════════════════════════════════════
+       SHARED PRIMITIVES
+       ════════════════════════════════════════════ */
+
+    /* Search input */
+    .search-input {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 11px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      outline: none;
+      color: #2c2c2c;
+      background: #fff;
+    }
+
+    .search-input::placeholder { color: #bbb; }
+
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-wrap .search-icon {
+      position: absolute;
+      right: 14px;
+      color: #aaa;
+    }
+
+    .search-input-wrap .search-input {
+      padding-right: 40px;
+    }
+
+    /* AND / OR toggle */
+    .logic-toggle {
+      display: inline-flex;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .logic-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      padding: 5px 14px;
+      border: none;
+      border-radius: 50px;
+      background: transparent;
+      color: #999;
+      cursor: default;
+    }
+
+    .logic-btn.active {
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    /* Field chip */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: 1px solid #d0d0d0;
+      background: #fff;
+      color: #666;
+      cursor: default;
+      white-space: nowrap;
+    }
+
+    .chip.selected {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+      color: #fff;
+    }
+
+    .chip.selected .chip-check {
+      display: inline-block;
+    }
+
+    .chip-check {
+      display: none;
+      margin-right: 5px;
+      font-size: 0.7rem;
+    }
+
+    /* Label above sections inside card */
+    .field-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #bbb;
+      margin-bottom: 10px;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid #ebebeb;
+      margin: 20px 0;
+    }
+
+    /* Row utility */
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .row.wrap {
+      flex-wrap: wrap;
+    }
+
+    /* ════════════════════════════════════════════
+       OPTION A — Chips above search bar
+       ════════════════════════════════════════════ */
+
+    /* ════════════════════════════════════════════
+       OPTION B — Query builder rows
+       ════════════════════════════════════════════ */
+    .builder-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .builder-connector {
+      min-width: 52px;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    .field-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #f9f7f4;
+      color: #2c2c2c;
+      outline: none;
+      cursor: default;
+      min-width: 160px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 34px;
+    }
+
+    .builder-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      outline: none;
+      color: #2c2c2c;
+    }
+
+    .builder-input::placeholder { color: #bbb; }
+
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #bbb;
+      font-size: 1rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    .add-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c2c2c;
+      border: 1.5px dashed #d0d0d0;
+      background: transparent;
+      border-radius: 50px;
+      padding: 8px 18px;
+      cursor: default;
+      margin-top: 4px;
+    }
+
+    /* ════════════════════════════════════════════
+       OPTION C — Two-panel layout
+       ════════════════════════════════════════════ */
+    .two-panel {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .fields-panel {
+      min-width: 180px;
+      background: #f9f7f4;
+      border: 1px solid #d0d0d0;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #555;
+      border-bottom: 1px solid #ebebeb;
+    }
+
+    .checkbox-row:last-child {
+      border-bottom: none;
+    }
+
+    .checkbox-row.checked {
+      color: #2c2c2c;
+      font-weight: 600;
+    }
+
+    .faux-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1.5px solid #d0d0d0;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .faux-checkbox.checked {
+      background: #2c2c2c;
+      border-color: #2c2c2c;
+    }
+
+    .faux-checkbox.checked::after {
+      content: '';
+      width: 4px;
+      height: 7px;
+      border: 1.5px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+      display: block;
+    }
+
+    .search-panel {
+      flex: 1;
+    }
+
+    /* ════════════════════════════════════════════
+       OPTION D — Inline field select + search
+       ════════════════════════════════════════════ */
+    .inline-search {
+      display: flex;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .inline-field-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 12px 18px;
+      border: none;
+      border-right: 1px solid #e8e8e8;
+      background: #f9f7f4;
+      color: #2c2c2c;
+      outline: none;
+      cursor: default;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 30px;
+    }
+
+    .inline-text-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 12px 16px;
+      border: none;
+      outline: none;
+      color: #2c2c2c;
+    }
+
+    .inline-text-input::placeholder { color: #bbb; }
+
+    .inline-search-btn {
+      padding: 0 20px;
+      background: #2c2c2c;
+      border: none;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: default;
+    }
+
+    /* active field tags below inline search */
+    .active-fields {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .active-field-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      background: #2c2c2c;
+      color: #fff;
+      border-radius: 50px;
+    }
+
+    .active-field-tag .tag-remove {
+      font-size: 0.7rem;
+      opacity: 0.6;
+    }
+
+    .active-fields-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #bbb;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ════════════════════════════════════════════
+       OPTION E — Stacked chips with search per field
+       ════════════════════════════════════════════ */
+    .field-search-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .field-badge {
+      min-width: 130px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 50px;
+      border: 1.5px solid #2c2c2c;
+      background: #2c2c2c;
+      color: #fff;
+      text-align: center;
+    }
+
+    .field-badge.inactive {
+      border-color: #d0d0d0;
+      background: #fff;
+      color: #aaa;
+    }
+
+    .field-search-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 9px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      outline: none;
+      color: #2c2c2c;
+    }
+
+    .field-search-input::placeholder { color: #ddd; }
+    .field-search-input.active-input { border-color: #2c2c2c; }
+    .field-search-input.active-input::placeholder { color: #bbb; }
+
+    .connector-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #aaa;
+      text-transform: uppercase;
+      padding-left: 130px;
+      margin-bottom: 4px;
+    }
+
+    svg { display: block; }
+  </style>
+</head>
+<body>
+
+<h1>Search interface — design mockups</h1>
+<p class="page-note">Static mockups only. Checked / selected states are illustrative.</p>
+
+<!-- ══════════════════════════════════════════
+     OPTION A — Field chips above search bar
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">A — Field chips + single search bar</div>
+  <div class="section-desc">User picks one or more fields via toggleable chips, then types in a single input. AND/OR applies across selected fields.</div>
+  <div class="card">
+
+    <div class="field-label">Search in</div>
+    <div class="row wrap" style="gap:8px; margin-bottom:16px;">
+      <span class="chip selected"><span class="chip-check">✓</span>Title</span>
+      <span class="chip selected"><span class="chip-check">✓</span>Persons</span>
+      <span class="chip">Places</span>
+      <span class="chip">Identifiers</span>
+      <span class="chip">Bibliography</span>
+      <span class="chip">Other metadata</span>
+      <span class="chip">Descriptions</span>
+      <span class="chip">All</span>
+    </div>
+
+    <div class="row" style="margin-bottom:0; gap:14px;">
+      <div class="search-input-wrap" style="flex:1;">
+        <input class="search-input" type="text" placeholder="Search…" value="Lute tablature">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPTION B — Query builder rows
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">B — Query builder (one row per condition)</div>
+  <div class="section-desc">Each search condition is its own row with an independent field selector and input. Rows are joined by an AND/OR connector.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <div class="builder-connector" style="color:transparent;">—</div>
+      <select class="field-select" disabled>
+        <option>Title</option>
+      </select>
+      <input class="builder-input" type="text" placeholder="Search…" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+
+    <div class="builder-row" style="margin-bottom:0; align-items:center;">
+      <div class="logic-toggle" style="min-width:52px;">
+        <button class="logic-btn active" style="padding:4px 10px;">AND</button>
+        <button class="logic-btn" style="padding:4px 10px;">OR</button>
+      </div>
+      <select class="field-select" disabled>
+        <option>Persons</option>
+      </select>
+      <input class="builder-input" type="text" placeholder="Search…" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+
+    <hr class="divider">
+
+    <button class="add-btn">+ Add condition</button>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPTION C — Two-panel (fields left, search right)
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">C — Two-panel (field list + search input)</div>
+  <div class="section-desc">Fields as a checkbox list on the left; single search input on the right. AND/OR toggle below the input.</div>
+  <div class="card">
+    <div class="two-panel">
+
+      <div class="fields-panel">
+        <div class="field-label" style="margin-bottom:6px;">Fields</div>
+        <div class="checkbox-row checked">
+          <div class="faux-checkbox checked"></div> Title
+        </div>
+        <div class="checkbox-row checked">
+          <div class="faux-checkbox checked"></div> Persons
+        </div>
+        <div class="checkbox-row">
+          <div class="faux-checkbox"></div> Places
+        </div>
+        <div class="checkbox-row">
+          <div class="faux-checkbox"></div> Identifiers
+        </div>
+        <div class="checkbox-row">
+          <div class="faux-checkbox"></div> Bibliography
+        </div>
+        <div class="checkbox-row">
+          <div class="faux-checkbox"></div> Other metadata
+        </div>
+        <div class="checkbox-row">
+          <div class="faux-checkbox"></div> Descriptions
+        </div>
+        <div class="checkbox-row" style="padding-top:10px; border-top: 1px solid #d0d0d0; margin-top:4px; border-bottom:none;">
+          <div class="faux-checkbox"></div> All
+        </div>
+      </div>
+
+      <div class="search-panel">
+        <div class="search-input-wrap" style="margin-bottom:14px;">
+          <input class="search-input" type="text" placeholder="Search…" value="Lute tablature">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="row">
+          <span style="font-size:0.8rem; color:#bbb; font-weight:600;">Logic across fields:</span>
+          <div class="logic-toggle">
+            <button class="logic-btn active">AND</button>
+            <button class="logic-btn">OR</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPTION D — Inline field dropdown + search bar
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">D — Inline field selector embedded in search bar</div>
+  <div class="section-desc">A single bar combining a field multi-select dropdown on the left and the search input on the right. Active fields shown as tags below.</div>
+  <div class="card">
+
+    <div class="inline-search" style="margin-bottom:14px;">
+      <select class="inline-field-select" disabled>
+        <option>2 fields selected</option>
+      </select>
+      <input class="inline-text-input" type="text" placeholder="Search…" value="Lute tablature">
+      <button class="inline-search-btn">Search</button>
+    </div>
+
+    <div class="row" style="gap:14px; align-items:center;">
+      <div class="active-fields">
+        <span class="active-fields-label">In:</span>
+        <span class="active-field-tag">Title <span class="tag-remove">✕</span></span>
+        <span class="active-field-tag">Persons <span class="tag-remove">✕</span></span>
+      </div>
+      <div class="logic-toggle" style="margin-left:auto;">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPTION E — One input row per field
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">E — One input per field (expandable)</div>
+  <div class="section-desc">Each field has its own dedicated search input. Active fields are highlighted; inactive ones are dimmed. AND/OR connector appears between active rows.</div>
+  <div class="card">
+
+    <div class="field-search-row">
+      <div class="field-badge">Title</div>
+      <input class="field-search-input active-input" type="text" placeholder="Search title…" value="Lute tablature">
+    </div>
+
+    <div class="connector-badge">AND</div>
+
+    <div class="field-search-row">
+      <div class="field-badge">Persons</div>
+      <input class="field-search-input active-input" type="text" placeholder="Search persons…" value="Newsidler">
+    </div>
+
+    <hr class="divider">
+
+    <div class="field-search-row">
+      <div class="field-badge inactive">Places</div>
+      <input class="field-search-input" type="text" placeholder="Search places…">
+    </div>
+    <div class="field-search-row">
+      <div class="field-badge inactive">Identifiers</div>
+      <input class="field-search-input" type="text" placeholder="Search identifiers…">
+    </div>
+    <div class="field-search-row">
+      <div class="field-badge inactive">Bibliography</div>
+      <input class="field-search-input" type="text" placeholder="Search bibliography…">
+    </div>
+    <div class="field-search-row">
+      <div class="field-badge inactive">Other metadata</div>
+      <input class="field-search-input" type="text" placeholder="Search other metadata…">
+    </div>
+    <div class="field-search-row" style="margin-bottom:0;">
+      <div class="field-badge inactive">Descriptions</div>
+      <input class="field-search-input" type="text" placeholder="Search descriptions…">
+    </div>
+
+    <hr class="divider" style="margin-bottom:12px;">
+
+    <div class="row">
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     OPTION F — B + E hybrid
+     ══════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-label">F — Field rows with search inputs + shared logic (B + E)</div>
+  <div class="section-desc">Each active field gets its own row with a field selector, search input and an × button. An "+ Add field" button lets users add more rows. A shared AND/OR toggle below the divider applies logic across all active fields.</div>
+  <div class="card">
+
+    <div class="builder-row">
+      <select class="field-select" disabled>
+        <option>Title</option>
+      </select>
+      <input class="builder-input" type="text" placeholder="Search…" value="Lute tablature">
+      <div class="remove-btn">×</div>
+    </div>
+
+    <div class="builder-row">
+      <select class="field-select" disabled>
+        <option>Persons</option>
+      </select>
+      <input class="builder-input" type="text" placeholder="Search…" value="Newsidler">
+      <div class="remove-btn">×</div>
+    </div>
+
+    <button class="add-btn">+ Add field</button>
+
+    <hr class="divider">
+
+    <div class="row">
+      <span style="font-size:0.8rem; color:#bbb; font-weight:600;">Logic between active fields:</span>
+      <div class="logic-toggle">
+        <button class="logic-btn active">AND</button>
+        <button class="logic-btn">OR</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
