@@ -403,6 +403,67 @@
       color: #fff;
       font-weight: 600;
     }
+
+    /* ── Physical type accordion (mockup 5) ── */
+    .phys-accordion {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .phys-accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .phys-accordion-header:hover { opacity: 0.75; }
+
+    .phys-chevron {
+      color: #2c2c2c;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .phys-accordion.expanded .phys-chevron {
+      transform: rotate(180deg);
+    }
+
+    .phys-accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .phys-accordion.expanded .phys-accordion-content {
+      max-height: 80px;
+    }
+
+    .phys-tag-x {
+      font-size: 0.7rem;
+      opacity: 0.55;
+      cursor: pointer;
+    }
+
+    /* ── Mockup 6: split-click header ── */
+    .phys-accordion-header.header-split {
+      cursor: default;
+      justify-content: flex-start;
+    }
+
+    .phys-accordion-header.header-split:hover {
+      opacity: 1;
+    }
+
+    .phys-toggle-zone {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .phys-toggle-zone:hover { opacity: 0.75; }
   </style>
 </head>
 <body>
@@ -517,6 +578,110 @@
       <span class="dot-value">
         <span class="filter-value-tag">Print <span class="tag-x">×</span></span>
       </span>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOCKUP 5: interactive Filters + interactive physical type accordion ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">5 — Search fields + Filters button (interactive Physical type accordion)</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows5"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn5">+ Add field</button>
+    <div class="logic-section" id="logicSection5" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd5">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle5">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr5">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <!-- Filters button -->
+  <button class="filter-button" id="filtersBtn5">Filters</button>
+
+  <!-- Filter panel -->
+  <div class="filter-panel" id="filterPanel5" style="margin-top:16px;">
+
+    <!-- Physical type accordion -->
+    <div class="phys-accordion" id="physAccordion5">
+      <div class="phys-accordion-header" id="physHeader5">
+        <span class="dot-label" style="color:#888; min-width:0;">Physical type</span>
+        <span class="filter-value-tag" id="physTag5" style="display:none; margin-left:15px;">
+          <span id="physTagText5"></span>
+          <span class="phys-tag-x" id="physTagX5">×</span>
+        </span>
+        <svg class="phys-chevron" style="margin-left:auto;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="seg-control" style="margin: 4px 0 12px;">
+          <button class="seg-btn active" data-val="Both">Both</button>
+          <button class="seg-btn" data-val="Print">Print</button>
+          <button class="seg-btn" data-val="Manuscript">Manuscript</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MOCKUP 6: chevron next to title, value after chevron, split-click ── -->
+<div style="font-size:0.7rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#aaa; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid #e0e0e0; margin-top:40px;">6 — Chevron beside title · value after chevron · title+chevron area toggles accordion</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows6"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn6">+ Add field</button>
+    <div class="logic-section" id="logicSection6" style="display:none;">
+      <span class="logic-between-label">Logic between search fields:</span>
+      <div class="site-logic-toggle">
+        <span class="site-logic-label active" id="labelAnd6">AND</span>
+        <label class="site-toggle-switch">
+          <input type="checkbox" id="logicToggle6">
+          <span class="site-toggle-slider"></span>
+        </label>
+        <span class="site-logic-label" id="labelOr6">OR</span>
+      </div>
+    </div>
+  </div>
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn6">Filters</button>
+
+  <div class="filter-panel" id="filterPanel6" style="margin-top:16px;">
+    <div class="phys-accordion" id="physAccordion6">
+
+      <!-- Header: only the toggle zone (title + chevron) is clickable -->
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone6">
+          <span class="dot-label" style="color:#888; min-width:0;">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <!-- Value tag: outside the clickable zone -->
+        <span class="filter-value-tag" id="physTag6" style="display:none; margin-left:15px;">
+          <span id="physTagText6"></span>
+          <span class="phys-tag-x" id="physTagX6">×</span>
+        </span>
+      </div>
+
+      <div class="phys-accordion-content">
+        <div class="seg-control" style="margin: 4px 0 12px;">
+          <button class="seg-btn active" data-val="Both">Both</button>
+          <button class="seg-btn" data-val="Print">Print</button>
+          <button class="seg-btn" data-val="Manuscript">Manuscript</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -706,12 +871,100 @@
     useSvgIcons: true
   });
 
+  createSearchWidget({
+    builderRowsId: 'builderRows5', addFieldBtnId: 'addFieldBtn5',
+    logicSectionId: 'logicSection5', logicToggleId: 'logicToggle5',
+    labelAndId: 'labelAnd5', labelOrId: 'labelOr5',
+    useSvgIcons: true
+  });
+
   /* ── Mockup 4: Filters button toggle ── */
   const filtersBtn4  = document.getElementById('filtersBtn4');
   const filterPanel4 = document.getElementById('filterPanel4');
 
   filtersBtn4.addEventListener('click', () => {
     filterPanel4.classList.toggle('open');
+  });
+
+  /* ── Mockup 5: Filters button + interactive physical type accordion ── */
+  const filtersBtn5  = document.getElementById('filtersBtn5');
+  const filterPanel5 = document.getElementById('filterPanel5');
+  const physAccordion5 = document.getElementById('physAccordion5');
+  const physHeader5    = document.getElementById('physHeader5');
+  const physTag5       = document.getElementById('physTag5');
+  const physTagText5   = document.getElementById('physTagText5');
+  const physTagX5      = document.getElementById('physTagX5');
+  const physSegBtns    = physAccordion5.querySelectorAll('.seg-btn');
+
+  filtersBtn5.addEventListener('click', () => {
+    filterPanel5.classList.toggle('open');
+  });
+
+  function setPhysValue5(val) {
+    physSegBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.val === val));
+    if (val === 'Both') {
+      physTag5.style.display = 'none';
+    } else {
+      physTagText5.textContent = val;
+      physTag5.style.display = 'inline-flex';
+    }
+  }
+
+  physHeader5.addEventListener('click', (e) => {
+    if (e.target.closest('#physTagX5')) return;
+    physAccordion5.classList.toggle('expanded');
+  });
+
+  physSegBtns.forEach(btn => {
+    btn.addEventListener('click', () => setPhysValue5(btn.dataset.val));
+  });
+
+  physTagX5.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setPhysValue5('Both');
+  });
+
+  /* ── Mockup 6: split-click accordion ── */
+  createSearchWidget({
+    builderRowsId: 'builderRows6', addFieldBtnId: 'addFieldBtn6',
+    logicSectionId: 'logicSection6', logicToggleId: 'logicToggle6',
+    labelAndId: 'labelAnd6', labelOrId: 'labelOr6',
+    useSvgIcons: true
+  });
+
+  const filtersBtn6    = document.getElementById('filtersBtn6');
+  const filterPanel6   = document.getElementById('filterPanel6');
+  const physAccordion6 = document.getElementById('physAccordion6');
+  const physToggle6    = document.getElementById('physToggleZone6');
+  const physTag6       = document.getElementById('physTag6');
+  const physTagText6   = document.getElementById('physTagText6');
+  const physTagX6      = document.getElementById('physTagX6');
+  const physSegBtns6   = physAccordion6.querySelectorAll('.seg-btn');
+
+  filtersBtn6.addEventListener('click', () => {
+    filterPanel6.classList.toggle('open');
+  });
+
+  function setPhysValue6(val) {
+    physSegBtns6.forEach(btn => btn.classList.toggle('active', btn.dataset.val === val));
+    if (val === 'Both') {
+      physTag6.style.display = 'none';
+    } else {
+      physTagText6.textContent = val;
+      physTag6.style.display = 'inline-flex';
+    }
+  }
+
+  physToggle6.addEventListener('click', () => {
+    physAccordion6.classList.toggle('expanded');
+  });
+
+  physSegBtns6.forEach(btn => {
+    btn.addEventListener('click', () => setPhysValue6(btn.dataset.val));
+  });
+
+  physTagX6.addEventListener('click', () => {
+    setPhysValue6('Both');
   });
 </script>
 
