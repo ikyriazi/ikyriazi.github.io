@@ -2380,8 +2380,8 @@
 
 <script>
   const FIELDS = [
-    'Title', 'Person', 'Place', 'RISM / VD16 / Brown ID',
-    'Description / Comment', 'Bibliography', 'All fields'
+    'All fields', 'Title', 'Person', 'Place', 'RISM / VD16 / Brown ID',
+    'Description / Comment', 'Bibliography'
   ];
 
   const PERSONS = [
@@ -2619,8 +2619,8 @@
 
     addFieldBtnEl.addEventListener('click', () => addRow());
 
+    addRow('All fields', false);
     addRow('Title', false);
-    addRow('Person', false);
   }
 
   function setupSplitAccordion(n, updateSelectionUI, smartInputs = {}) {
