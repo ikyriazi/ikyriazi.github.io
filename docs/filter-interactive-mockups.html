@@ -97,6 +97,51 @@
 
     .field-select:focus { border-color: #2c2c2c; }
 
+    /* ── Custom field-select dropdown (option 8) ── */
+    .custom-field-select {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .custom-field-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 10px 34px 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #f9f7f4 url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+      color: #2c2c2c;
+      min-width: 190px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .custom-field-btn:focus { outline: none; border-color: #2c2c2c; }
+    .custom-field-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 100%;
+      background: #fff;
+      border: 1px solid #d0d0d0;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+      z-index: 200;
+      overflow: hidden;
+    }
+    .custom-field-dropdown.open { display: block; }
+    .custom-field-option {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 9px 14px;
+      cursor: pointer;
+      color: #2c2c2c;
+      transition: background 0.1s;
+    }
+    .custom-field-option:hover { background: #e8e8e8; }
+    .custom-field-option.is-selected { font-weight: 600; }
+
     .builder-input {
       flex: 1;
       font-family: 'Inter', sans-serif;
@@ -2530,14 +2575,14 @@
   }
 
   function createSearchWidget({ builderRowsId, addFieldBtnId, logicSectionId,
-      logicToggleId, labelAndId, labelOrId, smartInputs = {} }) {
+      logicToggleId, labelAndId, labelOrId, smartInputs = {}, showLogic = true, useCustomSelect = false }) {
 
     const builderRowsEl  = document.getElementById(builderRowsId);
     const addFieldBtnEl  = document.getElementById(addFieldBtnId);
-    const logicSectionEl = document.getElementById(logicSectionId);
-    const logicToggleEl  = document.getElementById(logicToggleId);
-    const labelAndEl     = document.getElementById(labelAndId);
-    const labelOrEl      = document.getElementById(labelOrId);
+    const logicSectionEl = logicSectionId ? document.getElementById(logicSectionId) : null;
+    const logicToggleEl  = logicToggleId  ? document.getElementById(logicToggleId)  : null;
+    const labelAndEl     = labelAndId     ? document.getElementById(labelAndId)     : null;
+    const labelOrEl      = labelOrId      ? document.getElementById(labelOrId)      : null;
 
     let rows = [];
     let nextId = 0;
@@ -2553,7 +2598,7 @@
       builderRowsEl.querySelectorAll('.remove-btn').forEach(btn => {
         btn.disabled = count <= 1;
       });
-      logicSectionEl.style.display = count >= 2 ? 'flex' : 'none';
+      if (logicSectionEl && showLogic) logicSectionEl.style.display = count >= 2 ? 'flex' : 'none';
     }
 
     function addRow(field = '', animate = true) {
@@ -2564,15 +2609,6 @@
       const div = document.createElement('div');
       div.className = 'builder-row' + (animate ? ' new' : '');
       div.dataset.id = id;
-
-      const select = document.createElement('select');
-      select.className = 'field-select';
-      FIELDS.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f; opt.textContent = f;
-        if (f === chosenField) opt.selected = true;
-        select.appendChild(opt);
-      });
 
       function makeInput(fieldName) {
         if (smartInputs[fieldName]) {
@@ -2587,14 +2623,54 @@
 
       let currentInput = makeInput(chosenField);
 
-      select.addEventListener('change', () => {
-        const newField = select.value;
-        rows.find(r => r.id === id).field = newField;
-        const newInput = makeInput(newField);
-        div.replaceChild(newInput, currentInput);
-        currentInput = newInput;
-        updateUI();
-      });
+      let fieldEl;
+      if (useCustomSelect) {
+        const cWrap = document.createElement('div');
+        cWrap.className = 'custom-field-select';
+        const cBtn = document.createElement('button');
+        cBtn.type = 'button'; cBtn.className = 'custom-field-btn'; cBtn.textContent = chosenField;
+        const cDrop = document.createElement('div');
+        cDrop.className = 'custom-field-dropdown';
+        FIELDS.forEach(f => {
+          const cOpt = document.createElement('div');
+          cOpt.className = 'custom-field-option' + (f === chosenField ? ' is-selected' : '');
+          cOpt.textContent = f;
+          cOpt.addEventListener('mousedown', e => {
+            e.preventDefault();
+            rows.find(r => r.id === id).field = f;
+            cBtn.textContent = f;
+            cDrop.querySelectorAll('.custom-field-option').forEach(o => o.classList.toggle('is-selected', o === cOpt));
+            cDrop.classList.remove('open');
+            const newInput = makeInput(f);
+            div.replaceChild(newInput, currentInput);
+            currentInput = newInput;
+            updateUI();
+          });
+          cDrop.appendChild(cOpt);
+        });
+        cBtn.addEventListener('click', e => { e.stopPropagation(); cDrop.classList.toggle('open'); });
+        document.addEventListener('click', () => cDrop.classList.remove('open'));
+        cWrap.appendChild(cBtn); cWrap.appendChild(cDrop);
+        fieldEl = cWrap;
+      } else {
+        const select = document.createElement('select');
+        select.className = 'field-select';
+        FIELDS.forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f; opt.textContent = f;
+          if (f === chosenField) opt.selected = true;
+          select.appendChild(opt);
+        });
+        select.addEventListener('change', () => {
+          const newField = select.value;
+          rows.find(r => r.id === id).field = newField;
+          const newInput = makeInput(newField);
+          div.replaceChild(newInput, currentInput);
+          currentInput = newInput;
+          updateUI();
+        });
+        fieldEl = select;
+      }
 
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-btn';
@@ -2605,17 +2681,19 @@
         updateUI();
       });
 
-      div.appendChild(select);
+      div.appendChild(fieldEl);
       div.appendChild(currentInput);
       div.appendChild(removeBtn);
       builderRowsEl.appendChild(div);
       updateUI();
     }
 
-    logicToggleEl.addEventListener('change', () => {
-      labelAndEl.classList.toggle('active', !logicToggleEl.checked);
-      labelOrEl.classList.toggle('active', logicToggleEl.checked);
-    });
+    if (logicToggleEl) {
+      logicToggleEl.addEventListener('change', () => {
+        if (labelAndEl) labelAndEl.classList.toggle('active', !logicToggleEl.checked);
+        if (labelOrEl)  labelOrEl.classList.toggle('active',  logicToggleEl.checked);
+      });
+    }
 
     addFieldBtnEl.addEventListener('click', () => addRow());
 
@@ -2623,11 +2701,15 @@
     addRow('Title', false);
   }
 
-  function setupSplitAccordion(n, updateSelectionUI, smartInputs = {}) {
+  function setupSplitAccordion(n, updateSelectionUI, smartInputs = {}, options = {}) {
+    const withLogic = options.showLogic !== false;
     createSearchWidget({
       builderRowsId: `builderRows${n}`, addFieldBtnId: `addFieldBtn${n}`,
-      logicSectionId: `logicSection${n}`, logicToggleId: `logicToggle${n}`,
-      labelAndId: `labelAnd${n}`, labelOrId: `labelOr${n}`, smartInputs
+      logicSectionId: withLogic ? `logicSection${n}` : null,
+      logicToggleId:  withLogic ? `logicToggle${n}`  : null,
+      labelAndId:     withLogic ? `labelAnd${n}`     : null,
+      labelOrId:      withLogic ? `labelOr${n}`      : null,
+      smartInputs, showLogic: withLogic, useCustomSelect: !!options.useCustomSelect
     });
 
     const filtersBtn    = document.getElementById(`filtersBtn${n}`);
@@ -3075,6 +3157,200 @@
     initChipShelfmarksAccordion({ n: 7 });
     initChipShelfmarksAccordion({ n: 7, prefix: 'fn' });
     initFundamentaAccordion({ n: 7 });
+  }
+</script>
+
+<!-- ── OPTION 8 ── -->
+<div class="section-label">8 — Smart Person &amp; Place inputs + Shelfmarks + Functions + Fundamenta (no logic toggle, custom field selector)</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows8"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn8">+ Add field</button>
+  </div>
+
+  <hr class="divider">
+
+  <button class="filter-button" id="filtersBtn8">Filters</button>
+
+  <div class="filter-panel" id="filterPanel8" style="margin-top:16px;">
+
+    <!-- Physical type -->
+    <div class="phys-accordion" id="physAccordion8">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="physToggleZone8">
+          <span class="dot-label">Physical type</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="physTag8" style="visibility:hidden; margin-left:15px;">
+          <span id="physTagText8"></span>
+          <span class="phys-tag-x" id="physTagX8">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList8">
+          <div class="phys-radio-row active" data-val="Both"><span class="phys-radio-circle"></span><span class="phys-radio-text">Both</span></div>
+          <div class="phys-radio-row" data-val="Print"><span class="phys-radio-circle"></span><span class="phys-radio-text">Print</span></div>
+          <div class="phys-radio-row" data-val="Manuscript"><span class="phys-radio-circle"></span><span class="phys-radio-text">Manuscript</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="phys-accordion" id="dateAccordion8">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="dateToggleZone8">
+          <span class="dot-label">Date</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="dateTag8" style="visibility:hidden; margin-left:15px;">
+          <span id="dateTagText8"></span>
+          <span class="phys-tag-x" id="dateTagX8">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content date-content">
+        <div class="range-slider-wrap">
+          <div class="range-track"><div class="range-fill" id="dateFill8"></div></div>
+          <input type="range" class="range-input range-min" id="dateMin8" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax8" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel8" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel8" value="1620" min="1450" max="1620">
+        </div>
+      </div>
+    </div>
+
+    <!-- Shelfmarks -->
+    <div class="phys-accordion" id="shelfAccordion8">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="shelfToggleZone8">
+          <span class="dot-label">Shelfmarks</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="shelfTag8" style="visibility:hidden; margin-left:15px;">
+          <span id="shelfTagText8"></span>
+          <span class="phys-tag-x" id="shelfTagX8">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content shelfmarks-content">
+        <input type="text" class="shelfmarks-search" id="shelfSearch8" placeholder="Search shelfmarks…">
+        <div class="sm-chip-grid" id="shelfList8">
+          <div class="sm-group-heading">A — Austria</div>
+          <span class="sm-chip">A-Imf</span><span class="sm-chip">A-Wgm</span><span class="sm-chip">A-Wgm 676/137</span><span class="sm-chip">A-Wkm KK_5410</span><span class="sm-chip">A-Wn 396116-A</span><span class="sm-chip">A-Wn Cod. 9704</span><span class="sm-chip">A-Wn MS47356-8°</span><span class="sm-chip">A-Wn Mus.Hs. 18688</span><span class="sm-chip">A-Wn Mus.Hs. 18827</span><span class="sm-chip">A-Wn Mus.Hs. 41950</span><span class="sm-chip">A-Wn SA.78.C.29 19</span><span class="sm-chip">A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1</span>
+          <div class="sm-group-heading">B — Belgium</div>
+          <span class="sm-chip">B-Br</span><span class="sm-chip">B-Br Fétis 2.884 b 9899 48</span><span class="sm-chip">B-Br Fétis 4.014 A (RP)</span><span class="sm-chip">B-Br Fétis 6.197 A (RP)</span>
+          <div class="sm-group-heading">CH — Switzerland</div>
+          <span class="sm-chip">CH-A AKB Mb 465</span><span class="sm-chip">CH-BEsu Hospinian 141</span><span class="sm-chip">CH-BEsu MUE Hospinian 141</span><span class="sm-chip">CH-Bu F IX 23</span><span class="sm-chip">CH-Bu F IX 56</span><span class="sm-chip">CH-Bu F IX 63</span><span class="sm-chip">CH-Bu F IX 70</span><span class="sm-chip">CH-Bu F X</span><span class="sm-chip">CH-Bu F X 1</span><span class="sm-chip">CH-Bu F X 10</span><span class="sm-chip">CH-Bu F X 11</span><span class="sm-chip">CH-Bu F X 17</span><span class="sm-chip">CH-Bu F X 18</span><span class="sm-chip">CH-Bu F X 19</span><span class="sm-chip">CH-Bu F X 2</span><span class="sm-chip">CH-Bu F X 20</span><span class="sm-chip">CH-Bu F X 21</span><span class="sm-chip">CH-Bu F X 22</span><span class="sm-chip">CH-Bu F X 23</span><span class="sm-chip">CH-Bu F X 24</span><span class="sm-chip">CH-Bu F X 25</span><span class="sm-chip">CH-Bu F X 3</span><span class="sm-chip">CH-Bu F X 4</span><span class="sm-chip">CH-Bu F X 5</span><span class="sm-chip">CH-Bu F X 6</span><span class="sm-chip">CH-Bu F X 7</span><span class="sm-chip">CH-Bu F X 8</span><span class="sm-chip">CH-Bu kk II 27</span><span class="sm-chip">CH-E</span><span class="sm-chip">CH-SAM Ms. FP/M 1</span><span class="sm-chip">CH-SAM Ms. FP/M 2</span><span class="sm-chip">CH-SGs Cod. Sang. 463</span><span class="sm-chip">CH-ZO</span><span class="sm-chip">CH-Zz Mus. 908</span>
+          <div class="sm-group-heading">CZ — Czech Republic</div>
+          <span class="sm-chip">CZ-Bm</span><span class="sm-chip">CZ-Bu</span><span class="sm-chip">CZ-Pu Hs. 223-20</span>
+          <div class="sm-group-heading">D — Germany</div>
+          <span class="sm-chip">D-As Tonk Schl 549</span><span class="sm-chip">D-B</span><span class="sm-chip">D-B 1 an: Yd 5008</span><span class="sm-chip">D-B 2 an: Yd 5008</span><span class="sm-chip">D-B Ms.germ.qu. 719</span><span class="sm-chip">D-B Ms.germ.qu.718</span><span class="sm-chip">D-B Mus. ant. theor. V. 30</span><span class="sm-chip">D-B Mus.ant.pract. A 180</span><span class="sm-chip">D-B Mus.ant.pract. G 435</span><span class="sm-chip">D-B Mus.ant.pract. O 65</span><span class="sm-chip">D-B Mus.ant.pract. O120</span><span class="sm-chip">D-B Mus.ant.theor G 60</span><span class="sm-chip">D-B Mus.ant.theor. A 15</span><span class="sm-chip">D-B Mus.ms. 40026</span><span class="sm-chip">D-B Mus.ms. 40588</span><span class="sm-chip">D-B Yd 5006</span><span class="sm-chip">D-B Yd 5008 R</span><span class="sm-chip">D-B Yd5041</span><span class="sm-chip">D-B Yd9496</span><span class="sm-chip">D-B Yd9503</span><span class="sm-chip">D-Cl Rara/BIII 1/9(Beil 1)</span><span class="sm-chip">D-DS Gü 13788</span><span class="sm-chip">D-FLs KdM1 a/b</span><span class="sm-chip">D-Gms</span><span class="sm-chip">D-Gs 8 MUS IV, 4600</span><span class="sm-chip">D-HAu Pon IIe 290 (1)</span><span class="sm-chip">D-HAu Pon IIe 290 (2)</span><span class="sm-chip">D-HEu cpg 343</span><span class="sm-chip">D-HTd</span><span class="sm-chip">D-Ju 4 Mus. 12a(1)</span><span class="sm-chip">D-Ju 4 Mus. 12a(2)</span><span class="sm-chip">D-Ju 4 Mus. 12b(1)</span><span class="sm-chip">D-Ju 4 Mus. 12c(1)</span><span class="sm-chip">D-Ju 4 Mus. 12d(1)</span><span class="sm-chip">D-Ju 4 Mus.12b(2)</span><span class="sm-chip">D-Ju 4 Mus.12c(2)</span><span class="sm-chip">D-Ju 4 Mus.12d(2)</span><span class="sm-chip">D-KA Don Mus.Autogr. 1</span><span class="sm-chip">D-Kl 2° Ms.Math. 31</span><span class="sm-chip">D-LEm</span><span class="sm-chip">D-LEm I. 8° 191</span><span class="sm-chip">D-LEm I.8°191</span><span class="sm-chip">D-LEm II. 6. 13 / D-Dl II. 6. 13</span><span class="sm-chip">D-LEm II. 6. 7</span><span class="sm-chip">D-Mbs 2 Mus.pr. 156.16/20#16</span><span class="sm-chip">D-Mbs 4 Mus.pr.167</span><span class="sm-chip">D-Mbs 4 Mus.th. 1616</span><span class="sm-chip">D-Mbs 4 Mus.th. 729</span><span class="sm-chip">D-Mbs 4 Mus.th. 729#Beibd.1</span><span class="sm-chip">D-Mbs 4° Mus pr 439</span><span class="sm-chip">D-Mbs Einbl. I,6</span><span class="sm-chip">D-Mbs Mus.ms. 1501</span><span class="sm-chip">D-Mbs Mus.ms. 1511c</span><span class="sm-chip">D-Mbs Mus.ms. 1511d</span><span class="sm-chip">D-Mbs Mus.ms. 1512</span><span class="sm-chip">D-Mbs Mus.ms. 266</span><span class="sm-chip">D-Mbs Mus.ms. 267</span><span class="sm-chip">D-Mbs Mus.ms. 268</span><span class="sm-chip">D-Mbs Mus.ms. 269</span><span class="sm-chip">D-Mbs Mus.ms. 270</span><span class="sm-chip">D-Mbs Mus.ms. 271</span><span class="sm-chip">D-Mbs Mus.ms. 2987</span><span class="sm-chip">D-Mbs Mus.pr. 316</span><span class="sm-chip">D-Mbs Mus.pr. 35</span><span class="sm-chip">D-Mbs Mus.pr. 39#Beibd.2</span><span class="sm-chip">D-Mbs Mus.pr. 46#Beibd.1</span><span class="sm-chip">D-Mbs Mus.th. 49</span><span class="sm-chip">D-Mbs Rar. 27</span><span class="sm-chip">D-Mbs Rar. 567</span><span class="sm-chip">D-Mu 4° Cod.ms. 718</span><span class="sm-chip">D-Mu 8° Cod. 328-331</span><span class="sm-chip">D-Ngm</span><span class="sm-chip">D-Ngm 8° Postinc. M. 261</span><span class="sm-chip">D-ROu Th A 1</span><span class="sm-chip">D-Rp Ms.Th. 98 4°</span><span class="sm-chip">D-Us Smr.misc 131b</span><span class="sm-chip">D-Us Smr.misc 131b_copy</span><span class="sm-chip">D-Usch Misc.235c</span><span class="sm-chip">D-W 2.14 Musica</span><span class="sm-chip">D-W 3 Musica</span><span class="sm-chip">D-W 43 Musica Helmst.</span><span class="sm-chip">D-W Musica 4.1.1</span><span class="sm-chip">D-W Musica Helmst. (3)</span><span class="sm-chip">D-WRZ 14,6:60e(n.1.)</span><span class="sm-chip">D-Wa cod. VII B Hs Nr. 264</span><span class="sm-chip">D-Z 2.8.10(5)</span><span class="sm-chip">D-Z 30.5.20(1)</span><span class="sm-chip">D-Z Mus. 115.3</span><span class="sm-chip">D-Z Mus. 15.1</span><span class="sm-chip">D-Z Mus. 15.1 b (Mu 94)</span><span class="sm-chip">D-Z Mus. 82.1 (Mu 477)</span><span class="sm-chip">D-Z Mus. 82.2</span>
+          <div class="sm-group-heading">DK — Denmark</div>
+          <span class="sm-chip">DK-Kk</span>
+          <div class="sm-group-heading">E — Spain</div>
+          <span class="sm-chip">E-Mn R/22789</span>
+          <div class="sm-group-heading">F — France</div>
+          <span class="sm-chip">F-Pc</span><span class="sm-chip">F-Pn RES VM7-663</span><span class="sm-chip">F-Pn Rés. 658</span><span class="sm-chip">F-Ssp M 01 (f.k. IIII)</span><span class="sm-chip">F-Ssp M 1</span>
+          <div class="sm-group-heading">GB — Great Britain</div>
+          <span class="sm-chip">GB-Eu</span><span class="sm-chip">GB-Lbl</span><span class="sm-chip">GB-Lbl C.125.CC.9.</span><span class="sm-chip">GB-Lbl Hirsch I 594</span><span class="sm-chip">GB-Lbl Hirsch IV 1603</span><span class="sm-chip">GB-Lbl Hirsch IV 1604</span><span class="sm-chip">GB-Lbl K.1.b.11.</span><span class="sm-chip">GB-Lbl K.8.c.9</span><span class="sm-chip">GB-Ob Mus. 156 e.25Music</span>
+          <div class="sm-group-heading">H — Hungary</div>
+          <span class="sm-chip">H-Ba K 53/II</span>
+          <div class="sm-group-heading">NL — Netherlands</div>
+          <span class="sm-chip">NL-DHgm</span><span class="sm-chip">NL-HAN</span>
+          <div class="sm-group-heading">PL — Poland</div>
+          <span class="sm-chip">PL-Kj Mus.ant.pract. L 1150</span><span class="sm-chip">PL-Kj Mus.ant.pract. N 175a</span><span class="sm-chip">PL-Kj Mus.ms. 40154</span><span class="sm-chip">PL-LEtpn (Lost acc. to Brown)</span><span class="sm-chip">PL-WRk 352</span>
+          <div class="sm-group-heading">RISM</div>
+          <span class="sm-chip">RISM B/8 1534/06</span>
+          <div class="sm-group-heading">S — Sweden</div>
+          <span class="sm-chip">S-Uu Lq.XI.3. n. 663</span>
+          <div class="sm-group-heading">UKR — Ukraine</div>
+          <span class="sm-chip">UKR-LVu 1400/1</span>
+          <div class="sm-group-heading">US — United States</div>
+          <span class="sm-chip">US-Bp</span><span class="sm-chip">US-CA</span><span class="sm-chip">US-NHub Osborn Music MS 31</span><span class="sm-chip">US-R</span><span class="sm-chip">US-Wc</span><span class="sm-chip">US-Wc MT640 .J9</span><span class="sm-chip">US-Wc MT640 .N3</span>
+          <div class="sm-group-heading">olim</div>
+          <span class="sm-chip">olim CZ-Pu 59r 469</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Functions -->
+    <div class="phys-accordion" id="fnAccordion8">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="fnToggleZone8">
+          <span class="dot-label">Functions</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="fnTag8" style="visibility:hidden; margin-left:15px;">
+          <span id="fnTagText8"></span>
+          <span class="phys-tag-x" id="fnTagX8">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content shelfmarks-content">
+        <input type="text" class="shelfmarks-search" id="fnSearch8" placeholder="Search functions…">
+        <div class="sm-chip-grid" id="fnList8">
+          <span class="sm-chip">broadsheet / Einblattdruck</span>
+          <span class="sm-chip">leaflet / Liedflugschrift</span>
+          <span class="sm-chip">part book / Stimmbuch</span>
+          <span class="sm-chip">primer, teacher's book</span>
+          <span class="sm-chip">song book / Liederbuch</span>
+          <span class="sm-chip">student handbook</span>
+          <span class="sm-chip">tablature book</span>
+          <span class="sm-chip sm-chip--terracotta">empty</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fundamenta -->
+    <div class="phys-accordion" id="fundaAccordion8">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="fundaToggleZone8">
+          <span class="dot-label">Fundamenta</span>
+          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <span class="filter-value-tag" id="fundaTag8" style="visibility:hidden; margin-left:15px;">
+          <span id="fundaTagText8"></span>
+          <span class="phys-tag-x" id="fundaTagX8">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content">
+        <div class="phys-radio-list phys-radio-list--row" id="fundaRadioList8">
+          <div class="phys-radio-row active" data-val="Both"><span class="phys-radio-circle"></span><span class="phys-radio-text">Both</span></div>
+          <div class="phys-radio-row" data-val="Yes"><span class="phys-radio-circle"></span><span class="phys-radio-text">Yes</span></div>
+          <div class="phys-radio-row" data-val="No"><span class="phys-radio-circle"></span><span class="phys-radio-text">No</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  {
+    const rows   = document.querySelectorAll('#physRadioList8 .phys-radio-row');
+    const setVal = setupSplitAccordion(8,
+      val => rows.forEach(r => r.classList.toggle('active', r.dataset.val === val)),
+      {
+        'Person': (rowId) => createModeDropdownWidget(rowId, PERSONS),
+        'Place':  (rowId) => createModeDropdownWidget(rowId, PLACES)
+      },
+      { showLogic: false, useCustomSelect: true }
+    );
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+    initDateAccordion({ n: 8, minYear: 1450, maxYear: 1620 });
+    initChipShelfmarksAccordion({ n: 8 });
+    initChipShelfmarksAccordion({ n: 8, prefix: 'fn' });
+    initFundamentaAccordion({ n: 8 });
   }
 </script>
 
