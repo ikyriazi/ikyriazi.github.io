@@ -2721,5 +2721,349 @@
   }
 </script>
 
+<!-- ════════════════════════════════════════════
+     PERSON FIELD — DESIGN ALTERNATIVES
+     ════════════════════════════════════════════ -->
+
+<style>
+  .person-static-field {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 10px 14px;
+    border: 1px solid #d0d0d0;
+    border-radius: 50px;
+    background: #f9f7f4;
+    color: #2c2c2c;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  /* ── P1: Typeahead ── */
+  .ta-wrap { flex: 1; position: relative; }
+
+  .suggestion-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+  .suggestion-list.open { display: block; }
+
+  .suggestion-item {
+    padding: 9px 16px;
+    font-size: 0.84rem;
+    font-family: 'Inter', sans-serif;
+    color: #2c2c2c;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .suggestion-item:hover,
+  .suggestion-item.highlighted { background: #f4f4f2; }
+  .suggestion-item.is-selected { font-weight: 600; }
+
+  .suggestion-empty {
+    padding: 9px 16px;
+    font-size: 0.84rem;
+    font-family: 'Inter', sans-serif;
+    color: #bbb;
+    font-style: italic;
+  }
+
+  /* ── P2: Mode switch ── */
+  .mode-field-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  .mode-tabs {
+    display: flex;
+    background: #f4f4f2;
+    border-radius: 50px;
+    padding: 3px;
+    align-self: flex-start;
+  }
+
+  .mode-tab {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 50px;
+    border: none;
+    background: transparent;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .mode-tab.active { background: #fff; color: #2c2c2c; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+  /* ── P3: Expand panel ── */
+  .expand-person-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #888;
+    border: 1px solid #d0d0d0;
+    background: #fff;
+    border-radius: 50px;
+    padding: 0 14px;
+    height: 40px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .expand-person-btn:hover { border-color: #999; color: #2c2c2c; }
+  .expand-person-btn.open { background: #2c2c2c; border-color: #2c2c2c; color: #fff; }
+  .expand-person-btn.open svg { stroke: #fff; }
+
+  /* ── Chip panel (P2 list mode, P3 expand, P4 persistent) ── */
+  .person-chip-panel {
+    padding: 14px 16px;
+    background: #f9f7f4;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .person-chip-panel.hidden { display: none; }
+
+  .person-alt-note {
+    font-size: 0.8rem;
+    color: #bbb;
+    margin: 0 0 18px;
+    line-height: 1.5;
+  }
+</style>
+
+<div class="section-label" style="margin-top:64px;">Person field — design alternatives</div>
+<p class="page-note" style="max-width:720px; margin-bottom:40px;">Four approaches for combining free-text entry with selection from the 17 known person values.</p>
+
+<!-- ── P1: Typeahead ── -->
+<div class="section-label">P1 — Typeahead / autocomplete</div>
+<div class="card" style="overflow:visible;">
+  <p class="person-alt-note">Click or start typing to see suggestions from the known list. Arrow keys navigate, Enter selects. Typing without selecting works as free text — the field accepts both.</p>
+  <div class="builder-row">
+    <div class="person-static-field">Person</div>
+    <div class="ta-wrap" id="ta1Wrap">
+      <input class="builder-input" id="ta1Input" placeholder="Search persons…" autocomplete="off" style="width:100%;">
+      <div class="suggestion-list" id="ta1List"></div>
+    </div>
+    <button class="remove-btn" id="ta1RemoveBtn" disabled></button>
+  </div>
+</div>
+
+<!-- ── P2: Mode switch ── -->
+<div class="section-label">P2 — Mode switch (Free text / From list)</div>
+<div class="card">
+  <p class="person-alt-note">Toggle between typing freely and picking from the known person list. "From list" replaces the input with a chip selector; multiple chips can be toggled.</p>
+  <div class="builder-row" style="align-items:flex-start;">
+    <div class="person-static-field" style="margin-top:2px;">Person</div>
+    <div class="mode-field-wrap">
+      <div class="mode-tabs" id="p2Tabs">
+        <button class="mode-tab active" data-mode="free">Free text</button>
+        <button class="mode-tab" data-mode="list">From list</button>
+      </div>
+      <input class="builder-input" id="p2Input" placeholder="Type person name…">
+      <div class="person-chip-panel hidden" id="p2ChipPanel"></div>
+    </div>
+    <button class="remove-btn" id="p2RemoveBtn" disabled></button>
+  </div>
+</div>
+
+<!-- ── P3: Expand panel ── -->
+<div class="section-label">P3 — Expandable chip panel</div>
+<div class="card">
+  <p class="person-alt-note">Type freely in the input, or open the person panel to browse and click a name. The panel filters its chips as you type. Clicking a chip fills the input.</p>
+  <div class="builder-row">
+    <div class="person-static-field">Person</div>
+    <input class="builder-input" id="p3Input" placeholder="Search persons…" style="flex:1;" autocomplete="off">
+    <button class="expand-person-btn" id="p3ExpandBtn">
+      <span>Persons</span>
+      <svg id="p3Chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+    </button>
+    <button class="remove-btn" id="p3RemoveBtn" disabled></button>
+  </div>
+  <div class="person-chip-panel hidden" id="p3ChipPanel"></div>
+</div>
+
+<!-- ── P4: Always-visible chips ── -->
+<div class="section-label">P4 — Always-visible chip list</div>
+<div class="card">
+  <p class="person-alt-note">All 17 known persons are always shown as selectable chips. Multiple chips can be toggled (OR). The text input remains available for free-text search in parallel.</p>
+  <div class="builder-row">
+    <div class="person-static-field">Person</div>
+    <input class="builder-input" id="p4Input" placeholder="Or type freely…" style="flex:1;">
+    <button class="remove-btn" id="p4RemoveBtn" disabled></button>
+  </div>
+  <div class="person-chip-panel" id="p4ChipPanel"></div>
+</div>
+
+<script>
+(function () {
+  const PERSONS = [
+    'Agricola, Martin', 'Aich, Arnt von', 'Apiarius, Mathias',
+    'Egenolff d.Ä., Christian', 'Formschneider, Hieronymus', 'Forster, Georg',
+    'Franck, Matthäus', 'Fuhrmann, Valentin', 'Furter, Michael',
+    'Gerle, Hans', 'Guldenmundt, Hans', 'Hergot, Kunigunde',
+    'Hochfelder, Kaspar', 'Huber, Wolfgang', 'Judenkünig, Hans',
+    'Meyerpeck, Wolfgang', 'Neuber, Valentin', 'Neusidler, Hans',
+    'Ott, Hans', 'Petreius, Johann', 'Rhau, Georg',
+    'Schlick, Arnold', 'Schöffer, Peter d.J.', 'Singriener, Johannes',
+    'Virdung, Sebastian', 'Öglin, Erhard'
+  ];
+
+  ['ta1RemoveBtn', 'p2RemoveBtn', 'p3RemoveBtn', 'p4RemoveBtn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.innerHTML = SVG_X;
+  });
+
+  /* ── P1: Typeahead ── */
+  {
+    const input  = document.getElementById('ta1Input');
+    const list   = document.getElementById('ta1List');
+    const wrap   = document.getElementById('ta1Wrap');
+    let highlighted = -1;
+
+    function renderList(term) {
+      const filtered = term
+        ? PERSONS.filter(p => p.toLowerCase().includes(term.toLowerCase()))
+        : PERSONS;
+      list.innerHTML = '';
+      highlighted = -1;
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="suggestion-empty">No match — will search as free text</div>';
+      } else {
+        filtered.forEach(name => {
+          const item = document.createElement('div');
+          item.className = 'suggestion-item' + (input.value === name ? ' is-selected' : '');
+          item.textContent = name;
+          item.addEventListener('mousedown', e => {
+            e.preventDefault();
+            input.value = name;
+            input.style.fontWeight = '600';
+            list.classList.remove('open');
+          });
+          list.appendChild(item);
+        });
+      }
+      list.classList.add('open');
+    }
+
+    input.addEventListener('focus', () => renderList(input.value));
+    input.addEventListener('input', () => {
+      input.style.fontWeight = '';
+      renderList(input.value);
+    });
+    input.addEventListener('keydown', e => {
+      const items = list.querySelectorAll('.suggestion-item');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        highlighted = Math.min(highlighted + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('highlighted', i === highlighted));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        highlighted = Math.max(highlighted - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('highlighted', i === highlighted));
+      } else if (e.key === 'Enter' && highlighted >= 0) {
+        input.value = items[highlighted].textContent;
+        input.style.fontWeight = '600';
+        list.classList.remove('open');
+      } else if (e.key === 'Escape') {
+        list.classList.remove('open');
+      }
+    });
+    document.addEventListener('click', e => {
+      if (!wrap.contains(e.target)) list.classList.remove('open');
+    });
+  }
+
+  /* ── P2: Mode switch ── */
+  {
+    const tabs      = document.getElementById('p2Tabs');
+    const input     = document.getElementById('p2Input');
+    const chipPanel = document.getElementById('p2ChipPanel');
+
+    PERSONS.forEach(name => {
+      const chip = document.createElement('span');
+      chip.className = 'sm-chip';
+      chip.textContent = name;
+      chip.addEventListener('click', () => chip.classList.toggle('selected'));
+      chipPanel.appendChild(chip);
+    });
+
+    tabs.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const isList = tab.dataset.mode === 'list';
+        input.style.display = isList ? 'none' : '';
+        chipPanel.classList.toggle('hidden', !isList);
+      });
+    });
+  }
+
+  /* ── P3: Expand panel ── */
+  {
+    const input   = document.getElementById('p3Input');
+    const btn     = document.getElementById('p3ExpandBtn');
+    const panel   = document.getElementById('p3ChipPanel');
+    const chevron = document.getElementById('p3Chevron');
+    let open = false;
+
+    PERSONS.forEach(name => {
+      const chip = document.createElement('span');
+      chip.className = 'sm-chip';
+      chip.textContent = name;
+      chip.addEventListener('click', () => {
+        panel.querySelectorAll('.sm-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        input.value = name;
+        input.style.fontWeight = '600';
+      });
+      panel.appendChild(chip);
+    });
+
+    btn.addEventListener('click', () => {
+      open = !open;
+      panel.classList.toggle('hidden', !open);
+      btn.classList.toggle('open', open);
+      chevron.style.transform = open ? 'rotate(180deg)' : '';
+    });
+
+    input.addEventListener('input', () => {
+      input.style.fontWeight = '';
+      panel.querySelectorAll('.sm-chip').forEach(c => c.classList.remove('selected'));
+      const term = input.value.toLowerCase();
+      panel.querySelectorAll('.sm-chip').forEach(chip => {
+        chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    });
+  }
+
+  /* ── P4: Always-visible chips ── */
+  {
+    const panel = document.getElementById('p4ChipPanel');
+    PERSONS.forEach(name => {
+      const chip = document.createElement('span');
+      chip.className = 'sm-chip';
+      chip.textContent = name;
+      chip.addEventListener('click', () => chip.classList.toggle('selected'));
+      panel.appendChild(chip);
+    });
+  }
+})();
+</script>
+
 </body>
 </html>
