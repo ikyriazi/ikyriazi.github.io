@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sources — Search Drawer UI Variants</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px 80px;
+      color: #2c2c2c;
+    }
+
+    .page-title {
+      font-size: 1rem; font-weight: 600; letter-spacing: 0.5px;
+      text-transform: uppercase; color: #888; margin: 0 0 6px;
+    }
+    .page-note { font-size: 0.8rem; color: #bbb; margin-bottom: 52px; }
+
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #aaa;
+      margin: 52px 0 6px; padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .section-label:first-of-type { margin-top: 0; }
+    .section-note { font-size: 0.8rem; color: #aaa; margin-bottom: 14px; line-height: 1.6; }
+
+    /* ── Demo container ── */
+    .demo-area {
+      position: relative; overflow: hidden;
+      border: 1px solid #e0e0e0; border-radius: 16px;
+      background: #fff; min-height: 480px;
+    }
+    .demo-content { padding: 28px 32px 32px; }
+
+    /* ── Page header inside demo ── */
+    .demo-page-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 6px;
+    }
+    .demo-h1 { font-size: 30px; font-weight: 600; color: #2c2c2c; margin: 0; }
+    .demo-subtitle { font-size: 0.82rem; color: #888; margin-bottom: 22px; }
+
+    /* ── Search icon button ── */
+    .search-icon-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid #d0d0d0; background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+      color: #2c2c2c; flex-shrink: 0; padding: 0; margin-top: 3px;
+    }
+    .search-icon-btn:hover                { border-color: #888; }
+    .search-icon-btn.drawer-open          { border-color: #2c2c2c; box-shadow: 0 0 0 3px rgba(44,44,44,0.08); }
+    .search-icon-btn.active               { background: #2c2c2c; border-color: #2c2c2c; color: #fff; }
+    .search-icon-btn svg                  { width: 17px; height: 17px; }
+
+    /* ── Fake table ── */
+    .fake-table {
+      width: 100%; border-collapse: collapse; font-size: 0.8rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+    }
+    .fake-table thead th {
+      background: #f1f1f1; font-weight: 600;
+      padding: 10px 11px; text-align: left;
+      border-bottom: 2px solid #e0e0e0;
+      white-space: nowrap; color: #2c2c2c;
+    }
+    .fake-table thead th:first-child { border-top-left-radius: 8px; }
+    .fake-table thead th:last-child  { border-top-right-radius: 8px; }
+    .fake-table tbody td {
+      padding: 8px 11px; background: #f9f7f4;
+      border-bottom: 1px solid #eeebe7; color: #444;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; max-width: 160px;
+    }
+    .fake-table tbody tr:last-child td { border-bottom: none; }
+    .chev-cell { width: 22px; text-align: center; color: #ccc; }
+
+    /* ── Search drawer (shared) ── */
+    .search-drawer {
+      position: absolute; top: 0; right: 0; bottom: 0; width: 460px;
+      background: #fff; box-shadow: -6px 0 36px rgba(0,0,0,0.13);
+      transform: translateX(100%);
+      transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 20; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .search-drawer.open { transform: translateX(0); }
+
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px 14px; border-bottom: 1px solid #e8e8e8;
+      background: #fafaf8; flex-shrink: 0;
+    }
+    .drawer-title {
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: #aaa;
+    }
+    .drawer-close {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 1px solid #e0e0e0; background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #aaa; padding: 0; transition: all 0.18s;
+    }
+    .drawer-close:hover { border-color: #2c2c2c; color: #2c2c2c; }
+    .drawer-close svg   { width: 13px; height: 13px; }
+
+    .drawer-body { flex: 1; overflow-y: auto; padding: 22px 22px 28px; }
+
+    /* ── Search builder ── */
+    .builder-rows { display: flex; flex-direction: column; gap: 9px; }
+    .builder-row  { display: flex; align-items: center; gap: 8px; }
+    @keyframes rowIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .builder-row.animate { animation: rowIn 0.18s ease; }
+
+    .field-select {
+      font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500;
+      padding: 9px 28px 9px 12px; border: 1px solid #d0d0d0; border-radius: 50px;
+      background: #f9f7f4 url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center;
+      color: #2c2c2c; outline: none; min-width: 148px;
+      appearance: none; cursor: pointer; transition: border-color 0.2s;
+    }
+    .field-select:focus { border-color: #2c2c2c; }
+
+    .builder-input {
+      flex: 1; font-family: 'Inter', sans-serif; font-size: 0.8rem;
+      padding: 9px 13px; border: 1px solid #d0d0d0; border-radius: 50px;
+      outline: none; color: #2c2c2c; min-width: 0; transition: border-color 0.2s;
+    }
+    .builder-input::placeholder { color: #bbb; }
+    .builder-input:focus { border-color: #2c2c2c; }
+
+    .remove-btn {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 1px solid #e0e0e0; background: #fff; color: #bbb;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; padding: 0;
+      transition: border-color 0.18s, color 0.18s;
+    }
+    .remove-btn:hover   { border-color: #ccc; color: #2c2c2c; }
+    .remove-btn:disabled { opacity: 0.22; cursor: default; pointer-events: none; }
+    .remove-btn svg     { display: block; width: 12px; height: 12px; }
+
+    .bottom-row { display: flex; align-items: center; margin-top: 10px; padding-right: 34px; }
+
+    .add-btn {
+      font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 600;
+      color: #2c2c2c; border: 1.5px dashed #d0d0d0; background: transparent;
+      border-radius: 50px; padding: 6px 15px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px; transition: border-color 0.18s;
+    }
+    .add-btn:hover { border-color: #2c2c2c; }
+
+    .divider-line { border: none; border-top: 1px solid #ebebeb; margin: 18px 0; }
+
+    .filter-toggle-btn {
+      font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px; border-radius: 50px; border: none;
+      background: #2c2c2c; color: #fff; cursor: pointer;
+      transition: background 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+    }
+    .filter-toggle-btn:hover { background: #1a1a1a; }
+
+    /* ── Filter panel ── */
+    .filter-panel { margin-top: 16px; display: none; }
+    .filter-panel.open { display: block; }
+
+    .filter-acc { border-top: 1px solid #f0f0f0; }
+    .filter-acc-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 0; cursor: pointer; user-select: none;
+    }
+    .filter-acc-header:hover { opacity: 0.72; }
+    .filter-acc-label {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase; color: #999;
+    }
+    .filter-acc-chev { color: #2c2c2c; transition: transform 0.25s ease; }
+    .filter-acc-chev svg { width: 14px; height: 14px; display: block; }
+    .filter-acc.expanded .filter-acc-chev { transform: rotate(180deg); }
+    .filter-acc-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+    .filter-acc.expanded .filter-acc-body { max-height: 180px; }
+
+    .radio-list { display: flex; gap: 18px; margin: 4px 0 14px; }
+    .radio-row {
+      display: flex; align-items: center; gap: 7px; cursor: pointer;
+      font-size: 0.8rem; color: #bbb; font-weight: 500; transition: color 0.15s;
+    }
+    .radio-row:hover { color: #666; }
+    .radio-circle {
+      width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid #ccc;
+      flex-shrink: 0; transition: all 0.15s;
+    }
+    .radio-row.active .radio-circle { background: #2c2c2c; border-color: #2c2c2c; box-shadow: inset 0 0 0 3px #fff; }
+    .radio-row.active { color: #2c2c2c; font-weight: 600; }
+
+    .range-wrap { padding: 6px 4px 14px; }
+    .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 8px; }
+    .range-track  { position: relative; height: 4px; background: #e0e0e0; border-radius: 2px; }
+    .range-fill   { height: 100%; background: #2c2c2c; border-radius: 2px; width: 100%; }
+
+    /* ── Variant C backdrop ── */
+    .demo-backdrop {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.10);
+      z-index: 15; opacity: 0; pointer-events: none; transition: opacity 0.32s;
+    }
+    .demo-backdrop.show { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+<body>
+
+<h1 class="page-title">Sources — Search Drawer UI Variants</h1>
+<p class="page-note">Three interaction patterns for the search icon. The panel slides in from the right over the datatable.</p>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VARIANT A — Hover to open · Auto-closes on mouse-out
+     ══════════════════════════════════════════════════════════ -->
+<div class="section-label">A — Hover icon to open · Closes automatically on mouse-out</div>
+<p class="section-note">
+  The drawer opens when the cursor enters the icon. It stays open as long as the mouse is over
+  the icon or the drawer itself. Once the cursor leaves both areas (with a short grace period),
+  the drawer slides away on its own — no close button needed.
+</p>
+
+<div class="demo-area" id="demoA">
+  <div class="demo-content">
+    <div class="demo-page-header">
+      <h1 class="demo-h1">Sources</h1>
+      <button class="search-icon-btn" id="iconA" aria-label="Search"></button>
+    </div>
+    <p class="demo-subtitle">Tablature sources (prints or manuscripts)</p>
+    <table class="fake-table">
+      <thead><tr>
+        <th class="chev-cell"></th>
+        <th>Shelfmark</th><th>Title</th><th>Short title</th>
+        <th>Dates</th><th>Author / Editor</th><th>Publisher</th><th>Printing place</th>
+      </tr></thead>
+      <tbody id="rowsA"></tbody>
+    </table>
+  </div>
+  <div class="search-drawer" id="drawerA">
+    <div class="drawer-header"><span class="drawer-title">Search</span></div>
+    <div class="drawer-body">
+      <div class="builder-rows" id="builderA"></div>
+      <div class="bottom-row"><button class="add-btn" id="addA"></button></div>
+      <hr class="divider-line">
+      <button class="filter-toggle-btn" id="filtersA">Filters</button>
+      <div class="filter-panel" id="panelA"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VARIANT B — Hover to open · Stays open (× to close)
+     ══════════════════════════════════════════════════════════ -->
+<div class="section-label">B — Hover icon to open · Drawer stays open until dismissed</div>
+<p class="section-note">
+  Hovering the icon opens the drawer, which then "pins" open regardless of where the cursor goes.
+  The user dismisses it deliberately with the × button or Escape. Re-hovering after closing reopens it.
+  Better when the user needs time to compose a multi-field query without the panel disappearing.
+</p>
+
+<div class="demo-area" id="demoB">
+  <div class="demo-content">
+    <div class="demo-page-header">
+      <h1 class="demo-h1">Sources</h1>
+      <button class="search-icon-btn" id="iconB" aria-label="Search"></button>
+    </div>
+    <p class="demo-subtitle">Tablature sources (prints or manuscripts)</p>
+    <table class="fake-table">
+      <thead><tr>
+        <th class="chev-cell"></th>
+        <th>Shelfmark</th><th>Title</th><th>Short title</th>
+        <th>Dates</th><th>Author / Editor</th><th>Publisher</th><th>Printing place</th>
+      </tr></thead>
+      <tbody id="rowsB"></tbody>
+    </table>
+  </div>
+  <div class="search-drawer" id="drawerB">
+    <div class="drawer-header">
+      <span class="drawer-title">Search</span>
+      <button class="drawer-close" id="closeB"></button>
+    </div>
+    <div class="drawer-body">
+      <div class="builder-rows" id="builderB"></div>
+      <div class="bottom-row"><button class="add-btn" id="addB"></button></div>
+      <hr class="divider-line">
+      <button class="filter-toggle-btn" id="filtersB">Filters</button>
+      <div class="filter-panel" id="panelB"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VARIANT C — Click to open · Icon becomes × · Light backdrop
+     ══════════════════════════════════════════════════════════ -->
+<div class="section-label">C — Click icon to open · Icon becomes × · Light backdrop dims the table</div>
+<p class="section-note">
+  The icon is a deliberate toggle: click to open, click again (or the × inside the drawer) to close.
+  A light backdrop dims the datatable, making the search layer visually distinct.
+  Clicking the backdrop also closes the drawer. The most explicit separation between browsing and searching.
+  Works equally well on touch devices where hover is unavailable.
+</p>
+
+<div class="demo-area" id="demoC">
+  <div class="demo-backdrop" id="backdropC"></div>
+  <div class="demo-content">
+    <div class="demo-page-header">
+      <h1 class="demo-h1">Sources</h1>
+      <button class="search-icon-btn" id="iconC" aria-label="Search"></button>
+    </div>
+    <p class="demo-subtitle">Tablature sources (prints or manuscripts)</p>
+    <table class="fake-table">
+      <thead><tr>
+        <th class="chev-cell"></th>
+        <th>Shelfmark</th><th>Title</th><th>Short title</th>
+        <th>Dates</th><th>Author / Editor</th><th>Publisher</th><th>Printing place</th>
+      </tr></thead>
+      <tbody id="rowsC"></tbody>
+    </table>
+  </div>
+  <div class="search-drawer" id="drawerC">
+    <div class="drawer-header">
+      <span class="drawer-title">Search</span>
+      <button class="drawer-close" id="closeC"></button>
+    </div>
+    <div class="drawer-body">
+      <div class="builder-rows" id="builderC"></div>
+      <div class="bottom-row"><button class="add-btn" id="addC"></button></div>
+      <hr class="divider-line">
+      <button class="filter-toggle-btn" id="filtersC">Filters</button>
+      <div class="filter-panel" id="panelC"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  /* ── Shared data ── */
+  const FIELDS = ['All fields', 'Title', 'Person', 'Place', 'RISM / VD16', 'Description'];
+
+  const TABLE_ROWS = [
+    ['›', 'D-Mbs Mus.pr. 35',         'Ain schone künstliche underweisung…', 'Judenkünig 1523',  '1523',      'Judenkünig, Hans',  'Singriener, Johannes',  'Wien'],
+    ['›', 'D-B Mus.ant.pract. G 435', 'Musica und Tabulatur auff die Lauten', 'Gerle 1533',       '1533',      'Gerle, Hans',       'Formschneider, H.',     'Nürnberg'],
+    ['›', 'A-Wn Mus.Hs. 18688',       '[manuscript]',                         '—',                'c.1520–50', '—',                 '—',                     '—'],
+    ['›', 'D-B Yd 5008 R',            'Ein newgeordent Künstlich Lautenbuch', 'Schlick 1512',     '1512',      'Schlick, Arnold',   'Schöffer, Peter d.J.',  'Mainz'],
+    ['›', 'CH-Bu F IX 56',            '[manuscript]',                         '—',                'c.1515–25', '—',                 '—',                     '—'],
+    ['›', 'GB-Lbl K.1.b.11.',         'Des neuen Lautenbuchs ander Teil',    'Neusidler 1544',   '1544',      'Neusidler, Hans',   'Petreius, Johann',      'Nürnberg'],
+    ['›', 'D-Mbs 4 Mus.pr.167',       'Musica Teusch, auff die Instrument',  'Gerle 1532',       '1532',      'Gerle, Hans',       'Formschneider, H.',     'Nürnberg'],
+    ['›', 'F-Pn RES VM7-663',         '[manuscript / mixed]',                 '—',                'c.1520–40', '—',                 '—',                     '—'],
+  ];
+
+  /* ── Feather icons ── */
+  const SVG_SEARCH  = feather.icons['search'].toSvg({ width: 17, height: 17, 'stroke-width': 2 });
+  const SVG_X_SM    = feather.icons['x'].toSvg({ width: 12, height: 12, 'stroke-width': 2.5 });
+  const SVG_X_MED   = feather.icons['x'].toSvg({ width: 14, height: 14, 'stroke-width': 2.5 });
+  const SVG_PLUS    = feather.icons['plus'].toSvg({ width: 12, height: 12, 'stroke-width': 3 });
+  const SVG_CHEV    = feather.icons['chevron-down'].toSvg({ width: 14, height: 14, 'stroke-width': 2 });
+
+  /* ── Fake table rows ── */
+  function populateTable(tbodyId) {
+    const tbody = document.getElementById(tbodyId);
+    TABLE_ROWS.forEach(cols => {
+      const tr = document.createElement('tr');
+      cols.forEach((val, i) => {
+        const td = document.createElement('td');
+        if (i === 0) td.className = 'chev-cell';
+        td.textContent = val;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Search builder ── */
+  function initBuilder(builderId, addBtnId) {
+    const rowsEl = document.getElementById(builderId);
+    const addBtn = document.getElementById(addBtnId);
+    addBtn.innerHTML = SVG_PLUS + ' Add field';
+    let rows = [], nextId = 0;
+
+    function updateDisabled() {
+      rowsEl.querySelectorAll('.remove-btn').forEach(b => { b.disabled = rows.length <= 1; });
+    }
+
+    function addRow(field, animate) {
+      const id = nextId++;
+      rows.push(id);
+      const div = document.createElement('div');
+      div.className = 'builder-row' + (animate ? ' animate' : '');
+      div.dataset.rid = id;
+
+      const sel = document.createElement('select');
+      sel.className = 'field-select';
+      FIELDS.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f; opt.textContent = f;
+        if (f === field) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      const inp = document.createElement('input');
+      inp.className = 'builder-input'; inp.type = 'text'; inp.placeholder = 'Search…';
+
+      const rmv = document.createElement('button');
+      rmv.className = 'remove-btn'; rmv.innerHTML = SVG_X_SM;
+      rmv.addEventListener('click', () => { rows = rows.filter(r => r !== id); div.remove(); updateDisabled(); });
+
+      div.appendChild(sel); div.appendChild(inp); div.appendChild(rmv);
+      rowsEl.appendChild(div);
+      updateDisabled();
+    }
+
+    addBtn.addEventListener('click', () => { if (rows.length < 8) addRow('All fields', true); });
+    addRow('All fields', false);
+    addRow('Title', false);
+  }
+
+  /* ── Filter panel ── */
+  function initFilterPanel(panelId, filtersBtnId) {
+    const panel    = document.getElementById(panelId);
+    const filtersBtn = document.getElementById(filtersBtnId);
+
+    function makeAcc(label, bodyContent) {
+      const acc = document.createElement('div'); acc.className = 'filter-acc';
+      const hdr = document.createElement('div'); hdr.className = 'filter-acc-header';
+      hdr.innerHTML = `<span class="filter-acc-label">${label}</span><span class="filter-acc-chev">${SVG_CHEV}</span>`;
+      const body = document.createElement('div'); body.className = 'filter-acc-body';
+      body.appendChild(bodyContent);
+      acc.appendChild(hdr); acc.appendChild(body);
+      hdr.addEventListener('click', () => acc.classList.toggle('expanded'));
+      return acc;
+    }
+
+    function makeRadioList(values) {
+      const wrap = document.createElement('div'); wrap.className = 'radio-list';
+      values.forEach((val, i) => {
+        const row = document.createElement('div');
+        row.className = 'radio-row' + (i === 0 ? ' active' : '');
+        row.innerHTML = `<span class="radio-circle"></span>${val}`;
+        row.addEventListener('click', () => {
+          wrap.querySelectorAll('.radio-row').forEach(r => r.classList.remove('active'));
+          row.classList.add('active');
+        });
+        wrap.appendChild(row);
+      });
+      return wrap;
+    }
+
+    // Physical type
+    const physBody = document.createElement('div');
+    physBody.appendChild(makeRadioList(['Both', 'Print', 'Manuscript']));
+    panel.appendChild(makeAcc('Physical type', physBody));
+
+    // Date
+    const dateBody = document.createElement('div'); dateBody.className = 'range-wrap';
+    dateBody.innerHTML = `
+      <div class="range-labels"><span>1450</span><span>1620</span></div>
+      <div class="range-track"><div class="range-fill"></div></div>`;
+    panel.appendChild(makeAcc('Date', dateBody));
+
+    // Shelfmarks
+    const shelfBody = document.createElement('div');
+    shelfBody.style.cssText = 'padding: 6px 0 14px; color: #bbb; font-size: 0.78rem;';
+    shelfBody.textContent = 'Browse or search shelfmarks…';
+    panel.appendChild(makeAcc('Shelfmarks', shelfBody));
+
+    // Fundamenta
+    const fundaBody = document.createElement('div');
+    fundaBody.appendChild(makeRadioList(['Both', 'Yes', 'No']));
+    panel.appendChild(makeAcc('Fundamenta', fundaBody));
+
+    filtersBtn.addEventListener('click', () => panel.classList.toggle('open'));
+  }
+
+  /* ── Populate all three demos ── */
+  populateTable('rowsA'); initBuilder('builderA', 'addA'); initFilterPanel('panelA', 'filtersA');
+  populateTable('rowsB'); initBuilder('builderB', 'addB'); initFilterPanel('panelB', 'filtersB');
+  populateTable('rowsC'); initBuilder('builderC', 'addC'); initFilterPanel('panelC', 'filtersC');
+
+  /* ── Set search icons ── */
+  document.getElementById('iconA').innerHTML = SVG_SEARCH;
+  document.getElementById('iconB').innerHTML = SVG_SEARCH;
+  document.getElementById('iconC').innerHTML = SVG_SEARCH;
+  document.getElementById('closeB').innerHTML = SVG_X_MED;
+  document.getElementById('closeC').innerHTML = SVG_X_MED;
+
+
+  /* ══════════════════════════════════
+     VARIANT A — hover auto-close
+     ══════════════════════════════════ */
+  (function () {
+    const icon   = document.getElementById('iconA');
+    const drawer = document.getElementById('drawerA');
+    let timer;
+
+    function open() {
+      clearTimeout(timer);
+      drawer.classList.add('open');
+      icon.classList.add('drawer-open');
+    }
+    function scheduleClose() {
+      timer = setTimeout(() => {
+        drawer.classList.remove('open');
+        icon.classList.remove('drawer-open');
+      }, 120);
+    }
+
+    icon.addEventListener('mouseenter',   open);
+    icon.addEventListener('mouseleave',   scheduleClose);
+    drawer.addEventListener('mouseenter', () => clearTimeout(timer));
+    drawer.addEventListener('mouseleave', scheduleClose);
+  })();
+
+
+  /* ══════════════════════════════════
+     VARIANT B — hover sticky
+     ══════════════════════════════════ */
+  (function () {
+    const icon     = document.getElementById('iconB');
+    const drawer   = document.getElementById('drawerB');
+    const closeBtn = document.getElementById('closeB');
+
+    function open() {
+      drawer.classList.add('open');
+      icon.classList.add('drawer-open');
+    }
+    function close() {
+      drawer.classList.remove('open');
+      icon.classList.remove('drawer-open');
+    }
+
+    icon.addEventListener('mouseenter', open);
+    closeBtn.addEventListener('click', close);
+    document.getElementById('demoB').addEventListener('keydown', e => {
+      if (e.key === 'Escape') close();
+    });
+  })();
+
+
+  /* ══════════════════════════════════
+     VARIANT C — click toggle + backdrop
+     ══════════════════════════════════ */
+  (function () {
+    const icon     = document.getElementById('iconC');
+    const drawer   = document.getElementById('drawerC');
+    const closeBtn = document.getElementById('closeC');
+    const backdrop = document.getElementById('backdropC');
+    let isOpen = false;
+
+    function open() {
+      isOpen = true;
+      drawer.classList.add('open');
+      backdrop.classList.add('show');
+      icon.classList.add('active');
+      icon.innerHTML = SVG_X_SM;
+    }
+    function close() {
+      isOpen = false;
+      drawer.classList.remove('open');
+      backdrop.classList.remove('show');
+      icon.classList.remove('active');
+      icon.innerHTML = SVG_SEARCH;
+    }
+
+    icon.addEventListener('click',   () => isOpen ? close() : open());
+    closeBtn.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+    document.getElementById('demoC').addEventListener('keydown', e => {
+      if (e.key === 'Escape' && isOpen) close();
+    });
+  })();
+</script>
+
+</body>
+</html>

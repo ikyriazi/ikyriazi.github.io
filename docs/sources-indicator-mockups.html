@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sources Search Icon — Active-State Indicator Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px 80px;
+      color: #2c2c2c;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .page-note {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-bottom: 48px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 16px;
+    }
+
+    /* ── Option block ─────────────────────────────── */
+    .option-block {
+      margin-bottom: 56px;
+    }
+
+    .option-block .section-label {
+      margin-bottom: 20px;
+    }
+
+    /* Side-by-side states */
+    .states-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .state-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      overflow: hidden;
+      flex: 1 1 360px;
+      min-width: 280px;
+    }
+
+    .state-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #ccc;
+      padding: 14px 20px 0;
+    }
+
+    /* Mini page preview inside each card */
+    .mini-page {
+      position: relative;
+      padding: 20px 20px 20px;
+      min-height: 180px;
+    }
+
+    .mini-heading {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2c2c2c;
+      margin: 0 0 4px;
+    }
+
+    .mini-subtitle {
+      font-size: 0.75rem;
+      color: #bbb;
+      margin: 0 0 20px;
+    }
+
+    /* Skeleton table rows */
+    .skeleton-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .skeleton-table td {
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0ee;
+      vertical-align: middle;
+    }
+
+    .skel {
+      background: #ebebeb;
+      border-radius: 4px;
+      height: 10px;
+      display: block;
+    }
+
+    .skel.w-60 { width: 60%; }
+    .skel.w-40 { width: 40%; }
+    .skel.w-75 { width: 75%; }
+    .skel.w-30 { width: 30%; }
+    .skel.w-50 { width: 50%; }
+
+    /* ── Base search icon button (shared) ─────────── */
+    .srch-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: #f4f4f2;
+      color: #2c2c2c;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .srch-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      display: block;
+    }
+
+    /* ── OPTION A — Numeric badge ──────────────────── */
+    .badge-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 9px;
+      background: #2c2c2c;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      line-height: 1;
+      pointer-events: none;
+      border: 2px solid #fff;
+    }
+
+    /* ── OPTION B — Small dot ──────────────────────── */
+    .dot-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .dot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #2c2c2c;
+      border: 2px solid #fff;
+      pointer-events: none;
+    }
+
+    /* ── OPTION C — Filled / inverted button ────────── */
+    .srch-btn.filled {
+      background: #2c2c2c;
+      color: #fff;
+    }
+
+    /* ── OPTION D — Text pill to the left ──────────── */
+    .pill-row {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-tag {
+      background: #2c2c2c;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* reposition base button inside pill-row */
+    .pill-row .srch-btn {
+      position: static;
+    }
+
+    /* ── OPTION E — Outer ring ───────────────────────── */
+    .srch-btn.ring {
+      box-shadow: 0 0 0 3px rgba(44,44,44,0.25);
+    }
+
+    /* ── OPTION F — Underline stroke on label ─────── */
+    .icon-label-wrap {
+      position: absolute;
+      top: 14px;
+      right: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .icon-label-wrap .srch-btn {
+      position: static;
+    }
+
+    .icon-underline-bar {
+      width: 20px;
+      height: 2.5px;
+      border-radius: 2px;
+      background: #2c2c2c;
+    }
+
+  </style>
+</head>
+<body>
+
+<h1>Sources Search Icon — Active-State Indicator Options</h1>
+<p class="page-note">Each option shows inactive state (left) vs. active state — one or more fields / filters selected (right).</p>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION A — Numeric badge
+     ═══════════════════════════════════════════════════ -->
+<div class="option-block">
+  <div class="section-label">A — Numeric badge</div>
+  <div class="states-row">
+
+    <!-- Inactive -->
+    <div class="state-card">
+      <div class="state-label">Inactive</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <!-- Icon: no badge -->
+        <button class="srch-btn" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active: 3 total (2 fields + 1 filter) -->
+    <div class="state-card">
+      <div class="state-label">Active — 3 selections</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <!-- Icon: badge with count -->
+        <span class="badge-wrap" style="position:absolute;top:16px;right:16px;">
+          <button class="srch-btn" style="position:static;" aria-label="Search">
+            <i data-feather="search"></i>
+          </button>
+          <span class="badge">3</span>
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION B — Small dot (binary)
+     ═══════════════════════════════════════════════════ -->
+<div class="option-block">
+  <div class="section-label">B — Small dot (binary)</div>
+  <div class="states-row">
+
+    <!-- Inactive -->
+    <div class="state-card">
+      <div class="state-label">Inactive</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active: dot only -->
+    <div class="state-card">
+      <div class="state-label">Active — any selections</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <span class="dot-wrap" style="position:absolute;top:16px;right:16px;">
+          <button class="srch-btn" style="position:static;" aria-label="Search">
+            <i data-feather="search"></i>
+          </button>
+          <span class="dot"></span>
+        </span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION C — Filled / inverted button
+     ═══════════════════════════════════════════════════ -->
+<div class="option-block">
+  <div class="section-label">C — Filled button</div>
+  <div class="states-row">
+
+    <!-- Inactive -->
+    <div class="state-card">
+      <div class="state-label">Inactive</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active: dark background, white icon -->
+    <div class="state-card">
+      <div class="state-label">Active — any selections</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn filled" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION D — Text pill to the left
+     ═══════════════════════════════════════════════════ -->
+<div class="option-block">
+  <div class="section-label">D — Text pill to the left of icon</div>
+  <div class="states-row">
+
+    <!-- Inactive -->
+    <div class="state-card">
+      <div class="state-label">Inactive</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active: pill + icon -->
+    <div class="state-card">
+      <div class="state-label">Active — 2 fields · 1 filter</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <div class="pill-row">
+          <span class="pill-tag">2 fields · 1 filter</span>
+          <button class="srch-btn" aria-label="Search">
+            <i data-feather="search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION E — Outer ring / shadow
+     ═══════════════════════════════════════════════════ -->
+<div class="option-block">
+  <div class="section-label">E — Outer ring</div>
+  <div class="states-row">
+
+    <!-- Inactive -->
+    <div class="state-card">
+      <div class="state-label">Inactive</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active: ring around icon -->
+    <div class="state-card">
+      <div class="state-label">Active — any selections</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn ring" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     OPTION F — Underline bar below icon
+     ═══════════════════════════════════════════════════ -->
+<div class="option-block">
+  <div class="section-label">F — Underline bar</div>
+  <div class="states-row">
+
+    <!-- Inactive -->
+    <div class="state-card">
+      <div class="state-label">Inactive</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <button class="srch-btn" aria-label="Search">
+          <i data-feather="search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active: icon + underline bar -->
+    <div class="state-card">
+      <div class="state-label">Active — any selections</div>
+      <div class="mini-page">
+        <div class="mini-heading">Sources</div>
+        <div class="mini-subtitle">2,341 records</div>
+        <table class="skeleton-table">
+          <tr><td><span class="skel w-60"></span></td><td><span class="skel w-40"></span></td></tr>
+          <tr><td><span class="skel w-75"></span></td><td><span class="skel w-30"></span></td></tr>
+          <tr><td><span class="skel w-50"></span></td><td><span class="skel w-60"></span></td></tr>
+          <tr><td><span class="skel w-40"></span></td><td><span class="skel w-75"></span></td></tr>
+        </table>
+        <div class="icon-label-wrap">
+          <button class="srch-btn" aria-label="Search">
+            <i data-feather="search"></i>
+          </button>
+          <div class="icon-underline-bar"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  feather.replace();
+</script>
+</body>
+</html>
