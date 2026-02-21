@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Filter Mockups — Options 1 &amp; 2</title>
+  <title>Sources Search — Mockups</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/feather-icons"></script>
@@ -87,7 +87,7 @@
     }
     .field-select:focus { border-color: #2c2c2c; }
 
-    /* ── Custom field-select dropdown (option 2) ── */
+    /* ── Custom field-select dropdown ── */
     .custom-field-select { position: relative; flex-shrink: 0; }
     .custom-field-btn {
       font-family: 'Inter', sans-serif;
@@ -268,14 +268,11 @@
     .sm-chip { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 50px; border: 1px solid #d0d0d0; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap; line-height: 1.3; }
     .sm-chip:hover { border-color: #999; color: #2c2c2c; }
     .sm-chip.selected { background: #2c2c2c; border-color: #2c2c2c; color: #fff; }
-    .sm-chip--terracotta { border-color: #c0553a69; color: #c29b91; }
-    .sm-chip--terracotta:hover { border-color: #a84530; color: #a84530; }
-    .sm-chip--terracotta.selected { background: #c0553a; border-color: #c0553a; color: #fff; }
     .sm-chip--grey { border-color: #9999994d; color: #999; }
     .sm-chip--grey:hover { border-color: #666; color: #666; }
     .sm-chip--grey.selected { background: #888; border-color: #888; color: #fff; }
 
-    /* ── Pill tags row (option 2 shelfmarks / functions) ── */
+    /* ── Pill tags row ── */
     .pill-tags-row { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: 15px; }
     .pill-tags-row:empty { display: none; }
     .pill-chip { display: inline-flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 4px 10px; border-radius: 50px; background: #2c2c2c; color: #fff; }
@@ -304,11 +301,11 @@
 </head>
 <body>
 
-<h1>Filter — Mockups 1 &amp; 2</h1>
-<p class="page-note">Click "+ Add field" to add search rows. Click "Filters" to open the filter panel.</p>
+<h1>Sources Search — Mockups</h1>
+<p></p><!-- <p class="page-note">Click "+ Add field" to add search rows. Click "Filters" to open the filter panel.</p> -->
 
 <!-- ── OPTION 1 ── -->
-<div class="section-label">1 — Smart Person &amp; Place inputs + Shelfmarks + Functions + Fundamenta</div>
+<div class="section-label">Search interface</div>
 
 <div class="card">
   <div class="builder-rows" id="builderRows1"></div>
@@ -316,53 +313,11 @@
     <button class="add-btn" id="addFieldBtn1">+ Add field</button>
   </div>
   <hr class="divider">
-  <button class="filter-button" id="filtersBtn1">Filters</button>
+  <div class="filter-btn-row">
+    <button class="filter-button" id="filtersBtn1">Filters</button>
+    <button class="clear-all" id="clearFiltersBtn1" style="display:none;">Clear all filters</button>
+  </div>
   <div class="filter-panel" id="filterPanel1" style="margin-top:16px;"></div>
-</div>
-
-<!-- ── OPTION 2 ── -->
-<div class="section-label">2 — Same as option 1, but selected shelfmarks &amp; functions shown by name</div>
-
-<div class="card">
-  <div class="builder-rows" id="builderRows2"></div>
-  <div class="bottom-row" style="margin-top:14px;">
-    <button class="add-btn" id="addFieldBtn2">+ Add field</button>
-  </div>
-  <hr class="divider">
-  <button class="filter-button" id="filtersBtn2">Filters</button>
-  <div class="filter-panel" id="filterPanel2" style="margin-top:16px;"></div>
-</div>
-
-<!-- ── OPTION 3 ── -->
-<div class="section-label">3 — Same as option 2, but filters button shows active filter count</div>
-
-<div class="card">
-  <div class="builder-rows" id="builderRows3"></div>
-  <div class="bottom-row" style="margin-top:14px;">
-    <button class="add-btn" id="addFieldBtn3">+ Add field</button>
-  </div>
-  <hr class="divider">
-  <div class="filter-btn-row">
-    <button class="filter-button" id="filtersBtn3">Filters</button>
-    <button class="clear-all" id="clearFiltersBtn3" style="display:none;">Clear all filters</button>
-  </div>
-  <div class="filter-panel" id="filterPanel3" style="margin-top:16px;"></div>
-</div>
-
-<!-- ── OPTION 4 ── -->
-<div class="section-label">4 — Same as option 3, but "[empty field]" in functions uses grey instead of terracotta</div>
-
-<div class="card">
-  <div class="builder-rows" id="builderRows4"></div>
-  <div class="bottom-row" style="margin-top:14px;">
-    <button class="add-btn" id="addFieldBtn4">+ Add field</button>
-  </div>
-  <hr class="divider">
-  <div class="filter-btn-row">
-    <button class="filter-button" id="filtersBtn4">Filters</button>
-    <button class="clear-all" id="clearFiltersBtn4" style="display:none;">Clear all filters</button>
-  </div>
-  <div class="filter-panel" id="filterPanel4" style="margin-top:16px;"></div>
 </div>
 
 
@@ -412,12 +367,6 @@
   ];
 
   const FUNCTIONS_DATA = [
-    'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
-    "primer, teacher's book", 'song book / Liederbuch', 'student handbook', 'tablature book',
-    { label: '[empty field]', cls: 'sm-chip--terracotta' }
-  ];
-
-  const FUNCTIONS_DATA_GREY = [
     'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
     "primer, teacher's book", 'song book / Liederbuch', 'student handbook', 'tablature book',
     { label: '[empty field]', cls: 'sm-chip--grey' }
@@ -502,10 +451,10 @@
     });
   }
 
-  [1, 2, 3, 4].forEach(n => {
+  [1].forEach(n => {
     document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
     renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
-    renderChipGrid(document.getElementById('fnList'   + n), n === 4 ? FUNCTIONS_DATA_GREY : FUNCTIONS_DATA);
+    renderChipGrid(document.getElementById('fnList'   + n), FUNCTIONS_DATA);
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
@@ -786,7 +735,7 @@
 
     toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
 
-    /* pill row — inserted between header and collapsible content, always visible */
+    /* pill row — inserted into header, always visible */
     let pillRow = null;
     if (showValues) {
       tag.style.display = 'none';
@@ -867,12 +816,9 @@
     return () => setVal('Both');
   }
 
-  /* ── Init both cards ── */
+  /* ── Init card ── */
   const CARD_CONFIGS = [
-    { n: 1, options: { showLogic: false } },
-    { n: 2, options: { showLogic: false, showChipValues: true } },
-    { n: 3, options: { showLogic: false, showChipValues: true, filterCount: true } },
-    { n: 4, options: { showLogic: false, showChipValues: true, filterCount: true } }
+    { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } }
   ];
 
   CARD_CONFIGS.forEach(({ n, options }) => {
