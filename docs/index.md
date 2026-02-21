@@ -7,5 +7,5 @@ layout: home
 
 This is a small (tentative) site for sharing short demos.<br/>
 
-elautedb-search:<br/>
-[Sources](./elautedb-sources.html){:target="_blank" rel="noopener noreferrer"}<br/>
+<!-- elautedb-search:<br/> -->
+<!-- [Sources](){:target="_blank" rel="noopener noreferrer"}<br/> -->
