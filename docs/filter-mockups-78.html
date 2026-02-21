@@ -177,17 +177,6 @@
     .add-btn:hover { border-color: #2c2c2c; }
     .add-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-    /* ── AND/OR logic toggle ── */
-    .logic-section { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-    .logic-between-label { font-size: 0.8rem; color: #bbb; font-weight: 600; line-height: 1; white-space: nowrap; }
-    .site-logic-toggle { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .site-logic-label { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s; }
-    .site-logic-label.active { color: #2c2c2c; }
-    .site-toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; }
-    .site-toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .site-toggle-slider { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #2c2c2c; border-radius: 24px; transition: 0.3s; }
-    .site-toggle-slider::before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #fff; border-radius: 50%; transition: 0.3s; }
-    .site-toggle-switch input:checked + .site-toggle-slider::before { transform: translateX(20px); }
 
     /* ── Filters button ── */
     .filter-button {
@@ -278,6 +267,14 @@
     .sm-chip--terracotta:hover { border-color: #a84530; color: #a84530; }
     .sm-chip--terracotta.selected { background: #c0553a; border-color: #c0553a; color: #fff; }
 
+    /* ── Pill tags row (option 2 shelfmarks / functions) ── */
+    .pill-tags-row { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: 15px; }
+    .pill-tags-row:empty { display: none; }
+    .pill-chip { display: inline-flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 4px 10px; border-radius: 50px; background: #2c2c2c; color: #fff; }
+    .pill-chip-x { font-size: 0.7rem; opacity: 0.55; cursor: pointer; line-height: 1; }
+    .pill-chip-x:hover { opacity: 1; }
+    .pill-or { font-size: 0.68rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; }
+
     /* ── P2c mode-dropdown widget (Person / Place fields in builder) ── */
     .suggestion-list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto; z-index: 100; display: none; }
     .suggestion-list.open { display: block; }
@@ -308,225 +305,38 @@
   <div class="builder-rows" id="builderRows1"></div>
   <div class="bottom-row" style="margin-top:14px;">
     <button class="add-btn" id="addFieldBtn1">+ Add field</button>
-    <div class="logic-section" id="logicSection1" style="display:none;">
-      <span class="logic-between-label">Logic between search fields:</span>
-      <div class="site-logic-toggle">
-        <span class="site-logic-label active" id="labelAnd1">AND</span>
-        <label class="site-toggle-switch">
-          <input type="checkbox" id="logicToggle1">
-          <span class="site-toggle-slider"></span>
-        </label>
-        <span class="site-logic-label" id="labelOr1">OR</span>
-      </div>
-    </div>
   </div>
-
   <hr class="divider">
-
   <button class="filter-button" id="filtersBtn1">Filters</button>
-
-  <div class="filter-panel" id="filterPanel1" style="margin-top:16px;">
-
-    <!-- Physical type -->
-    <div class="phys-accordion" id="physAccordion1">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="physToggleZone1">
-          <span class="dot-label">Physical type</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="physTag1" style="visibility:hidden; margin-left:15px;">
-          <span id="physTagText1"></span><span class="phys-tag-x" id="physTagX1">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content">
-        <div class="phys-radio-list phys-radio-list--row" id="physRadioList1"></div>
-      </div>
-    </div>
-
-    <!-- Date -->
-    <div class="phys-accordion" id="dateAccordion1">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="dateToggleZone1">
-          <span class="dot-label">Date</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="dateTag1" style="visibility:hidden; margin-left:15px;">
-          <span id="dateTagText1"></span><span class="phys-tag-x" id="dateTagX1">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content date-content">
-        <div class="range-slider-wrap">
-          <div class="range-track"><div class="range-fill" id="dateFill1"></div></div>
-          <input type="range" class="range-input range-min" id="dateMin1" min="1450" max="1620" value="1450" step="1">
-          <input type="range" class="range-input range-max" id="dateMax1" min="1450" max="1620" value="1620" step="1">
-        </div>
-        <div class="range-labels">
-          <input type="number" class="range-label-input" id="dateMinLabel1" value="1450" min="1450" max="1620">
-          <input type="number" class="range-label-input" id="dateMaxLabel1" value="1620" min="1450" max="1620">
-        </div>
-      </div>
-    </div>
-
-    <!-- Shelfmarks -->
-    <div class="phys-accordion" id="shelfAccordion1">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="shelfToggleZone1">
-          <span class="dot-label">Shelfmarks</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="shelfTag1" style="visibility:hidden; margin-left:15px;">
-          <span id="shelfTagText1"></span><span class="phys-tag-x" id="shelfTagX1">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content shelfmarks-content">
-        <input type="text" class="shelfmarks-search" id="shelfSearch1" placeholder="Search shelfmarks…">
-        <div class="sm-chip-grid" id="shelfList1"></div>
-      </div>
-    </div>
-
-    <!-- Functions -->
-    <div class="phys-accordion" id="fnAccordion1">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="fnToggleZone1">
-          <span class="dot-label">Functions</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="fnTag1" style="visibility:hidden; margin-left:15px;">
-          <span id="fnTagText1"></span><span class="phys-tag-x" id="fnTagX1">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content shelfmarks-content">
-        <input type="text" class="shelfmarks-search" id="fnSearch1" placeholder="Search functions…">
-        <div class="sm-chip-grid" id="fnList1"></div>
-      </div>
-    </div>
-
-    <!-- Fundamenta -->
-    <div class="phys-accordion" id="fundaAccordion1">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="fundaToggleZone1">
-          <span class="dot-label">Fundamenta</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="fundaTag1" style="visibility:hidden; margin-left:15px;">
-          <span id="fundaTagText1"></span><span class="phys-tag-x" id="fundaTagX1">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content">
-        <div class="phys-radio-list phys-radio-list--row" id="fundaRadioList1"></div>
-      </div>
-    </div>
-
-  </div><!-- /filterPanel1 -->
-</div><!-- /card -->
+  <div class="filter-panel" id="filterPanel1" style="margin-top:16px;"></div>
+</div>
 
 <!-- ── OPTION 2 ── -->
-<div class="section-label">2 — Smart Person &amp; Place inputs + Shelfmarks + Functions + Fundamenta (no logic toggle, custom field selector)</div>
+<div class="section-label">2 — Same as option 1, but selected shelfmarks &amp; functions shown by name</div>
 
 <div class="card">
   <div class="builder-rows" id="builderRows2"></div>
   <div class="bottom-row" style="margin-top:14px;">
     <button class="add-btn" id="addFieldBtn2">+ Add field</button>
   </div>
-
   <hr class="divider">
-
   <button class="filter-button" id="filtersBtn2">Filters</button>
+  <div class="filter-panel" id="filterPanel2" style="margin-top:16px;"></div>
+</div>
 
-  <div class="filter-panel" id="filterPanel2" style="margin-top:16px;">
+<!-- ── OPTION 3 ── -->
+<div class="section-label">3 — Same as option 2, but filters button shows active filter count</div>
 
-    <!-- Physical type -->
-    <div class="phys-accordion" id="physAccordion2">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="physToggleZone2">
-          <span class="dot-label">Physical type</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="physTag2" style="visibility:hidden; margin-left:15px;">
-          <span id="physTagText2"></span><span class="phys-tag-x" id="physTagX2">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content">
-        <div class="phys-radio-list phys-radio-list--row" id="physRadioList2"></div>
-      </div>
-    </div>
+<div class="card">
+  <div class="builder-rows" id="builderRows3"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn3">+ Add field</button>
+  </div>
+  <hr class="divider">
+  <button class="filter-button" id="filtersBtn3">Filters</button>
+  <div class="filter-panel" id="filterPanel3" style="margin-top:16px;"></div>
+</div>
 
-    <!-- Date -->
-    <div class="phys-accordion" id="dateAccordion2">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="dateToggleZone2">
-          <span class="dot-label">Date</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="dateTag2" style="visibility:hidden; margin-left:15px;">
-          <span id="dateTagText2"></span><span class="phys-tag-x" id="dateTagX2">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content date-content">
-        <div class="range-slider-wrap">
-          <div class="range-track"><div class="range-fill" id="dateFill2"></div></div>
-          <input type="range" class="range-input range-min" id="dateMin2" min="1450" max="1620" value="1450" step="1">
-          <input type="range" class="range-input range-max" id="dateMax2" min="1450" max="1620" value="1620" step="1">
-        </div>
-        <div class="range-labels">
-          <input type="number" class="range-label-input" id="dateMinLabel2" value="1450" min="1450" max="1620">
-          <input type="number" class="range-label-input" id="dateMaxLabel2" value="1620" min="1450" max="1620">
-        </div>
-      </div>
-    </div>
-
-    <!-- Shelfmarks -->
-    <div class="phys-accordion" id="shelfAccordion2">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="shelfToggleZone2">
-          <span class="dot-label">Shelfmarks</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="shelfTag2" style="visibility:hidden; margin-left:15px;">
-          <span id="shelfTagText2"></span><span class="phys-tag-x" id="shelfTagX2">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content shelfmarks-content">
-        <input type="text" class="shelfmarks-search" id="shelfSearch2" placeholder="Search shelfmarks…">
-        <div class="sm-chip-grid" id="shelfList2"></div>
-      </div>
-    </div>
-
-    <!-- Functions -->
-    <div class="phys-accordion" id="fnAccordion2">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="fnToggleZone2">
-          <span class="dot-label">Functions</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="fnTag2" style="visibility:hidden; margin-left:15px;">
-          <span id="fnTagText2"></span><span class="phys-tag-x" id="fnTagX2">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content shelfmarks-content">
-        <input type="text" class="shelfmarks-search" id="fnSearch2" placeholder="Search functions…">
-        <div class="sm-chip-grid" id="fnList2"></div>
-      </div>
-    </div>
-
-    <!-- Fundamenta -->
-    <div class="phys-accordion" id="fundaAccordion2">
-      <div class="phys-accordion-header header-split">
-        <div class="phys-toggle-zone" id="fundaToggleZone2">
-          <span class="dot-label">Fundamenta</span>
-          <svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <span class="filter-value-tag" id="fundaTag2" style="visibility:hidden; margin-left:15px;">
-          <span id="fundaTagText2"></span><span class="phys-tag-x" id="fundaTagX2">×</span>
-        </span>
-      </div>
-      <div class="phys-accordion-content">
-        <div class="phys-radio-list phys-radio-list--row" id="fundaRadioList2"></div>
-      </div>
-    </div>
-
-  </div><!-- /filterPanel2 -->
-</div><!-- /card -->
 
 <script>
   const FIELDS = [
@@ -553,7 +363,6 @@
     'Wien (university)', 'Wittenberg (city)', 'Zwickau (city)'
   ];
 
-  /* ── Chip data (single source, rendered into both cards) ── */
   const SHELFMARKS = [
     { heading: 'A — Austria', chips: ['A-Imf','A-Wgm','A-Wgm 676/137','A-Wkm KK_5410','A-Wn 396116-A','A-Wn Cod. 9704','A-Wn MS47356-8°','A-Wn Mus.Hs. 18688','A-Wn Mus.Hs. 18827','A-Wn Mus.Hs. 41950','A-Wn SA.78.C.29 19','A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1'] },
     { heading: 'B — Belgium', chips: ['B-Br','B-Br Fétis 2.884 b 9899 48','B-Br Fétis 4.014 A (RP)','B-Br Fétis 6.197 A (RP)'] },
@@ -580,10 +389,53 @@
     { label: 'empty', cls: 'sm-chip--terracotta' }
   ];
 
-  /* ── Radio list data (single source, rendered into both cards) ── */
   const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
   const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
 
+  /* ── Filter panel template ── */
+  const SVG_CHEVRON = '<svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+  function accordion(prefix, label, n, contentClass, content) {
+    return `
+    <div class="phys-accordion" id="${prefix}Accordion${n}">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="${prefix}ToggleZone${n}">
+          <span class="dot-label">${label}</span>${SVG_CHEVRON}
+        </div>
+        <span class="filter-value-tag" id="${prefix}Tag${n}" style="visibility:hidden; margin-left:15px;">
+          <span id="${prefix}TagText${n}"></span><span class="phys-tag-x" id="${prefix}TagX${n}">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content${contentClass ? ' ' + contentClass : ''}">${content}</div>
+    </div>`;
+  }
+
+  function buildFilterPanel(n) {
+    return [
+      accordion('phys', 'Physical type', n, '', `
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList${n}"></div>`),
+      accordion('date', 'Date', n, 'date-content', `
+        <div class="range-slider-wrap">
+          <div class="range-track"><div class="range-fill" id="dateFill${n}"></div></div>
+          <input type="range" class="range-input range-min" id="dateMin${n}" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax${n}" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel${n}" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel${n}" value="1620" min="1450" max="1620">
+        </div>`),
+      accordion('shelf', 'Shelfmarks', n, 'shelfmarks-content', `
+        <input type="text" class="shelfmarks-search" id="shelfSearch${n}" placeholder="Search shelfmarks…">
+        <div class="sm-chip-grid" id="shelfList${n}"></div>`),
+      accordion('fn', 'Functions', n, 'shelfmarks-content', `
+        <input type="text" class="shelfmarks-search" id="fnSearch${n}" placeholder="Search functions…">
+        <div class="sm-chip-grid" id="fnList${n}"></div>`),
+      accordion('funda', 'Fundamenta', n, '', `
+        <div class="phys-radio-list phys-radio-list--row" id="fundaRadioList${n}"></div>`)
+    ].join('');
+  }
+
+  /* ── Render filter panels, chips, radio lists ── */
   function renderChipGrid(el, data) {
     data.forEach(item => {
       if (item.heading !== undefined) {
@@ -616,13 +468,15 @@
     });
   }
 
-  [1, 2].forEach(n => {
+  [1, 2, 3].forEach(n => {
+    document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
     renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
     renderChipGrid(document.getElementById('fnList'   + n), FUNCTIONS_DATA);
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
 
+  /* ── Feather icons ── */
   const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
   const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
 
@@ -716,7 +570,7 @@
 
     function updateUI() {
       const count = rows.length;
-      addFieldBtnEl.disabled = count >= FIELDS.length;
+      addFieldBtnEl.disabled = count >= 10;
       builderRowsEl.querySelectorAll('.remove-btn').forEach(btn => { btn.disabled = count <= 1; });
       if (logicSectionEl && showLogic) logicSectionEl.style.display = count >= 2 ? 'flex' : 'none';
     }
@@ -836,7 +690,7 @@
   }
 
   /* ── Date range accordion ── */
-  function initDateAccordion({ n, minYear = 1450, maxYear = 1620 }) {
+  function initDateAccordion({ n, minYear = 1450, maxYear = 1620, onFilterChange = null }) {
     const accordion  = document.getElementById(`dateAccordion${n}`);
     const toggleZone = document.getElementById(`dateToggleZone${n}`);
     const tag        = document.getElementById(`dateTag${n}`);
@@ -860,6 +714,7 @@
       const isDefault = lo === minYear && hi === maxYear;
       tag.style.visibility = isDefault ? 'hidden' : 'visible';
       if (!isDefault) tagText.textContent = `${lo}–${hi}`;
+      if (onFilterChange) onFilterChange(!isDefault);
     }
 
     minInput.addEventListener('input', () => { if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; update(); });
@@ -885,7 +740,7 @@
   }
 
   /* ── Chip shelfmarks / functions accordion ── */
-  function initChipShelfmarksAccordion({ n, prefix = 'shelf' }) {
+  function initChipShelfmarksAccordion({ n, prefix = 'shelf', showValues = false, onFilterChange = null }) {
     const accordion   = document.getElementById(`${prefix}Accordion${n}`);
     const toggleZone  = document.getElementById(`${prefix}ToggleZone${n}`);
     const tag         = document.getElementById(`${prefix}Tag${n}`);
@@ -896,14 +751,47 @@
 
     toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
 
+    /* pill row — inserted between header and collapsible content, always visible */
+    let pillRow = null;
+    if (showValues) {
+      tag.style.display = 'none';
+      pillRow = document.createElement('div');
+      pillRow.className = 'pill-tags-row';
+      accordion.querySelector('.phys-accordion-header').appendChild(pillRow);
+    }
+
     function updateTag() {
-      const count = list.querySelectorAll('.sm-chip.selected').length;
-      tag.style.visibility = count === 0 ? 'hidden' : 'visible';
-      if (count > 0) tagText.textContent = count === 1 ? '1 selected' : `${count} selected`;
+      const selected = list.querySelectorAll('.sm-chip.selected');
+      const count = selected.length;
+      if (onFilterChange) onFilterChange(count > 0);
+
+      if (showValues) {
+        pillRow.innerHTML = '';
+        Array.from(selected).forEach((chip, i) => {
+          if (i > 0) {
+            const sep = document.createElement('span');
+            sep.className = 'pill-or';
+            sep.textContent = 'or';
+            pillRow.appendChild(sep);
+          }
+          const pill = document.createElement('span');
+          pill.className = 'pill-chip';
+          pill.textContent = chip.textContent;
+          const x = document.createElement('span');
+          x.className = 'pill-chip-x';
+          x.textContent = '×';
+          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); });
+          pill.appendChild(x);
+          pillRow.appendChild(pill);
+        });
+      } else {
+        tag.style.visibility = count === 0 ? 'hidden' : 'visible';
+        if (count > 0) tagText.textContent = count === 1 ? '1 selected' : `${count} selected`;
+      }
     }
 
     list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); });
-    tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); });
+    if (!showValues) tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); });
     searchInput.addEventListener('input', () => {
       const term = searchInput.value.toLowerCase();
       list.querySelectorAll('.sm-chip').forEach(chip => { chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none'; });
@@ -920,7 +808,7 @@
   }
 
   /* ── Fundamenta accordion ── */
-  function initFundamentaAccordion({ n }) {
+  function initFundamentaAccordion({ n, onFilterChange = null }) {
     const accordion  = document.getElementById(`fundaAccordion${n}`);
     const toggleZone = document.getElementById(`fundaToggleZone${n}`);
     const tag        = document.getElementById(`fundaTag${n}`);
@@ -934,6 +822,7 @@
       tag.style.visibility = val === 'Both' ? 'hidden' : 'visible';
       if (val !== 'Both') tagText.textContent = val;
       rows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
+      if (onFilterChange) onFilterChange(val !== 'Both');
     }
 
     rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
@@ -942,14 +831,33 @@
 
   /* ── Init both cards ── */
   const CARD_CONFIGS = [
-    { n: 1, options: {} },
-    { n: 2, options: { showLogic: false, useCustomSelect: true } }
+    { n: 1, options: { showLogic: false } },
+    { n: 2, options: { showLogic: false, showChipValues: true } },
+    { n: 3, options: { showLogic: false, showChipValues: true, filterCount: true } }
   ];
 
   CARD_CONFIGS.forEach(({ n, options }) => {
     const physRows = document.querySelectorAll(`#physRadioList${n} .phys-radio-row`);
-    const setVal   = setupSplitAccordion(n,
-      val => physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val)),
+
+    let onFilterChange = null;
+    if (options.filterCount) {
+      const filtersBtn  = document.getElementById(`filtersBtn${n}`);
+      const activeFilters = new Set();
+      onFilterChange = (key, isActive) => {
+        if (isActive) activeFilters.add(key);
+        else activeFilters.delete(key);
+        const count = activeFilters.size;
+        filtersBtn.textContent = count === 0 ? 'Filters'
+          : count === 1 ? '1 Filter'
+          : `${count} Filters`;
+      };
+    }
+
+    const setVal = setupSplitAccordion(n,
+      val => {
+        physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
+        if (onFilterChange) onFilterChange('phys', val !== 'Both');
+      },
       {
         'Person': (rowId) => createModeDropdownWidget(rowId, PERSONS),
         'Place':  (rowId) => createModeDropdownWidget(rowId, PLACES)
@@ -957,10 +865,10 @@
       options
     );
     physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
-    initDateAccordion({ n });
-    initChipShelfmarksAccordion({ n });
-    initChipShelfmarksAccordion({ n, prefix: 'fn' });
-    initFundamentaAccordion({ n });
+    initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
+    initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
+    initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
+    initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
   });
 </script>
 
