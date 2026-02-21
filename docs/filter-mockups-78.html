@@ -190,6 +190,11 @@
     }
     .filter-button:hover { background: #1a1a1a; transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0,0,0,0.2); }
 
+    /* ── Filter button row + clear all ── */
+    .filter-btn-row { display: flex; align-items: center; justify-content: space-between; }
+    .clear-all { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: #bbb; background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px; transition: color 0.2s; }
+    .clear-all:hover { color: #2c2c2c; }
+
     /* ── Filter panel ── */
     .filter-panel { display: none; flex-direction: column; gap: 0; animation: fadeSlideIn 0.2s ease; }
     .filter-panel.open { display: flex; }
@@ -333,7 +338,10 @@
     <button class="add-btn" id="addFieldBtn3">+ Add field</button>
   </div>
   <hr class="divider">
-  <button class="filter-button" id="filtersBtn3">Filters</button>
+  <div class="filter-btn-row">
+    <button class="filter-button" id="filtersBtn3">Filters</button>
+    <button class="clear-all" id="clearFiltersBtn3" style="display:none;">Clear all filters</button>
+  </div>
   <div class="filter-panel" id="filterPanel3" style="margin-top:16px;"></div>
 </div>
 
@@ -737,6 +745,7 @@
     maxLabel.addEventListener('blur',   () => applyLabel(maxLabel, false));
     tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); });
     update();
+    return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
   }
 
   /* ── Chip shelfmarks / functions accordion ── */
@@ -792,6 +801,7 @@
 
     list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); });
     if (!showValues) tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); });
+    const resetChips = () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); };
     searchInput.addEventListener('input', () => {
       const term = searchInput.value.toLowerCase();
       list.querySelectorAll('.sm-chip').forEach(chip => { chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none'; });
@@ -805,6 +815,7 @@
       });
     });
     updateTag();
+    return resetChips;
   }
 
   /* ── Fundamenta accordion ── */
@@ -827,6 +838,7 @@
 
     rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
     tagX.addEventListener('click', () => setVal('Both'));
+    return () => setVal('Both');
   }
 
   /* ── Init both cards ── */
@@ -840,8 +852,10 @@
     const physRows = document.querySelectorAll(`#physRadioList${n} .phys-radio-row`);
 
     let onFilterChange = null;
+    let clearFiltersBtn = null;
     if (options.filterCount) {
       const filtersBtn  = document.getElementById(`filtersBtn${n}`);
+      clearFiltersBtn   = document.getElementById(`clearFiltersBtn${n}`);
       const activeFilters = new Set();
       onFilterChange = (key, isActive) => {
         if (isActive) activeFilters.add(key);
@@ -850,10 +864,11 @@
         filtersBtn.textContent = count === 0 ? 'Filters'
           : count === 1 ? '1 Filter'
           : `${count} Filters`;
+        clearFiltersBtn.style.display = count > 0 ? '' : 'none';
       };
     }
 
-    const setVal = setupSplitAccordion(n,
+    const setVal    = setupSplitAccordion(n,
       val => {
         physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
         if (onFilterChange) onFilterChange('phys', val !== 'Both');
@@ -865,10 +880,20 @@
       options
     );
     physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
-    initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
-    initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
-    initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
-    initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
+    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
+    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
+    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
+    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
+
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener('click', () => {
+        setVal('Both');
+        resetDate();
+        resetShelf();
+        resetFn();
+        resetFunda();
+      });
+    }
   });
 </script>
 
