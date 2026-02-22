@@ -1,320 +1,399 @@
----
-layout: elautedb
-permalink: /elautedb-sources-plain/
-custom_css:
-  - https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css
-  - https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap
-  - /assets/css/ex15.css
-custom_js:
-  - https://code.jquery.com/jquery-3.7.1.min.js
-  - https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js
-  - https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js
-  - /assets/js/ex15.js
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sources Search — Mockups</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
 
-<style>
-  /* ── Wrapper (fixed, top-right) holds pill + icon ── */
-  #searchIconWrap {
-    position: fixed;
-    top: 20px;
-    right: 24px;
-    z-index: 1001;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f2;
+      margin: 0;
+      padding: 40px 24px 80px;
+      color: #2c2c2c;
+    }
 
-  /* ── Active-state pill (Option D) ── */
-  #searchPill {
-    background: #2c2c2c;
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 5px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateX(6px);
-    transition: opacity 0.22s ease, transform 0.22s ease;
-    pointer-events: none;
-  }
-  #searchPill.visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0 0 8px;
+      color: #888;
+      text-transform: uppercase;
+    }
 
-  /* ── Search icon button ── */
-  #searchIconBtn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    border: 1.5px solid #d0d0d0;
-    background: #fff;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    padding: 0;
-    color: #2c2c2c;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.12);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    flex-shrink: 0;
-  }
-  #searchIconBtn:hover       { border-color: #888; box-shadow: 0 6px 22px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.14); }
-  #searchIconBtn.drawer-open { border-color: #2c2c2c; box-shadow: 0 0 0 3px rgba(44,44,44,0.12), 0 4px 16px rgba(0,0,0,0.22); }
-  #searchIconBtn svg         { width: 17px; height: 17px; }
+    .page-note {
+      font-size: 0.8rem;
+      color: #bbb;
+      margin-bottom: 48px;
+    }
 
-  /* ── Search drawer — slides in from right, anchored below icon ── */
-  #searchDropdown {
-    position: fixed;
-    top: 68px; /* 20px icon-top + 40px icon-height + 8px gap */
-    right: 0;
-    width: 720px;
-    max-height: calc(100vh - 80px);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 0 20px 20px;
-    overflow-y: auto;
-    transform: translateX(100%);
-    transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-    z-index: 1000;
-  }
-  #searchDropdown.open {
-    transform: translateX(0);
-    pointer-events: auto;
-  }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      max-width: 720px;
+    }
 
-  #searchPanel, #filtersPanel {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10);
-    padding: 28px;
-    flex-shrink: 0;
-  }
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0e0e0;
+      margin-top: 40px;
+    }
 
-  .sd-heading-row {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .sd-title {
-    font-size: 0.7rem; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase; color: #aaa;
-  }
+    .section-label:first-of-type { margin-top: 0; }
 
-  /* ── Search builder ── */
-  #searchDropdown .builder-rows { display: flex; flex-direction: column; gap: 10px; }
-  #searchDropdown .builder-row  { display: flex; align-items: center; gap: 10px; }
-  #searchDropdown .builder-row.new { animation: sdRowIn 0.2s ease; }
-  @keyframes sdRowIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+    .divider {
+      border: none;
+      border-top: 1px solid #ebebeb;
+      margin: 20px 0;
+    }
 
-  /* Native field select */
-  #searchDropdown .field-select {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.85rem; font-weight: 500;
-    padding: 10px 34px 10px 14px;
-    border: 1px solid #d0d0d0; border-radius: 50px;
-    background: #f9f7f4 url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
-    color: #2c2c2c; outline: none;
-    min-width: 190px; appearance: none; cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  #searchDropdown .field-select:focus { border-color: #2c2c2c; }
+    /* ── Builder rows ── */
+    .builder-rows { display: flex; flex-direction: column; gap: 10px; }
+    .builder-row  { display: flex; align-items: center; gap: 10px; }
 
-  /* Search input */
-  #searchDropdown .builder-input {
-    flex: 1; font-family: 'Inter', sans-serif; font-size: 0.85rem;
-    padding: 10px 16px; border: 1px solid #d0d0d0; border-radius: 50px;
-    outline: none; color: #2c2c2c; transition: border-color 0.2s;
-  }
-  #searchDropdown .builder-input::placeholder { color: #bbb; }
-  #searchDropdown .builder-input:focus { border-color: #2c2c2c; }
+    /* ── Native field select ── */
+    .field-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #f9f7f4;
+      color: #2c2c2c;
+      outline: none;
+      min-width: 190px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 34px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .field-select:focus { border-color: #2c2c2c; }
 
-  /* Remove button */
-  #searchDropdown .remove-btn {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 1px solid #e0e0e0; background: #fff; color: #bbb;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; flex-shrink: 0; padding: 0;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  #searchDropdown .remove-btn:hover   { border-color: #d0d0d0; color: #2c2c2c; }
-  #searchDropdown .remove-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
-  #searchDropdown .remove-btn svg     { display: block; flex-shrink: 0; }
+    /* ── Custom field-select dropdown ── */
+    .custom-field-select { position: relative; flex-shrink: 0; }
+    .custom-field-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 10px 34px 10px 14px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      background: #f9f7f4 url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+      color: #2c2c2c;
+      min-width: 190px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .custom-field-btn:focus { outline: none; border-color: #2c2c2c; }
+    .custom-field-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 100%;
+      background: #fff;
+      border: 1px solid #d0d0d0;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+      z-index: 200;
+      overflow: hidden;
+    }
+    .custom-field-dropdown.open { display: block; }
+    .custom-field-option {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 9px 14px;
+      cursor: pointer;
+      color: #2c2c2c;
+      transition: background 0.1s;
+    }
+    .custom-field-option:hover { background: #e8e8e8; }
+    .custom-field-option.is-selected { font-weight: 600; }
 
-  /* Bottom row / add button */
-  #searchDropdown .bottom-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; padding-right: 38px; }
-  #searchDropdown .add-btn {
-    font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600;
-    color: #2c2c2c; border: 1.5px dashed #d0d0d0; background: transparent;
-    border-radius: 50px; padding: 8px 18px; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px;
-    transition: border-color 0.2s; white-space: nowrap;
-  }
-  #searchDropdown .add-btn:hover    { border-color: #2c2c2c; }
-  #searchDropdown .add-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+    /* ── Search input ── */
+    .builder-input {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 50px;
+      outline: none;
+      color: #2c2c2c;
+      transition: border-color 0.2s;
+    }
+    .builder-input::placeholder { color: #bbb; }
+    .builder-input:focus { border-color: #2c2c2c; }
 
-  #searchDropdown .clear-all {
-    font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600;
-    color: #bbb; background: none; border: none; cursor: pointer; padding: 0;
-    text-decoration: underline; text-underline-offset: 2px; transition: color 0.2s;
-  }
-  #searchDropdown .clear-all:hover { color: #2c2c2c; }
+    /* ── Remove button ── */
+    .remove-btn {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      color: #bbb;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: border-color 0.2s, color 0.2s;
+      padding: 0;
+    }
+    .remove-btn:hover { border-color: #d0d0d0; color: #2c2c2c; }
+    .remove-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+    .remove-btn svg { display: block; flex-shrink: 0; }
 
-  /* Filter panel — always visible */
-  #searchDropdown .filter-panel { display: flex; flex-direction: column; gap: 0; }
+    /* ── Bottom row ── */
+    .bottom-row { display: flex; align-items: center; gap: 12px; margin-top: 4px; padding-right: 38px; }
+    .add-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem; font-weight: 600;
+      color: #2c2c2c;
+      border: 1.5px dashed #d0d0d0;
+      background: transparent;
+      border-radius: 50px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      white-space: nowrap;
+    }
+    .add-btn:hover { border-color: #2c2c2c; }
+    .add-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-  /* Filter value tag */
-  #searchDropdown .filter-value-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 500; padding: 4px 12px; border-radius: 50px; background: #2c2c2c; color: #fff; }
-  #searchDropdown .phys-tag-x { font-size: 0.7rem; opacity: 0.55; cursor: pointer; }
 
-  /* Accordion */
-  #searchDropdown .phys-accordion { border-bottom: 1px solid #f0f0f0; }
-  #searchDropdown .phys-accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; cursor: pointer; user-select: none; }
-  #searchDropdown .phys-accordion-header:hover { opacity: 0.75; }
-  #searchDropdown .phys-chevron { color: #2c2c2c; flex-shrink: 0; transition: transform 0.3s ease; }
-  #searchDropdown .phys-accordion.expanded .phys-chevron { transform: rotate(180deg); }
-  #searchDropdown .phys-accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-  #searchDropdown .phys-accordion.expanded .phys-accordion-content { max-height: 80px; }
-  #searchDropdown .phys-accordion-header.header-split { cursor: default; justify-content: flex-start; }
-  #searchDropdown .phys-accordion-header.header-split:hover { opacity: 1; }
-  #searchDropdown .phys-toggle-zone { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-  #searchDropdown .phys-toggle-zone:hover { opacity: 0.75; }
+    /* ── Filters heading row (replaces toggle button) ── */
+    .filters-heading-row { display: flex; align-items: center; justify-content: space-between; }
+    .filters-heading { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #aaa; }
+    .clear-all { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: #bbb; background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px; transition: color 0.2s; }
+    .clear-all:hover { color: #2c2c2c; }
 
-  /* Radio list */
-  #searchDropdown .dot-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #888; min-width: 0; }
-  #searchDropdown .phys-radio-list { display: flex; flex-direction: column; margin: 4px 0 12px; }
-  #searchDropdown .phys-radio-list--row { flex-direction: row; gap: 20px; }
-  #searchDropdown .phys-radio-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; border-bottom: 1px solid #f4f4f4; }
-  #searchDropdown .phys-radio-row:last-child { border-bottom: none; }
-  #searchDropdown .phys-radio-list--row .phys-radio-row { border-bottom: none; padding: 6px 0; }
-  #searchDropdown .phys-radio-circle { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #ccc; flex-shrink: 0; transition: all 0.2s; }
-  #searchDropdown .phys-radio-row.active .phys-radio-circle { background: #2c2c2c; border-color: #2c2c2c; box-shadow: inset 0 0 0 3px #fff; }
-  #searchDropdown .phys-radio-text { font-size: 0.85rem; font-weight: 500; color: #aaa; transition: color 0.2s; }
-  #searchDropdown .phys-radio-row:hover .phys-radio-text { color: #666; }
-  #searchDropdown .phys-radio-row.active .phys-radio-text { color: #2c2c2c; font-weight: 600; }
+    /* ── Filter panel (always visible) ── */
+    .filter-panel { display: flex; flex-direction: column; gap: 0; }
 
-  /* Date range */
-  #searchDropdown .phys-accordion.expanded .phys-accordion-content.date-content { max-height: 100px; }
-  #searchDropdown .range-slider-wrap { position: relative; height: 30px; margin: 14px 10px 4px; }
-  #searchDropdown .range-track { position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 4px; background: #e0e0e0; border-radius: 2px; pointer-events: none; z-index: 1; }
-  #searchDropdown .range-fill { position: absolute; height: 100%; background: #2c2c2c; border-radius: 2px; }
-  #searchDropdown .range-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; -webkit-appearance: none; appearance: none; pointer-events: none; outline: none; margin: 0; padding: 0; z-index: 2; }
-  #searchDropdown .range-min { z-index: 3; }
-  #searchDropdown .range-max { z-index: 4; }
-  #searchDropdown .range-input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2c2c2c; cursor: pointer; pointer-events: all; border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
-  #searchDropdown .range-input::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #2c2c2c; cursor: pointer; pointer-events: all; border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); box-sizing: border-box; }
-  #searchDropdown .range-input::-webkit-slider-runnable-track { background: transparent; }
-  #searchDropdown .range-input::-moz-range-track { background: transparent; }
-  #searchDropdown .range-labels { display: flex; justify-content: space-between; margin: 0 10px 12px; }
-  #searchDropdown .range-label-input { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; color: #555; width: 38px; border: none; background: transparent; outline: none; padding: 2px 4px; border-radius: 4px; cursor: text; transition: background 0.15s; }
-  #searchDropdown .range-label-input:focus { background: #f0f0f0; }
-  #searchDropdown .range-label-input:last-child { text-align: right; }
-  #searchDropdown .range-label-input::-webkit-outer-spin-button,
-  #searchDropdown .range-label-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  #searchDropdown .range-label-input[type=number] { -moz-appearance: textfield; }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .builder-row.new { animation: fadeSlideIn 0.2s ease; }
 
-  /* Shelfmarks / Functions chip accordion */
-  #searchDropdown .phys-accordion.expanded .phys-accordion-content.shelfmarks-content { max-height: 300px; overflow-y: auto; }
-  #searchDropdown .shelfmarks-search { width: calc(100% - 20px); padding: 10px 16px; margin: 4px 10px 14px; font-family: 'Inter', sans-serif; font-size: 0.85rem; border: 1px solid #d0d0d0; border-radius: 50px; background: #fff; color: #2c2c2c; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
-  #searchDropdown .shelfmarks-search:focus { border-color: #2c2c2c; }
-  #searchDropdown .shelfmarks-search::placeholder { color: #bbb; }
-  #searchDropdown .sm-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; }
-  #searchDropdown .sm-chip-grid .sm-group-heading { width: 100%; }
-  #searchDropdown .sm-group-heading { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.3px; color: #2c2c2c; padding-top: 4px; margin-top: 4px; border-top: 1px solid #f0f0f0; }
-  #searchDropdown .sm-group-heading:first-child { margin-top: 0; border-top: none; }
-  #searchDropdown .sm-chip { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 50px; border: 1px solid #d0d0d0; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap; line-height: 1.3; }
-  #searchDropdown .sm-chip:hover { border-color: #999; color: #2c2c2c; }
-  #searchDropdown .sm-chip.selected { background: #2c2c2c; border-color: #2c2c2c; color: #fff; }
-  #searchDropdown .sm-chip--grey { border-color: #9999994d; color: #999; }
-  #searchDropdown .sm-chip--grey:hover { border-color: #666; color: #666; }
-  #searchDropdown .sm-chip--grey.selected { background: #888; border-color: #888; color: #fff; }
+    /* ── Filter value tag ── */
+    .filter-value-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 500; padding: 4px 12px; border-radius: 50px; background: #2c2c2c; color: #fff; }
+    .phys-tag-x { font-size: 0.7rem; opacity: 0.55; cursor: pointer; }
 
-  /* Pill tags row */
-  #searchDropdown .pill-tags-row { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: 15px; }
-  #searchDropdown .pill-tags-row:empty { display: none; }
-  #searchDropdown .pill-chip { display: inline-flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 4px 10px; border-radius: 50px; background: #2c2c2c; color: #fff; }
-  #searchDropdown .pill-chip--grey { background: #888; }
-  #searchDropdown .pill-chip-x { font-size: 0.7rem; opacity: 0.55; cursor: pointer; line-height: 1; }
-  #searchDropdown .pill-chip-x:hover { opacity: 1; }
-  #searchDropdown .pill-or { font-size: 0.68rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* ── Accordion ── */
+    .phys-accordion { border-bottom: 1px solid #f0f0f0; }
+    .phys-accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; cursor: pointer; user-select: none; }
+    .phys-accordion-header:hover { opacity: 0.75; }
+    .phys-chevron { color: #2c2c2c; flex-shrink: 0; transition: transform 0.3s ease; }
+    .phys-accordion.expanded .phys-chevron { transform: rotate(180deg); }
+    .phys-accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .phys-accordion.expanded .phys-accordion-content { max-height: 80px; }
 
-  /* P2c mode-dropdown widget (Person / Place) */
-  #searchDropdown .suggestion-list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto; z-index: 1100; display: none; }
-  #searchDropdown .suggestion-list.open { display: block; }
-  #searchDropdown .suggestion-item { padding: 9px 16px; font-size: 0.84rem; font-family: 'Inter', sans-serif; color: #2c2c2c; cursor: pointer; transition: background 0.1s; }
-  #searchDropdown .suggestion-item:hover,
-  #searchDropdown .suggestion-item.highlighted { background: #f4f4f2; }
-  #searchDropdown .suggestion-item.is-selected { font-weight: 600; }
-  #searchDropdown .p2b-tabs { display: flex; background: #f4f4f2; border-radius: 50px; padding: 2px; flex-shrink: 0; }
-  #searchDropdown .p2b-tab { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 4px 11px; border-radius: 50px; border: none; background: transparent; color: #999; cursor: pointer; transition: all 0.15s; line-height: 1.4; white-space: nowrap; }
-  #searchDropdown .p2b-tab.active { background: #fff; color: #2c2c2c; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-  #searchDropdown .p2b-divider { width: 1px; height: 18px; background: #e0e0e0; flex-shrink: 0; margin: 0 8px; }
-  #searchDropdown .p2b-text { flex: 1; border: none; outline: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #2c2c2c; background: transparent; padding: 4px 8px 4px 0; min-width: 0; }
-  #searchDropdown .p2b-text::placeholder { color: #bbb; }
-  #searchDropdown .p2c-wrap { flex: 1; display: flex; align-items: center; border: 1px solid #d0d0d0; border-radius: 50px; padding: 5px; transition: border-color 0.2s; background: #fff; position: relative; }
-  #searchDropdown .p2c-wrap:focus-within { border-color: #2c2c2c; }
-</style>
+    .phys-accordion-header.header-split { cursor: default; justify-content: flex-start; }
+    .phys-accordion-header.header-split:hover { opacity: 1; }
+    .phys-toggle-zone { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .phys-toggle-zone:hover { opacity: 0.75; }
 
-<!-- Search icon wrapper: pill + button -->
-<div id="searchIconWrap">
-  <div id="searchPill"></div>
-  <button id="searchIconBtn" aria-label="Search sources"></button>
+    /* ── Radio list ── */
+    .dot-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; color: #888; min-width: 0; }
+    .phys-radio-list { display: flex; flex-direction: column; margin: 4px 0 12px; }
+    .phys-radio-list--row { flex-direction: row; gap: 20px; }
+    .phys-radio-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; border-bottom: 1px solid #f4f4f4; }
+    .phys-radio-row:last-child { border-bottom: none; }
+    .phys-radio-list--row .phys-radio-row { border-bottom: none; padding: 6px 0; }
+    .phys-radio-circle { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #ccc; flex-shrink: 0; transition: all 0.2s; }
+    .phys-radio-row.active .phys-radio-circle { background: #2c2c2c; border-color: #2c2c2c; box-shadow: inset 0 0 0 3px #fff; }
+    .phys-radio-text { font-size: 0.85rem; font-weight: 500; color: #aaa; transition: color 0.2s; }
+    .phys-radio-row:hover .phys-radio-text { color: #666; }
+    .phys-radio-row.active .phys-radio-text { color: #2c2c2c; font-weight: 600; }
+
+    /* ── Date range ── */
+    .phys-accordion.expanded .phys-accordion-content.date-content { max-height: 100px; }
+    .range-slider-wrap { position: relative; height: 30px; margin: 14px 10px 4px; }
+    .range-track { position: absolute; top: 50%; transform: translateY(-50%); left: 0; right: 0; height: 4px; background: #e0e0e0; border-radius: 2px; pointer-events: none; z-index: 1; }
+    .range-fill { position: absolute; height: 100%; background: #2c2c2c; border-radius: 2px; }
+    .range-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; -webkit-appearance: none; appearance: none; pointer-events: none; outline: none; margin: 0; padding: 0; z-index: 2; }
+    .range-min { z-index: 3; }
+    .range-max { z-index: 4; }
+    .range-input::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #2c2c2c; cursor: pointer; pointer-events: all; border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+    .range-input::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #2c2c2c; cursor: pointer; pointer-events: all; border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25); box-sizing: border-box; }
+    .range-input::-webkit-slider-runnable-track { background: transparent; }
+    .range-input::-moz-range-track { background: transparent; }
+    .range-labels { display: flex; justify-content: space-between; margin: 0 10px 12px; }
+    .range-label-input { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; color: #555; width: 38px; border: none; background: transparent; outline: none; padding: 2px 4px; border-radius: 4px; cursor: text; transition: background 0.15s; }
+    .range-label-input:focus { background: #f0f0f0; }
+    .range-label-input:last-child { text-align: right; }
+    .range-label-input::-webkit-outer-spin-button,
+    .range-label-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .range-label-input[type=number] { -moz-appearance: textfield; }
+
+    /* ── Shelfmarks / Functions chip accordion ── */
+    .phys-accordion.expanded .phys-accordion-content.shelfmarks-content { max-height: 300px; overflow-y: auto; }
+    .shelfmarks-search { width: calc(100% - 20px); padding: 10px 16px; margin: 4px 10px 14px; font-family: 'Inter', sans-serif; font-size: 0.85rem; border: 1px solid #d0d0d0; border-radius: 50px; background: #fff; color: #2c2c2c; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+    .shelfmarks-search:focus { border-color: #2c2c2c; }
+    .shelfmarks-search::placeholder { color: #bbb; }
+    .sm-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; }
+    .sm-chip-grid .sm-group-heading { width: 100%; }
+    .sm-group-heading { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.3px; color: #2c2c2c; padding-top: 4px; margin-top: 4px; border-top: 1px solid #f0f0f0; }
+    .sm-group-heading:first-child { margin-top: 0; border-top: none; }
+    .sm-chip { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 50px; border: 1px solid #d0d0d0; background: #fff; color: #555; cursor: pointer; transition: all 0.15s; user-select: none; white-space: nowrap; line-height: 1.3; }
+    .sm-chip:hover { border-color: #999; color: #2c2c2c; }
+    .sm-chip.selected { background: #2c2c2c; border-color: #2c2c2c; color: #fff; }
+    .sm-chip--grey { border-color: #9999994d; color: #999; }
+    .sm-chip--grey:hover { border-color: #666; color: #666; }
+    .sm-chip--grey.selected { background: #888; border-color: #888; color: #fff; }
+
+    /* ── Pill tags row ── */
+    .pill-tags-row { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: 15px; }
+    .pill-tags-row:empty { display: none; }
+    .pill-chip { display: inline-flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 500; padding: 4px 10px; border-radius: 50px; background: #2c2c2c; color: #fff; }
+    .pill-chip--grey { background: #888; }
+    .pill-chip-x { font-size: 0.7rem; opacity: 0.55; cursor: pointer; line-height: 1; }
+    .pill-chip-x:hover { opacity: 1; }
+    .pill-or { font-size: 0.68rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ── P2c mode-dropdown widget (Person / Place fields in builder) ── */
+    .suggestion-list { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); max-height: 220px; overflow-y: auto; z-index: 100; display: none; }
+    .suggestion-list.open { display: block; }
+    .suggestion-item { padding: 9px 16px; font-size: 0.84rem; font-family: 'Inter', sans-serif; color: #2c2c2c; cursor: pointer; transition: background 0.1s; }
+    .suggestion-item:hover,
+    .suggestion-item.highlighted { background: #f4f4f2; }
+    .suggestion-item.is-selected { font-weight: 600; }
+
+    .p2b-tabs { display: flex; background: #f4f4f2; border-radius: 50px; padding: 2px; flex-shrink: 0; }
+    .p2b-tab { font-family: 'Inter', sans-serif; font-size: 0.72rem; font-weight: 600; padding: 4px 11px; border-radius: 50px; border: none; background: transparent; color: #999; cursor: pointer; transition: all 0.15s; line-height: 1.4; white-space: nowrap; }
+    .p2b-tab.active { background: #fff; color: #2c2c2c; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .p2b-divider { width: 1px; height: 18px; background: #e0e0e0; flex-shrink: 0; margin: 0 8px; }
+    .p2b-text { flex: 1; border: none; outline: none; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #2c2c2c; background: transparent; padding: 4px 8px 4px 0; min-width: 0; }
+    .p2b-text::placeholder { color: #bbb; }
+    .p2c-wrap { flex: 1; display: flex; align-items: center; border: 1px solid #d0d0d0; border-radius: 50px; padding: 5px; transition: border-color 0.2s; background: #fff; position: relative; }
+    .p2c-wrap:focus-within { border-color: #2c2c2c; }
+
+    /* ── Option 2: Two-tone bands ── */
+    .card--bands { padding: 0; overflow: hidden; }
+    .search-band  { background: #fafaf8; padding: 28px 28px 22px; }
+    .filters-band { background: #fff; padding: 22px 28px 28px; border-top: 1px solid #e8e8e8; }
+
+    /* ── Option 3: Boxed filters ── */
+    .filters-box {
+      background: #fafaf8;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 18px 20px 20px;
+      margin-top: 20px;
+    }
+
+    /* Shared: section sub-heading (SEARCH / FILTERS label inside card) */
+    .sub-heading {
+      display: block;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: #aaa;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Sources Search — Mockups</h1>
+<p></p><!-- <p class="page-note">Click "+ Add field" to add search rows. Click "Filters" to open the filter panel.</p> -->
+
+<!-- ── OPTION 1 ── -->
+<div class="section-label">Search interface</div>
+
+<div class="card">
+  <div class="builder-rows" id="builderRows1"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn1">+ Add field</button>
+  </div>
+  <hr class="divider">
+  <div class="filters-heading-row">
+    <span class="filters-heading">Filters</span>
+    <button class="clear-all" id="clearFiltersBtn1" style="display:none;">Clear all filters</button>
+  </div>
+  <div class="filter-panel" id="filterPanel1" style="margin-top:16px;"></div>
 </div>
 
-<!-- Search dropdown: two stacked panels -->
-<div id="searchDropdown">
 
-  <!-- Search panel -->
-  <div id="searchPanel">
-    <div class="sd-heading-row">
-      <span class="sd-title">Search</span>
-      <button class="clear-all" id="clearSearchBtn1" style="display:none;">Clear all search fields</button>
-    </div>
-    <div class="builder-rows" id="builderRows1"></div>
+<!-- ── OPTION 2: Two-tone bands (#fafaf8 search / white filters) ── -->
+<div class="section-label">Two-tone bands — #fafaf8 search · white filters</div>
+
+<div class="card card--bands">
+  <div class="search-band">
+    <span class="sub-heading">Search</span>
+    <div class="builder-rows" id="builderRows2"></div>
     <div class="bottom-row" style="margin-top:14px;">
-      <button class="add-btn" id="addFieldBtn1">+ Add field</button>
+      <button class="add-btn" id="addFieldBtn2">+ Add field</button>
     </div>
   </div>
-
-  <!-- Filters panel -->
-  <div id="filtersPanel">
-    <div class="sd-heading-row">
-      <span class="sd-title">Filters</span>
-      <button class="clear-all" id="clearFiltersBtn1" style="display:none;">Clear all filters</button>
+  <div class="filters-band">
+    <div class="filters-heading-row">
+      <span class="filters-heading">Filters</span>
+      <button class="clear-all" id="clearFiltersBtn2" style="display:none;">Clear all filters</button>
     </div>
-    <div class="filter-panel" id="filterPanel1"></div>
+    <div class="filter-panel" id="filterPanel2" style="margin-top:16px;"></div>
   </div>
-
 </div>
 
-<!-- Page heading -->
-<h1>Sources</h1>
-<div style="margin-bottom: 28px;">Tablature sources (prints or manuscripts)</div>
 
-<table id="sourcesTable" class="display" style="width:100%">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Shelfmark</th>
-      <th>Title</th>
-      <th>Short title</th>
-      <th>Dates</th>
-      <th>Author / Editor</th>
-      <th>Publisher</th>
-      <th>Printing place</th>
-      <th>RISM</th>
-      <th>VD16</th>
-    </tr>
-  </thead>
-</table>
+<!-- ── OPTION 3: Boxed filters section ── -->
+<div class="section-label">Boxed filters section</div>
+
+<div class="card">
+  <span class="sub-heading">Search</span>
+  <div class="builder-rows" id="builderRows3"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn3">+ Add field</button>
+  </div>
+  <div class="filters-box">
+    <div class="filters-heading-row" style="margin-bottom:16px;">
+      <span class="filters-heading">Filters</span>
+      <button class="clear-all" id="clearFiltersBtn3" style="display:none;">Clear all filters</button>
+    </div>
+    <div class="filter-panel" id="filterPanel3"></div>
+  </div>
+</div>
+
+
+<!-- ── OPTION 4: Two stacked panels ── -->
+<div class="section-label">Two stacked panels</div>
+
+<div class="card">
+  <div class="filters-heading-row" style="margin-bottom:16px;">
+    <span class="filters-heading">Search</span>
+    <button class="clear-all" id="clearSearchBtn4" style="display:none;">Clear all search fields</button>
+  </div>
+  <div class="builder-rows" id="builderRows4"></div>
+  <div class="bottom-row" style="margin-top:14px;">
+    <button class="add-btn" id="addFieldBtn4">+ Add field</button>
+  </div>
+</div>
+<div class="card" style="margin-top:12px;">
+  <div class="filters-heading-row" style="margin-bottom:16px;">
+    <span class="filters-heading">Filters</span>
+    <button class="clear-all" id="clearFiltersBtn4" style="display:none;">Clear all filters</button>
+  </div>
+  <div class="filter-panel" id="filterPanel4"></div>
+</div>
+
 
 <script>
-window.addEventListener('load', function () {
-
-  /* ── Data ── */
   const FIELDS = [
     'All fields', 'Title', 'Person', 'Place', 'RISM / VD16 / Brown ID',
     'Description / Comment', 'Bibliography'
@@ -368,22 +447,9 @@ window.addEventListener('load', function () {
   const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
   const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
 
-  /* ── Icons ── */
-  const SVG_CHEVRON = '<svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
-  const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
-  const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
-
-  document.getElementById('searchIconBtn').innerHTML =
-    feather.icons['search'].toSvg({ width: 17, height: 17, 'stroke-width': 2 });
-
-  document.querySelectorAll('#searchDropdown .add-btn').forEach(btn => {
-    btn.innerHTML = SVG_PLUS + ' Add field';
-    btn.style.display = 'inline-flex';
-    btn.style.alignItems = 'center';
-    btn.style.gap = '6px';
-  });
-
   /* ── Filter panel template ── */
+  const SVG_CHEVRON = '<svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
   function accordion(prefix, label, n, contentClass, content) {
     return `
     <div class="phys-accordion" id="${prefix}Accordion${n}">
@@ -424,16 +490,18 @@ window.addEventListener('load', function () {
     ].join('');
   }
 
-  /* ── Render chips and radio lists ── */
+  /* ── Render filter panels, chips, radio lists ── */
   function renderChipGrid(el, data) {
     data.forEach(item => {
       if (item.heading !== undefined) {
         const h = document.createElement('div');
-        h.className = 'sm-group-heading'; h.textContent = item.heading;
+        h.className = 'sm-group-heading';
+        h.textContent = item.heading;
         el.appendChild(h);
         item.chips.forEach(chip => {
           const s = document.createElement('span');
-          s.className = 'sm-chip'; s.textContent = chip;
+          s.className = 'sm-chip';
+          s.textContent = chip;
           el.appendChild(s);
         });
       } else {
@@ -455,15 +523,26 @@ window.addEventListener('load', function () {
     });
   }
 
-  [1].forEach(n => {
+  [1, 2, 3, 4].forEach(n => {
     document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
     renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
-    renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
+    renderChipGrid(document.getElementById('fnList'   + n), FUNCTIONS_DATA);
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
 
-  /* ── P2c mode-dropdown widget (Person / Place fields) ── */
+  /* ── Feather icons ── */
+  const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
+  const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
+
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.innerHTML = `${SVG_PLUS} Add field`;
+    btn.style.display = 'inline-flex';
+    btn.style.alignItems = 'center';
+    btn.style.gap = '6px';
+  });
+
+  /* ── P2c core logic ── */
   function initModeDropdownEl(tabs, input, list, wrap, items) {
     let mode = 'free', highlighted = -1, listMemory = '';
 
@@ -734,6 +813,7 @@ window.addEventListener('load', function () {
 
     toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
 
+    /* pill row — inserted into header, always visible */
     let pillRow = null;
     if (showValues) {
       tag.style.display = 'none';
@@ -752,14 +832,16 @@ window.addEventListener('load', function () {
         Array.from(selected).forEach((chip, i) => {
           if (i > 0) {
             const sep = document.createElement('span');
-            sep.className = 'pill-or'; sep.textContent = 'or';
+            sep.className = 'pill-or';
+            sep.textContent = 'or';
             pillRow.appendChild(sep);
           }
           const pill = document.createElement('span');
           pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
           pill.textContent = chip.textContent;
           const x = document.createElement('span');
-          x.className = 'pill-chip-x'; x.textContent = '×';
+          x.className = 'pill-chip-x';
+          x.textContent = '×';
           x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); });
           pill.appendChild(x);
           pillRow.appendChild(pill);
@@ -812,36 +894,14 @@ window.addEventListener('load', function () {
     return () => setVal('Both');
   }
 
-  /* ── Active-state pill (Option D) ── */
-  const pill = document.getElementById('searchPill');
-  const pillState = { fields: 0, filters: 0 };
-
-  function updatePill() {
-    const f = pillState.fields, fi = pillState.filters;
-    if (f === 0 && fi === 0) { pill.classList.remove('visible'); return; }
-    const parts = [];
-    if (f  > 0) parts.push(f  === 1 ? '1 field'  : `${f} fields`);
-    if (fi > 0) parts.push(fi === 1 ? '1 filter' : `${fi} filters`);
-    pill.textContent = parts.join(' · ');
-    pill.classList.add('visible');
-  }
-
-  /* Count builder rows with non-empty input */
-  document.getElementById('builderRows1').addEventListener('input', () => {
-    let count = 0;
-    document.querySelectorAll('#builderRows1 .builder-row').forEach(row => {
-      const inp = row.querySelector('.builder-input, .p2b-text');
-      if (inp && inp.value.trim()) count++;
-    });
-    pillState.fields = count;
-    updatePill();
-  });
-
-  /* ── Initialise search interface ── */
-  let resetSearch; /* exposed for clear-search button below */
+  /* ── Init card ── */
+  const resetSearchFns = {};
 
   const CARD_CONFIGS = [
-    { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } }
+    { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } },
+    { n: 2, options: { showLogic: false, showChipValues: true, filterCount: true } },
+    { n: 3, options: { showLogic: false, showChipValues: true, filterCount: true } },
+    { n: 4, options: { showLogic: false, showChipValues: true, filterCount: true } }
   ];
 
   CARD_CONFIGS.forEach(({ n, options }) => {
@@ -855,13 +915,11 @@ window.addEventListener('load', function () {
       onFilterChange = (key, isActive) => {
         if (isActive) activeFilters.add(key);
         else activeFilters.delete(key);
-        const count = activeFilters.size;
-        clearFiltersBtn.style.display = count > 0 ? '' : 'none';
-        pillState.filters = count; updatePill();
+        clearFiltersBtn.style.display = activeFilters.size > 0 ? '' : 'none';
       };
     }
 
-    const { setVal, resetSearch: rs } = setupSplitAccordion(n,
+    const { setVal, resetSearch } = setupSplitAccordion(n,
       val => {
         physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
         if (onFilterChange) onFilterChange('phys', val !== 'Both');
@@ -872,7 +930,7 @@ window.addEventListener('load', function () {
       },
       options
     );
-    resetSearch = rs;
+    resetSearchFns[n] = resetSearch;
     physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
     const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
     const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
@@ -893,36 +951,10 @@ window.addEventListener('load', function () {
     }
   });
 
-  /* ══════════════════════════════════════
-     Option A — hover to open, auto-close
-     ══════════════════════════════════════ */
-  const iconWrap = document.getElementById('searchIconWrap');
-  const icon     = document.getElementById('searchIconBtn');
-  const dropdown = document.getElementById('searchDropdown');
-  let hoverTimer;
-
-  function openDropdown() {
-    clearTimeout(hoverTimer);
-    dropdown.classList.add('open');
-    icon.classList.add('drawer-open');
-  }
-
-  function scheduleClose() {
-    hoverTimer = setTimeout(() => {
-      dropdown.classList.remove('open');
-      icon.classList.remove('drawer-open');
-    }, 120);
-  }
-
-  iconWrap.addEventListener('mouseenter',   openDropdown);
-  iconWrap.addEventListener('mouseleave',   scheduleClose);
-  dropdown.addEventListener('mouseenter',   () => clearTimeout(hoverTimer));
-  dropdown.addEventListener('mouseleave',   scheduleClose);
-
-  /* ── Clear all search fields (search panel) ── */
+  /* ── Option 4: clear all search fields ── */
   (function () {
-    const clearBtn = document.getElementById('clearSearchBtn1');
-    const rowsEl   = document.getElementById('builderRows1');
+    const clearBtn = document.getElementById('clearSearchBtn4');
+    const rowsEl   = document.getElementById('builderRows4');
 
     function update() {
       const hasInput = Array.from(rowsEl.querySelectorAll('.builder-input, .p2b-text'))
@@ -930,18 +962,21 @@ window.addEventListener('load', function () {
       clearBtn.style.display = hasInput ? '' : 'none';
     }
 
+    /* Show/hide on typing */
     rowsEl.addEventListener('input', update);
+
+    /* Re-check after a row is removed */
     rowsEl.addEventListener('click', e => {
       if (e.target.closest('.remove-btn')) setTimeout(update, 0);
     });
 
+    /* Reset to 2 default rows and hide the button */
     clearBtn.addEventListener('click', () => {
-      resetSearch();           /* reset to 2 default rows */
-      pillState.fields = 0;
-      updatePill();
+      resetSearchFns[4]();
       update();
     });
   })();
-
-});
 </script>
+
+</body>
+</html>
