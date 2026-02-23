@@ -1,0 +1,635 @@
+window.addEventListener('load', function () {
+
+  /* ── Data ── */
+  const FIELDS = [
+    'All fields', 'Title', 'Person', 'Place', 'RISM / VD16 / Brown ID',
+    'Description / Comment', 'Bibliography'
+  ];
+
+  const PERSONS = [
+    'Agricola, Martin', 'Aich, Arnt von', 'Apiarius, Mathias',
+    'Egenolff d.Ä., Christian', 'Formschneider, Hieronymus', 'Forster, Georg',
+    'Franck, Matthäus', 'Fuhrmann, Valentin', 'Furter, Michael',
+    'Gerle, Hans', 'Guldenmundt, Hans', 'Hergot, Kunigunde',
+    'Hochfelder, Kaspar', 'Huber, Wolfgang', 'Judenkünig, Hans',
+    'Meyerpeck, Wolfgang', 'Neuber, Valentin', 'Neusidler, Hans',
+    'Ott, Hans', 'Petreius, Johann', 'Rhau, Georg',
+    'Schlick, Arnold', 'Schöffer, Peter d.J.', 'Singriener, Johannes',
+    'Virdung, Sebastian', 'Öglin, Erhard'
+  ];
+
+  const PLACES = [
+    'Argentorati (city)', 'Augsburg (city)', 'Basel', 'Frankfurt am Main',
+    'Heidelberg (city)', 'Köln (city)', 'Königstein / Taunus', 'Mainz (city)',
+    'München (city)', 'Nürnberg (city)', 'Wien (city)', 'Wien (region)',
+    'Wien (university)', 'Wittenberg (city)', 'Zwickau (city)'
+  ];
+
+  const SHELFMARKS = [
+    { heading: 'A — Austria', chips: ['A-Imf','A-Wgm','A-Wgm 676/137','A-Wkm KK_5410','A-Wn 396116-A','A-Wn Cod. 9704','A-Wn MS47356-8°','A-Wn Mus.Hs. 18688','A-Wn Mus.Hs. 18827','A-Wn Mus.Hs. 41950','A-Wn SA.78.C.29 19','A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1'] },
+    { heading: 'B — Belgium', chips: ['B-Br','B-Br Fétis 2.884 b 9899 48','B-Br Fétis 4.014 A (RP)','B-Br Fétis 6.197 A (RP)'] },
+    { heading: 'CH — Switzerland', chips: ['CH-A AKB Mb 465','CH-BEsu Hospinian 141','CH-BEsu MUE Hospinian 141','CH-Bu F IX 23','CH-Bu F IX 56','CH-Bu F IX 63','CH-Bu F IX 70','CH-Bu F X','CH-Bu F X 1','CH-Bu F X 10','CH-Bu F X 11','CH-Bu F X 17','CH-Bu F X 18','CH-Bu F X 19','CH-Bu F X 2','CH-Bu F X 20','CH-Bu F X 21','CH-Bu F X 22','CH-Bu F X 23','CH-Bu F X 24','CH-Bu F X 25','CH-Bu F X 3','CH-Bu F X 4','CH-Bu F X 5','CH-Bu F X 6','CH-Bu F X 7','CH-Bu F X 8','CH-Bu kk II 27','CH-E','CH-SAM Ms. FP/M 1','CH-SAM Ms. FP/M 2','CH-SGs Cod. Sang. 463','CH-ZO','CH-Zz Mus. 908'] },
+    { heading: 'CZ — Czech Republic', chips: ['CZ-Bm','CZ-Bu','CZ-Pu Hs. 223-20'] },
+    { heading: 'D — Germany', chips: ['D-As Tonk Schl 549','D-B','D-B 1 an: Yd 5008','D-B 2 an: Yd 5008','D-B Ms.germ.qu. 719','D-B Ms.germ.qu.718','D-B Mus. ant. theor. V. 30','D-B Mus.ant.pract. A 180','D-B Mus.ant.pract. G 435','D-B Mus.ant.pract. O 65','D-B Mus.ant.pract. O120','D-B Mus.ant.theor G 60','D-B Mus.ant.theor. A 15','D-B Mus.ms. 40026','D-B Mus.ms. 40588','D-B Yd 5006','D-B Yd 5008 R','D-B Yd5041','D-B Yd9496','D-B Yd9503','D-Cl Rara/BIII 1/9(Beil 1)','D-DS Gü 13788','D-FLs KdM1 a/b','D-Gms','D-Gs 8 MUS IV, 4600','D-HAu Pon IIe 290 (1)','D-HAu Pon IIe 290 (2)','D-HEu cpg 343','D-HTd','D-Ju 4 Mus. 12a(1)','D-Ju 4 Mus. 12a(2)','D-Ju 4 Mus. 12b(1)','D-Ju 4 Mus. 12c(1)','D-Ju 4 Mus. 12d(1)','D-Ju 4 Mus.12b(2)','D-Ju 4 Mus.12c(2)','D-Ju 4 Mus.12d(2)','D-KA Don Mus.Autogr. 1','D-Kl 2° Ms.Math. 31','D-LEm','D-LEm I. 8° 191','D-LEm I.8°191','D-LEm II. 6. 13 / D-Dl II. 6. 13','D-LEm II. 6. 7','D-Mbs 2 Mus.pr. 156.16/20#16','D-Mbs 4 Mus.pr.167','D-Mbs 4 Mus.th. 1616','D-Mbs 4 Mus.th. 729','D-Mbs 4 Mus.th. 729#Beibd.1','D-Mbs 4° Mus pr 439','D-Mbs Einbl. I,6','D-Mbs Mus.ms. 1501','D-Mbs Mus.ms. 1511c','D-Mbs Mus.ms. 1511d','D-Mbs Mus.ms. 1512','D-Mbs Mus.ms. 266','D-Mbs Mus.ms. 267','D-Mbs Mus.ms. 268','D-Mbs Mus.ms. 269','D-Mbs Mus.ms. 270','D-Mbs Mus.ms. 271','D-Mbs Mus.ms. 2987','D-Mbs Mus.pr. 316','D-Mbs Mus.pr. 35','D-Mbs Mus.pr. 39#Beibd.2','D-Mbs Mus.pr. 46#Beibd.1','D-Mbs Mus.th. 49','D-Mbs Rar. 27','D-Mbs Rar. 567','D-Mu 4° Cod.ms. 718','D-Mu 8° Cod. 328-331','D-Ngm','D-Ngm 8° Postinc. M. 261','D-ROu Th A 1','D-Rp Ms.Th. 98 4°','D-Us Smr.misc 131b','D-Us Smr.misc 131b_copy','D-Usch Misc.235c','D-W 2.14 Musica','D-W 3 Musica','D-W 43 Musica Helmst.','D-W Musica 4.1.1','D-W Musica Helmst. (3)','D-WRZ 14,6:60e(n.1.)','D-Wa cod. VII B Hs Nr. 264','D-Z 2.8.10(5)','D-Z 30.5.20(1)','D-Z Mus. 115.3','D-Z Mus. 15.1','D-Z Mus. 15.1 b (Mu 94)','D-Z Mus. 82.1 (Mu 477)','D-Z Mus. 82.2'] },
+    { heading: 'DK — Denmark', chips: ['DK-Kk'] },
+    { heading: 'E — Spain', chips: ['E-Mn R/22789'] },
+    { heading: 'F — France', chips: ['F-Pc','F-Pn RES VM7-663','F-Pn Rés. 658','F-Ssp M 01 (f.k. IIII)','F-Ssp M 1'] },
+    { heading: 'GB — Great Britain', chips: ['GB-Eu','GB-Lbl','GB-Lbl C.125.CC.9.','GB-Lbl Hirsch I 594','GB-Lbl Hirsch IV 1603','GB-Lbl Hirsch IV 1604','GB-Lbl K.1.b.11.','GB-Lbl K.8.c.9','GB-Ob Mus. 156 e.25Music'] },
+    { heading: 'H — Hungary', chips: ['H-Ba K 53/II'] },
+    { heading: 'NL — Netherlands', chips: ['NL-DHgm','NL-HAN'] },
+    { heading: 'PL — Poland', chips: ['PL-Kj Mus.ant.pract. L 1150','PL-Kj Mus.ant.pract. N 175a','PL-Kj Mus.ms. 40154','PL-LEtpn (Lost acc. to Brown)','PL-WRk 352'] },
+    { heading: 'RISM', chips: ['RISM B/8 1534/06'] },
+    { heading: 'S — Sweden', chips: ['S-Uu Lq.XI.3. n. 663'] },
+    { heading: 'UKR — Ukraine', chips: ['UKR-LVu 1400/1'] },
+    { heading: 'US — United States', chips: ['US-Bp','US-CA','US-NHub Osborn Music MS 31','US-R','US-Wc','US-Wc MT640 .J9','US-Wc MT640 .N3'] },
+    { heading: 'olim', chips: ['olim CZ-Pu 59r 469'] },
+  ];
+
+  const FUNCTIONS_DATA = [
+    'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
+    "primer, teacher's book", 'song book / Liederbuch', 'student handbook', 'tablature book',
+    { label: '[empty field]', cls: 'sm-chip--grey' }
+  ];
+
+  const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
+  const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
+
+  /* ── Icons ── */
+  const SVG_CHEVRON = '<svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+  const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
+  const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
+
+  document.getElementById('searchIconBtn').innerHTML =
+    feather.icons['search'].toSvg({ width: 17, height: 17, 'stroke-width': 2 });
+
+  document.querySelectorAll('#searchDropdown .add-btn').forEach(btn => {
+    btn.innerHTML = SVG_PLUS + ' Add field';
+    btn.style.display = 'inline-flex';
+    btn.style.alignItems = 'center';
+    btn.style.gap = '6px';
+  });
+
+  /* ── Filter panel template ── */
+  function accordion(prefix, label, n, contentClass, content) {
+    return `
+    <div class="phys-accordion" id="${prefix}Accordion${n}">
+      <div class="phys-accordion-header header-split">
+        <div class="phys-toggle-zone" id="${prefix}ToggleZone${n}">
+          <span class="dot-label">${label}</span>${SVG_CHEVRON}
+        </div>
+        <span class="filter-value-tag" id="${prefix}Tag${n}" style="visibility:hidden; margin-left:15px;">
+          <span id="${prefix}TagText${n}"></span><span class="phys-tag-x" id="${prefix}TagX${n}">×</span>
+        </span>
+      </div>
+      <div class="phys-accordion-content${contentClass ? ' ' + contentClass : ''}">${content}</div>
+    </div>`;
+  }
+
+  function buildFilterPanel(n) {
+    return [
+      accordion('phys', 'Physical type', n, '', `
+        <div class="phys-radio-list phys-radio-list--row" id="physRadioList${n}"></div>`),
+      accordion('date', 'Date', n, 'date-content', `
+        <div class="range-slider-wrap">
+          <div class="range-track"><div class="range-fill" id="dateFill${n}"></div></div>
+          <input type="range" class="range-input range-min" id="dateMin${n}" min="1450" max="1620" value="1450" step="1">
+          <input type="range" class="range-input range-max" id="dateMax${n}" min="1450" max="1620" value="1620" step="1">
+        </div>
+        <div class="range-labels">
+          <input type="number" class="range-label-input" id="dateMinLabel${n}" value="1450" min="1450" max="1620">
+          <input type="number" class="range-label-input" id="dateMaxLabel${n}" value="1620" min="1450" max="1620">
+        </div>`),
+      accordion('shelf', 'Shelfmarks', n, 'shelfmarks-content', `
+        <input type="text" class="shelfmarks-search" id="shelfSearch${n}" placeholder="Search shelfmarks…">
+        <div class="sm-chip-grid" id="shelfList${n}"></div>`),
+      accordion('fn', 'Functions', n, 'shelfmarks-content', `
+        <input type="text" class="shelfmarks-search" id="fnSearch${n}" placeholder="Search functions…">
+        <div class="sm-chip-grid" id="fnList${n}"></div>`),
+      accordion('funda', 'Fundamenta', n, '', `
+        <div class="phys-radio-list phys-radio-list--row" id="fundaRadioList${n}"></div>`)
+    ].join('');
+  }
+
+  /* ── Render chips and radio lists ── */
+  function renderChipGrid(el, data) {
+    data.forEach(item => {
+      if (item.heading !== undefined) {
+        const h = document.createElement('div');
+        h.className = 'sm-group-heading'; h.textContent = item.heading;
+        el.appendChild(h);
+        item.chips.forEach(chip => {
+          const s = document.createElement('span');
+          s.className = 'sm-chip'; s.textContent = chip;
+          el.appendChild(s);
+        });
+      } else {
+        const s = document.createElement('span');
+        s.className = 'sm-chip' + (typeof item === 'object' && item.cls ? ' ' + item.cls : '');
+        s.textContent = typeof item === 'string' ? item : item.label;
+        el.appendChild(s);
+      }
+    });
+  }
+
+  function renderRadioList(el, values) {
+    values.forEach((val, i) => {
+      const row = document.createElement('div');
+      row.className = 'phys-radio-row' + (i === 0 ? ' active' : '');
+      row.dataset.val = val;
+      row.innerHTML = '<span class="phys-radio-circle"></span><span class="phys-radio-text">' + val + '</span>';
+      el.appendChild(row);
+    });
+  }
+
+  [1].forEach(n => {
+    document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
+    renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
+    renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
+    renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
+    renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
+  });
+
+  /* ── P2c mode-dropdown widget (Person / Place fields) ── */
+  function initModeDropdownEl(tabs, input, list, wrap, items) {
+    let mode = 'free', highlighted = -1, listMemory = '';
+
+    function showSelected(name) { input.value = name; input.style.display = ''; input.style.fontWeight = '600'; }
+    function hideInput() { input.value = ''; input.style.display = 'none'; }
+    function renderList() {
+      list.innerHTML = ''; highlighted = -1;
+      items.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-item' + (name === listMemory ? ' is-selected' : '');
+        item.textContent = name;
+        item.addEventListener('mousedown', e => { e.preventDefault(); listMemory = name; showSelected(name); list.classList.remove('open'); });
+        list.appendChild(item);
+      });
+      list.classList.add('open');
+    }
+    tabs.querySelectorAll('button').forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.querySelectorAll('button').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        mode = tab.dataset.mode;
+        if (mode === 'list') {
+          input.readOnly = true; input.style.caretColor = 'transparent'; input.placeholder = '';
+          if (listMemory) { showSelected(listMemory); } else { hideInput(); }
+          renderList();
+        } else {
+          list.classList.remove('open'); input.value = ''; input.style.fontWeight = '';
+          input.style.display = ''; input.readOnly = false; input.style.caretColor = '';
+          input.placeholder = 'Search...';
+        }
+      });
+    });
+    wrap.addEventListener('click', () => { if (mode === 'list') renderList(); });
+    input.addEventListener('keydown', e => {
+      if (mode !== 'list') return;
+      const its = list.querySelectorAll('.suggestion-item');
+      if (e.key === 'Backspace' || e.key === 'Delete') { listMemory = ''; hideInput(); renderList(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); highlighted = Math.min(highlighted + 1, its.length - 1); its.forEach((el, i) => el.classList.toggle('highlighted', i === highlighted)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); highlighted = Math.max(highlighted - 1, 0); its.forEach((el, i) => el.classList.toggle('highlighted', i === highlighted)); }
+      else if (e.key === 'Enter' && highlighted >= 0) { listMemory = its[highlighted].textContent; showSelected(listMemory); list.classList.remove('open'); }
+      else if (e.key === 'Escape') { list.classList.remove('open'); }
+    });
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) list.classList.remove('open'); });
+  }
+
+  function createModeDropdownWidget(rowId, items) {
+    const wrap  = document.createElement('div');  wrap.className = 'p2c-wrap'; wrap.style.flex = '1';
+    const tabs  = document.createElement('div');  tabs.className = 'p2b-tabs';
+    ['Text in source', 'From list'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'p2b-tab' + (i === 0 ? ' active' : '');
+      btn.dataset.mode = i === 0 ? 'free' : 'list'; btn.textContent = label;
+      tabs.appendChild(btn);
+    });
+    const divider = document.createElement('div'); divider.className = 'p2b-divider';
+    const input   = document.createElement('input'); input.className = 'p2b-text'; input.placeholder = 'Search...';
+    const list    = document.createElement('div'); list.className = 'suggestion-list';
+    wrap.appendChild(tabs); wrap.appendChild(divider); wrap.appendChild(input); wrap.appendChild(list);
+    initModeDropdownEl(tabs, input, list, wrap, items);
+    return wrap;
+  }
+
+  /* ── Search builder ── */
+  function createSearchWidget({ builderRowsId, addFieldBtnId, logicSectionId,
+      logicToggleId, labelAndId, labelOrId, smartInputs = {}, showLogic = true, useCustomSelect = false }) {
+
+    const builderRowsEl  = document.getElementById(builderRowsId);
+    const addFieldBtnEl  = document.getElementById(addFieldBtnId);
+    const logicSectionEl = logicSectionId ? document.getElementById(logicSectionId) : null;
+    const logicToggleEl  = logicToggleId  ? document.getElementById(logicToggleId)  : null;
+    const labelAndEl     = labelAndId     ? document.getElementById(labelAndId)     : null;
+    const labelOrEl      = labelOrId      ? document.getElementById(labelOrId)      : null;
+
+    let rows = [], nextId = 0;
+
+    function getDefaultField() {
+      const used = new Set(rows.map(r => r.field));
+      return FIELDS.find(f => !used.has(f)) || FIELDS[0];
+    }
+
+    function updateUI() {
+      const count = rows.length;
+      addFieldBtnEl.disabled = count >= 10;
+      builderRowsEl.querySelectorAll('.remove-btn').forEach(btn => { btn.disabled = count <= 1; });
+      if (logicSectionEl && showLogic) logicSectionEl.style.display = count >= 2 ? 'flex' : 'none';
+    }
+
+    function addRow(field = '', animate = true) {
+      const id = nextId++;
+      const chosenField = field || getDefaultField();
+      rows.push({ id, field: chosenField });
+
+      const div = document.createElement('div');
+      div.className = 'builder-row' + (animate ? ' new' : '');
+      div.dataset.id = id;
+
+      function makeInput(fieldName) {
+        if (smartInputs[fieldName]) return smartInputs[fieldName](id);
+        const inp = document.createElement('input');
+        inp.className = 'builder-input'; inp.type = 'text'; inp.placeholder = 'Search…';
+        return inp;
+      }
+
+      let currentInput = makeInput(chosenField);
+
+      let fieldEl;
+      if (useCustomSelect) {
+        const cWrap = document.createElement('div'); cWrap.className = 'custom-field-select';
+        const cBtn  = document.createElement('button'); cBtn.type = 'button'; cBtn.className = 'custom-field-btn'; cBtn.textContent = chosenField;
+        const cDrop = document.createElement('div'); cDrop.className = 'custom-field-dropdown';
+        FIELDS.forEach(f => {
+          const cOpt = document.createElement('div');
+          cOpt.className = 'custom-field-option' + (f === chosenField ? ' is-selected' : '');
+          cOpt.textContent = f;
+          cOpt.addEventListener('mousedown', e => {
+            e.preventDefault();
+            rows.find(r => r.id === id).field = f;
+            cBtn.textContent = f;
+            cDrop.querySelectorAll('.custom-field-option').forEach(o => o.classList.toggle('is-selected', o === cOpt));
+            cDrop.classList.remove('open');
+            const newInput = makeInput(f);
+            div.replaceChild(newInput, currentInput); currentInput = newInput;
+            updateUI();
+          });
+          cDrop.appendChild(cOpt);
+        });
+        cBtn.addEventListener('click', e => { e.stopPropagation(); cDrop.classList.toggle('open'); });
+        document.addEventListener('click', () => cDrop.classList.remove('open'));
+        cWrap.appendChild(cBtn); cWrap.appendChild(cDrop);
+        fieldEl = cWrap;
+      } else {
+        const select = document.createElement('select'); select.className = 'field-select';
+        FIELDS.forEach(f => {
+          const opt = document.createElement('option'); opt.value = f; opt.textContent = f;
+          if (f === chosenField) opt.selected = true;
+          select.appendChild(opt);
+        });
+        select.addEventListener('change', () => {
+          const newField = select.value;
+          rows.find(r => r.id === id).field = newField;
+          const newInput = makeInput(newField);
+          div.replaceChild(newInput, currentInput); currentInput = newInput;
+          updateUI();
+        });
+        fieldEl = select;
+      }
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn'; removeBtn.innerHTML = SVG_X;
+      removeBtn.addEventListener('click', () => { rows = rows.filter(r => r.id !== id); div.remove(); updateUI(); });
+
+      div.appendChild(fieldEl); div.appendChild(currentInput); div.appendChild(removeBtn);
+      builderRowsEl.appendChild(div);
+      updateUI();
+    }
+
+    if (logicToggleEl) {
+      logicToggleEl.addEventListener('change', () => {
+        if (labelAndEl) labelAndEl.classList.toggle('active', !logicToggleEl.checked);
+        if (labelOrEl)  labelOrEl.classList.toggle('active',  logicToggleEl.checked);
+      });
+    }
+
+    addFieldBtnEl.addEventListener('click', () => addRow());
+    addRow('All fields', false);
+    addRow('Title', false);
+
+    function reset() {
+      builderRowsEl.innerHTML = '';
+      rows = [];
+      nextId = 0;
+      addRow('All fields', false);
+      addRow('Title', false);
+    }
+    return reset;
+  }
+
+  /* ── Filter panel + physical type wiring ── */
+  function setupSplitAccordion(n, updateSelectionUI, smartInputs = {}, options = {}) {
+    const withLogic = options.showLogic !== false;
+    const resetSearch = createSearchWidget({
+      builderRowsId: `builderRows${n}`, addFieldBtnId: `addFieldBtn${n}`,
+      logicSectionId: withLogic ? `logicSection${n}` : null,
+      logicToggleId:  withLogic ? `logicToggle${n}`  : null,
+      labelAndId:     withLogic ? `labelAnd${n}`     : null,
+      labelOrId:      withLogic ? `labelOr${n}`      : null,
+      smartInputs, showLogic: withLogic, useCustomSelect: !!options.useCustomSelect
+    });
+
+    const physAccordion = document.getElementById(`physAccordion${n}`);
+    const physToggle    = document.getElementById(`physToggleZone${n}`);
+    const physTag       = document.getElementById(`physTag${n}`);
+    const physTagText   = document.getElementById(`physTagText${n}`);
+    const physTagX      = document.getElementById(`physTagX${n}`);
+
+    physToggle.addEventListener('click', () => physAccordion.classList.toggle('expanded'));
+
+    function setVal(val) {
+      if (val !== 'Both') physTagText.textContent = val;
+      physTag.style.visibility = val === 'Both' ? 'hidden' : 'visible';
+      updateSelectionUI(val);
+    }
+
+    physTagX.addEventListener('click', () => setVal('Both'));
+    return { setVal, resetSearch };
+  }
+
+  /* ── Date range accordion ── */
+  function initDateAccordion({ n, minYear = 1450, maxYear = 1620, onFilterChange = null }) {
+    const accordion  = document.getElementById(`dateAccordion${n}`);
+    const toggleZone = document.getElementById(`dateToggleZone${n}`);
+    const tag        = document.getElementById(`dateTag${n}`);
+    const tagText    = document.getElementById(`dateTagText${n}`);
+    const tagX       = document.getElementById(`dateTagX${n}`);
+    const minInput   = document.getElementById(`dateMin${n}`);
+    const maxInput   = document.getElementById(`dateMax${n}`);
+    const fill       = document.getElementById(`dateFill${n}`);
+    const minLabel   = document.getElementById(`dateMinLabel${n}`);
+    const maxLabel   = document.getElementById(`dateMaxLabel${n}`);
+
+    toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
+
+    function update() {
+      const lo = parseInt(minInput.value), hi = parseInt(maxInput.value), span = maxYear - minYear;
+      fill.style.left  = ((lo - minYear) / span * 100) + '%';
+      fill.style.width = ((hi - lo)      / span * 100) + '%';
+      if (document.activeElement !== minLabel) minLabel.value = lo;
+      if (document.activeElement !== maxLabel) maxLabel.value = hi;
+      minInput.style.zIndex = lo >= hi ? 5 : 3;
+      const isDefault = lo === minYear && hi === maxYear;
+      tag.style.visibility = isDefault ? 'hidden' : 'visible';
+      if (!isDefault) tagText.textContent = `${lo}–${hi}`;
+      if (onFilterChange) onFilterChange(!isDefault);
+    }
+
+    minInput.addEventListener('input', () => { if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; update(); });
+    maxInput.addEventListener('input', () => { if (parseInt(maxInput.value) < parseInt(minInput.value)) maxInput.value = minInput.value; update(); });
+    minLabel.addEventListener('focus', () => minLabel.select());
+    maxLabel.addEventListener('focus', () => maxLabel.select());
+
+    function applyLabel(labelEl, isMin) {
+      let val = parseInt(labelEl.value);
+      if (isNaN(val)) val = isMin ? minYear : maxYear;
+      val = Math.max(minYear, Math.min(maxYear, val));
+      if (isMin) { val = Math.min(val, parseInt(maxInput.value)); minInput.value = val; }
+      else       { val = Math.max(val, parseInt(minInput.value)); maxInput.value = val; }
+      update();
+    }
+
+    minLabel.addEventListener('change', () => applyLabel(minLabel, true));
+    minLabel.addEventListener('blur',   () => applyLabel(minLabel, true));
+    maxLabel.addEventListener('change', () => applyLabel(maxLabel, false));
+    maxLabel.addEventListener('blur',   () => applyLabel(maxLabel, false));
+    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); });
+    update();
+    return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
+  }
+
+  /* ── Chip shelfmarks / functions accordion ── */
+  function initChipShelfmarksAccordion({ n, prefix = 'shelf', showValues = false, onFilterChange = null }) {
+    const accordion   = document.getElementById(`${prefix}Accordion${n}`);
+    const toggleZone  = document.getElementById(`${prefix}ToggleZone${n}`);
+    const tag         = document.getElementById(`${prefix}Tag${n}`);
+    const tagText     = document.getElementById(`${prefix}TagText${n}`);
+    const tagX        = document.getElementById(`${prefix}TagX${n}`);
+    const searchInput = document.getElementById(`${prefix}Search${n}`);
+    const list        = document.getElementById(`${prefix}List${n}`);
+
+    toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
+
+    let pillRow = null;
+    if (showValues) {
+      tag.style.display = 'none';
+      pillRow = document.createElement('div');
+      pillRow.className = 'pill-tags-row';
+      accordion.querySelector('.phys-accordion-header').appendChild(pillRow);
+    }
+
+    function updateTag() {
+      const selected = list.querySelectorAll('.sm-chip.selected');
+      const count = selected.length;
+      if (onFilterChange) onFilterChange(count > 0);
+
+      if (showValues) {
+        pillRow.innerHTML = '';
+        Array.from(selected).forEach((chip, i) => {
+          if (i > 0) {
+            const sep = document.createElement('span');
+            sep.className = 'pill-or'; sep.textContent = 'or';
+            pillRow.appendChild(sep);
+          }
+          const pill = document.createElement('span');
+          pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
+          pill.textContent = chip.textContent;
+          const x = document.createElement('span');
+          x.className = 'pill-chip-x'; x.textContent = '×';
+          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); });
+          pill.appendChild(x);
+          pillRow.appendChild(pill);
+        });
+      } else {
+        tag.style.visibility = count === 0 ? 'hidden' : 'visible';
+        if (count > 0) tagText.textContent = count === 1 ? '1 selected' : `${count} selected`;
+      }
+    }
+
+    list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); });
+    if (!showValues) tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); });
+    const resetChips = () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); };
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.toLowerCase();
+      list.querySelectorAll('.sm-chip').forEach(chip => { chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none'; });
+      list.querySelectorAll('.sm-group-heading').forEach(heading => {
+        let sibling = heading.nextElementSibling, anyVisible = false;
+        while (sibling && !sibling.classList.contains('sm-group-heading')) {
+          if (sibling.style.display !== 'none') anyVisible = true;
+          sibling = sibling.nextElementSibling;
+        }
+        heading.style.display = anyVisible ? '' : 'none';
+      });
+    });
+    updateTag();
+    return resetChips;
+  }
+
+  /* ── Fundamenta accordion ── */
+  function initFundamentaAccordion({ n, onFilterChange = null }) {
+    const accordion  = document.getElementById(`fundaAccordion${n}`);
+    const toggleZone = document.getElementById(`fundaToggleZone${n}`);
+    const tag        = document.getElementById(`fundaTag${n}`);
+    const tagText    = document.getElementById(`fundaTagText${n}`);
+    const tagX       = document.getElementById(`fundaTagX${n}`);
+    const rows       = document.querySelectorAll(`#fundaRadioList${n} .phys-radio-row`);
+
+    toggleZone.addEventListener('click', () => accordion.classList.toggle('expanded'));
+
+    function setVal(val) {
+      tag.style.visibility = val === 'Both' ? 'hidden' : 'visible';
+      if (val !== 'Both') tagText.textContent = val;
+      rows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
+      if (onFilterChange) onFilterChange(val !== 'Both');
+    }
+
+    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+    tagX.addEventListener('click', () => setVal('Both'));
+    return () => setVal('Both');
+  }
+
+  /* ── Active-state pill (Option D) ── */
+  const pill = document.getElementById('searchPill');
+  const pillState = { fields: 0, filters: 0 };
+
+  function updatePill() {
+    const f = pillState.fields, fi = pillState.filters;
+    if (f === 0 && fi === 0) { pill.classList.remove('visible'); return; }
+    const parts = [];
+    if (f  > 0) parts.push(f  === 1 ? '1 search field'  : `${f} search fields`);
+    if (fi > 0) parts.push(fi === 1 ? '1 filter' : `${fi} filters`);
+    pill.textContent = parts.join(' · ');
+    pill.classList.add('visible');
+  }
+
+  /* Count builder rows with non-empty input */
+  document.getElementById('builderRows1').addEventListener('input', () => {
+    let count = 0;
+    document.querySelectorAll('#builderRows1 .builder-row').forEach(row => {
+      const inp = row.querySelector('.builder-input, .p2b-text');
+      if (inp && inp.value.trim()) count++;
+    });
+    pillState.fields = count;
+    updatePill();
+  });
+
+  /* ── Initialise search interface ── */
+  let resetSearch; /* exposed for clear-search button below */
+
+  const CARD_CONFIGS = [
+    { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } }
+  ];
+
+  CARD_CONFIGS.forEach(({ n, options }) => {
+    const physRows = document.querySelectorAll(`#physRadioList${n} .phys-radio-row`);
+
+    let onFilterChange = null;
+    let clearFiltersBtn = null;
+    if (options.filterCount) {
+      clearFiltersBtn = document.getElementById(`clearFiltersBtn${n}`);
+      const activeFilters = new Set();
+      onFilterChange = (key, isActive) => {
+        if (isActive) activeFilters.add(key);
+        else activeFilters.delete(key);
+        const count = activeFilters.size;
+        clearFiltersBtn.style.display = count > 0 ? '' : 'none';
+        pillState.filters = count; updatePill();
+      };
+    }
+
+    const { setVal, resetSearch: rs } = setupSplitAccordion(n,
+      val => {
+        physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
+        if (onFilterChange) onFilterChange('phys', val !== 'Both');
+      },
+      {
+        'Person': (rowId) => createModeDropdownWidget(rowId, PERSONS),
+        'Place':  (rowId) => createModeDropdownWidget(rowId, PLACES)
+      },
+      options
+    );
+    resetSearch = rs;
+    physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
+    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
+    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
+    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
+
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener('click', () => {
+        setVal('Both');
+        resetDate();
+        resetShelf();
+        resetFn();
+        resetFunda();
+        document.getElementById(`filterPanel${n}`)
+          .querySelectorAll('.phys-accordion.expanded')
+          .forEach(a => a.classList.remove('expanded'));
+      });
+    }
+  });
+
+  /* ══════════════════════════════════════
+     Option A — hover to open, auto-close
+     ══════════════════════════════════════ */
+  const iconWrap = document.getElementById('searchIconWrap');
+  const icon     = document.getElementById('searchIconBtn');
+  const dropdown = document.getElementById('searchDropdown');
+  const overlay  = document.getElementById('searchOverlay');
+  let hoverTimer;
+
+  function openDropdown() {
+    clearTimeout(hoverTimer);
+    dropdown.classList.add('open');
+    icon.classList.add('drawer-open');
+    overlay.classList.add('show');
+  }
+
+  function scheduleClose() {
+    hoverTimer = setTimeout(() => {
+      dropdown.classList.remove('open');
+      icon.classList.remove('drawer-open');
+      overlay.classList.remove('show');
+    }, 120);
+  }
+
+  iconWrap.addEventListener('mouseenter',   openDropdown);
+  iconWrap.addEventListener('mouseleave',   scheduleClose);
+  dropdown.addEventListener('mouseenter',   () => clearTimeout(hoverTimer));
+  dropdown.addEventListener('mouseleave',   scheduleClose);
+
+  /* ── Clear all search fields (search panel) ── */
+  (function () {
+    const clearBtn = document.getElementById('clearSearchBtn1');
+    const rowsEl   = document.getElementById('builderRows1');
+
+    function update() {
+      const hasInput = Array.from(rowsEl.querySelectorAll('.builder-input, .p2b-text'))
+        .some(inp => inp.value.trim());
+      clearBtn.style.display = hasInput ? '' : 'none';
+    }
+
+    rowsEl.addEventListener('input', update);
+    rowsEl.addEventListener('click', e => {
+      if (e.target.closest('.remove-btn')) setTimeout(update, 0);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      resetSearch();           /* reset to 2 default rows */
+      pillState.fields = 0;
+      updatePill();
+      update();
+    });
+  })();
+
+});

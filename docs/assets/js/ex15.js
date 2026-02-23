@@ -947,6 +947,7 @@ $(document).ready(function() {
 
         },
         initComplete: function() {
+          $('#sourcesTable').css('opacity', '1');
           feather.replace();
           // Update all filter lists
           const updateFunctions = [updateShortTitlesList, updatePersonsList, updatePlacesList, updateFunctionsList, updateShelfmarksList];
