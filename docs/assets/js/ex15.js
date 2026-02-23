@@ -2,111 +2,6 @@ $(document).ready(function() {
   // Track manually hidden content
   const manuallyHiddenContent = new Set();
   let isManualToggle = false; // Flag to prevent search handler interference
-  // lastSearchValue will be initialized from URL params after they're read
-
-  // Function to update URL parameters
-  function updateUrlParams(search, filters) {
-    const params = new URLSearchParams();
-
-    if (search && search.trim()) {
-      params.set('search', search.trim());
-    }
-
-    if (filters.minDate !== 1450 || filters.maxDate !== 1620) {
-      params.set('minDate', filters.minDate);
-      params.set('maxDate', filters.maxDate);
-    }
-
-    if (filters.physicalType && filters.physicalType !== 'both') {
-      params.set('physicalType', filters.physicalType);
-    }
-
-    if (filters.fundamenta && filters.fundamenta !== 'both') {
-      params.set('fundamenta', filters.fundamenta);
-    }
-
-    // Add logic modes (only if OR - AND is the default)
-    if (filters.personsLogic === true) {
-      params.set('personsLogic', 'or');
-    }
-    if (filters.placesLogic === true) {
-      params.set('placesLogic', 'or');
-    }
-    if (filters.functionsLogic === true) {
-      params.set('functionsLogic', 'or');
-    }
-    // shelfmarksLogic is always OR, no need to store in URL
-
-    // Add multi-select filters
-    const URL_PARAM_MAPPINGS = [
-      { filter: 'shortTitles', param: 'shortTitle' },
-      { filter: 'persons', param: 'person' },
-      { filter: 'places', param: 'place' },
-      { filter: 'functions', param: 'function' },
-      { filter: 'shelfmarks', param: 'shelfmark' }
-    ];
-
-    URL_PARAM_MAPPINGS.forEach(({ filter, param }) => {
-      if (filters[filter] && filters[filter].length > 0) {
-        filters[filter].forEach(value => params.append(param, value));
-      }
-    });
-
-    const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
-    window.history.replaceState({}, '', newUrl);
-  }
-
-  // Helper to get current filters state
-  const FILTER_SETS = {
-    shortTitles: () => selectedShortTitles,
-    persons: () => selectedPersons,
-    places: () => selectedPlaces,
-    functions: () => selectedFunctions,
-    shelfmarks: () => selectedShelfmarks
-  };
-
-  function getCurrentFilters() {
-    const filters = {
-      minDate: minDate,
-      maxDate: maxDate,
-      physicalType: physicalTypeFilter,
-      fundamenta: fundamentaFilter,
-      personsLogic: personsLogic,
-      placesLogic: placesLogic,
-      functionsLogic: functionsLogic
-    };
-
-    Object.entries(FILTER_SETS).forEach(([key, getSet]) => {
-      filters[key] = Array.from(getSet());
-    });
-
-    return filters;
-  }
-
-  // Helper to parse logic parameter from URL (default is AND=false)
-  function parseLogicParam(params, paramName) {
-    return params.get(paramName) === 'or';
-  }
-
-  // Function to read URL parameters
-  function readUrlParams() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      search: params.get('search') || '',
-      minDate: params.get('minDate') ? parseInt(params.get('minDate'), 10) : 1450,
-      maxDate: params.get('maxDate') ? parseInt(params.get('maxDate'), 10) : 1620,
-      physicalType: params.get('physicalType') || 'both',
-      fundamenta: params.get('fundamenta') || 'both',
-      personsLogic: parseLogicParam(params, 'personsLogic'),
-      placesLogic: parseLogicParam(params, 'placesLogic'),
-      functionsLogic: parseLogicParam(params, 'functionsLogic'),
-      shortTitles: params.getAll('shortTitle'),
-      persons: params.getAll('person'),
-      places: params.getAll('place'),
-      functions: params.getAll('function'),
-      shelfmarks: params.getAll('shelfmark')
-    };
-  }
 
   // Function to get column widths from main table
   function getColumnWidths() {
@@ -654,34 +549,20 @@ $(document).ready(function() {
   let isDescCommentsOpen = false; // Track if descriptions/comments are open
 
   // Fetch data from Q1.json
-  // Read URL parameters
-  const urlParams = readUrlParams();
+  let lastSearchValue = '';
 
-  // Initialize current search term from URL
-  currentSearchTerm = urlParams.search;
-  
-  // Initialize lastSearchValue to match URL search (to properly detect changes when clearing)
-  let lastSearchValue = urlParams.search;
-
-  // Initialize filter variables from URL parameters (BEFORE DataTable initialization)
+  // Initialize filter variables
   const minYear = 1450;
   const maxYear = 1620;
-  let minDate = urlParams.minDate;
-  let maxDate = urlParams.maxDate;
-  let physicalTypeFilter = urlParams.physicalType;
-  let fundamentaFilter = urlParams.fundamenta;
-  let selectedShortTitles = new Set(urlParams.shortTitles);
-  let selectedPersons = new Set(urlParams.persons);
-  let selectedPlaces = new Set(urlParams.places);
-  let selectedFunctions = new Set(urlParams.functions);
-  let selectedShelfmarks = new Set(urlParams.shelfmarks);
-
-  // Logic mode for each filter (false = AND, true = OR) - initialized from URL params
-  const shortTitlesLogic = true; // No UI toggle, always OR
-  let personsLogic = urlParams.personsLogic;
-  let placesLogic = urlParams.placesLogic;
-  let functionsLogic = urlParams.functionsLogic;
-  const shelfmarksLogic = true; // No UI toggle, always OR
+  let minDate = minYear;
+  let maxDate = maxYear;
+  let physicalTypeFilter = 'both';
+  let fundamentaFilter = 'both';
+  let selectedShortTitles = new Set();
+  let selectedPersons = new Set();
+  let selectedPlaces = new Set();
+  let selectedFunctions = new Set();
+  let selectedShelfmarks = new Set();
 
   // Constants
   const NO_RECORDS_MESSAGE = '<div style="color: #666;">No matching records available</div>';
@@ -748,17 +629,10 @@ $(document).ready(function() {
     return getValuesFromRecord(row, FILTER_CONFIGS.shelfmarks);
   }
 
-  // Helper function to check multi-select filter
-  function checkMultiSelectFilter(recordValues, selectedSet, useOrLogic) {
+  // Helper function to check multi-select filter (OR logic: at least one match)
+  function checkMultiSelectFilter(recordValues, selectedSet) {
     if (selectedSet.size === 0) return true;
-
-    if (useOrLogic) {
-      // OR logic: record must contain AT LEAST ONE of the selected values
-      return recordValues.some(value => selectedSet.has(value));
-    } else {
-      // AND logic: record must contain ALL selected values
-      return Array.from(selectedSet).every(value => recordValues.includes(value));
-    }
+    return recordValues.some(value => selectedSet.has(value));
   }
 
   // Shared filter function (excludeShortTitles/excludePersons/excludePlaces/excludeFunctions/excludeShelfmarks: whether to skip those filters)
@@ -793,23 +667,23 @@ $(document).ready(function() {
     }
 
     // Check multi-select filters using helper function
-    if (!excludeShortTitles && !checkMultiSelectFilter(getShortTitlesFromRecord(row), selectedShortTitles, shortTitlesLogic)) {
+    if (!excludeShortTitles && !checkMultiSelectFilter(getShortTitlesFromRecord(row), selectedShortTitles)) {
       return false;
     }
 
-    if (!excludePersons && !checkMultiSelectFilter(getPersonsFromRecord(row), selectedPersons, personsLogic)) {
+    if (!excludePersons && !checkMultiSelectFilter(getPersonsFromRecord(row), selectedPersons)) {
       return false;
     }
 
-    if (!excludePlaces && !checkMultiSelectFilter(getPlacesFromRecord(row), selectedPlaces, placesLogic)) {
+    if (!excludePlaces && !checkMultiSelectFilter(getPlacesFromRecord(row), selectedPlaces)) {
       return false;
     }
 
-    if (!excludeFunctions && !checkMultiSelectFilter(getFunctionsFromRecord(row), selectedFunctions, functionsLogic)) {
+    if (!excludeFunctions && !checkMultiSelectFilter(getFunctionsFromRecord(row), selectedFunctions)) {
       return false;
     }
 
-    if (!excludeShelfmarks && !checkMultiSelectFilter(getShelfmarksFromRecord(row), selectedShelfmarks, shelfmarksLogic)) {
+    if (!excludeShelfmarks && !checkMultiSelectFilter(getShelfmarksFromRecord(row), selectedShelfmarks)) {
       return false;
     }
 
@@ -1522,35 +1396,15 @@ $(document).ready(function() {
         const searchTerm = $(config.searchInputId).val().toLowerCase().trim();
         const valuesMap = new Map();
         const selectedSet = config.selectedSet;
-        const otherSelected = Array.from(selectedSet);
 
         // Calculate counts
         table.rows().data().each(function(row) {
           if (!applyFilters(row, ...config.excludeParams)) return;
-
-          const valuesInRecord = config.getValuesFunc(row);
-
-          if (config.hasLogic) {
-            const useOrLogic = config.logicVar();
-            if (useOrLogic) {
-              // OR logic: count ALL values from records that pass other filters
-              incrementValueCounts(valuesInRecord, valuesMap);
-            } else {
-              // AND logic: count values from records that contain ALL selected values
-              const hasAllOtherSelected = otherSelected.every(v => valuesInRecord.includes(v));
-              if (hasAllOtherSelected || selectedSet.size === 0) {
-                incrementValueCounts(valuesInRecord, valuesMap);
-              }
-            }
-          } else {
-            // No logic mode (e.g., shortTitles) - simple counting
-            incrementValueCounts(valuesInRecord, valuesMap);
-          }
+          incrementValueCounts(config.getValuesFunc(row), valuesMap);
         });
 
         // Sort results
         const sortedValues = Array.from(valuesMap.entries())
-          .filter(([name, count]) => !config.hasLogic || config.logicVar() || count > 0)
           .sort((a, b) => {
             if (a[0] === '—') return -1;
             if (b[0] === '—') return 1;
@@ -1604,7 +1458,6 @@ $(document).ready(function() {
           selectedSet: selectedShortTitles,
           getValuesFunc: getShortTitlesFromRecord,
           excludeParams: [true, false, false, false, false],
-          hasLogic: false,
           showCount: false,
           idPrefix: 'shorttitle-',
           dataAttr: 'shorttitle',
@@ -1616,8 +1469,6 @@ $(document).ready(function() {
           selectedSet: selectedPersons,
           getValuesFunc: getPersonsFromRecord,
           excludeParams: [false, true, false, false, false],
-          hasLogic: true,
-          logicVar: () => personsLogic,
           showCount: true,
           idPrefix: 'person-',
           dataAttr: 'person'
@@ -1628,8 +1479,6 @@ $(document).ready(function() {
           selectedSet: selectedPlaces,
           getValuesFunc: getPlacesFromRecord,
           excludeParams: [false, false, true, false, false],
-          hasLogic: true,
-          logicVar: () => placesLogic,
           showCount: true,
           idPrefix: 'place-',
           dataAttr: 'place'
@@ -1640,8 +1489,6 @@ $(document).ready(function() {
           selectedSet: selectedFunctions,
           getValuesFunc: getFunctionsFromRecord,
           excludeParams: [false, false, false, true, false],
-          hasLogic: true,
-          logicVar: () => functionsLogic,
           showCount: true,
           idPrefix: 'function-',
           dataAttr: 'function'
@@ -1948,24 +1795,9 @@ $(document).ready(function() {
       // Initialize slider display
       updateSliderDisplay();
 
-      // Initialize global search box from URL
-      $('#globalSearch').val(urlParams.search);
-
-      // Initialize Physical Type and Fundamenta buttons from URL
-      setActiveSegmentButton('physicalTypeContainer', physicalTypeFilter);
-      setActiveSegmentButton('fundamentaContainer', fundamentaFilter);
-
-      // Now that filter variables are defined, update the global search handler to include URL params
-      $('#globalSearch').off('input keyup change', globalSearchHandler);
-      const originalHandler = globalSearchHandler;
-      globalSearchHandler = function() {
-        // Call the original handler
-        originalHandler.call(this);
-        // Add URL params update
-        updateUrlParams(currentSearchTerm, getCurrentFilters());
-      };
-
-      $('#globalSearch').on('input keyup change', globalSearchHandler);
+      // Initialize Physical Type and Fundamenta buttons
+      setActiveSegmentButton('physicalTypeContainer', 'both');
+      setActiveSegmentButton('fundamentaContainer', 'both');
 
       // Configuration for checkbox lists
       const CHECKBOX_CONFIGS = [
@@ -2000,26 +1832,6 @@ $(document).ready(function() {
           $(`#${config.listId} input[type="checkbox"]`).prop('checked', false);
         });
       }
-
-      // Apply filters from URL parameters on page load
-      let urlFiltersApplied = false;
-      table.one('draw', function() {
-        setTimeout(function() {
-          if (urlFiltersApplied) return;
-          urlFiltersApplied = true;
-
-          // Check the appropriate checkboxes based on URL params
-          CHECKBOX_CONFIGS.forEach(config => {
-            checkFilterBoxes(config.set(), config.listId, config.dataAttr);
-          });
-
-          updateFilterUI();
-
-          if (currentSearchTerm) {
-            globalSearchHandler.call($('#globalSearch')[0]);
-          }
-        }, 100);
-      });
 
       // Date input handlers (consolidated)
       function createDateInputHandler(type) {
@@ -2065,7 +1877,6 @@ $(document).ready(function() {
       function updateFilterUI() {
         updateFilterButtonLabel();
         updateAccordionIndicators();
-        updateUrlParams(currentSearchTerm, getCurrentFilters());
       }
 
       // Helper to apply filter changes
@@ -2148,12 +1959,6 @@ $(document).ready(function() {
         isExpandAllActive = false; // Reset expand all state
         isDescCommentsOpen = false; // Reset descriptions/comments state
 
-        // Reset logic toggles to AND (default)
-        personsLogic = false;
-        placesLogic = false;
-        functionsLogic = false;
-        $('#personsLogic, #placesLogic, #functionsLogic').prop('checked', false);
-
         // Collapse all filter accordions
         $('.filter-accordion').removeClass('expanded');
         $('.filter-accordion-content').css('max-height', '0');
@@ -2187,40 +1992,6 @@ $(document).ready(function() {
 
       $('#clearFilters').on('click', () => resetAllFilters());
       $('#resetBtn').on('click', () => resetAllFilters(true));
-
-      // Logic toggle handlers (consolidated)
-      const LOGIC_TOGGLE_CONFIGS = [
-        { selector: '#personsLogic', setLogic: (val) => personsLogic = val, updateFunc: updatePersonsList },
-        { selector: '#placesLogic', setLogic: (val) => placesLogic = val, updateFunc: updatePlacesList },
-        { selector: '#functionsLogic', setLogic: (val) => functionsLogic = val, updateFunc: updateFunctionsList }
-      ];
-
-      LOGIC_TOGGLE_CONFIGS.forEach(config => {
-        $(config.selector).on('change', function() {
-          config.setLogic(this.checked);
-          if (config.updateFunc) {
-            config.updateFunc();
-          }
-          table.draw();
-          updateFilterUI();
-        });
-      });
-
-      // Helper to set initial logic toggle states
-      function setInitialLogicToggles() {
-        const logicStates = {
-          '#personsLogic': personsLogic,
-          '#placesLogic': placesLogic,
-          '#functionsLogic': functionsLogic
-        };
-
-        Object.entries(logicStates).forEach(([selector, value]) => {
-          $(selector).prop('checked', value);
-        });
-      }
-
-      // Set initial toggle states to match JavaScript variables
-      setInitialLogicToggles();
 
       // Update filter button label and accordion indicators initially
       updateFilterButtonLabel();

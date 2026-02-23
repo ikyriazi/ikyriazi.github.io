@@ -629,6 +629,78 @@ window.addEventListener('load', function () {
       pillState.fields = 0;
       updatePill();
       update();
+      $('#sourcesTable').DataTable().draw();
+    });
+  })();
+
+  /* ── Search builder → DataTable OR-logic filtering ── */
+  (function () {
+    const rowsEl = document.getElementById('builderRows1');
+    /* Get the DataTable instance lazily (only when actually needed, i.e. inside
+       a DataTables callback or a user-event handler) so we never call .DataTable()
+       before ex15.js has finished initialising the table via fetch(). */
+    function getTable() { return $('#sourcesTable').DataTable(); }
+
+    function normalize(val) { return (val || '').toLowerCase(); }
+
+    function getActiveRows() {
+      const active = [];
+      rowsEl.querySelectorAll('.builder-row').forEach(row => {
+        const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+        const inp   = row.querySelector('.builder-input, .p2b-text');
+        const value = inp ? inp.value.trim() : '';
+        if (value) active.push({ field, value: value.toLowerCase() });
+      });
+      return active;
+    }
+
+    function rowMatches(row, field, value) {
+      switch (field) {
+        case 'All fields':
+          return [
+            row.shelfmark?.label, row.title, row.shortTitle, row.date?.label,
+            row.author?.label, row.publisher?.label, row.printPlace?.label,
+            row.rism, row.otherRism, row.vd16, row.otherVD16,
+            row.description, row.comment, row.bibliography
+          ].some(v => normalize(v).includes(value));
+        case 'Title':
+          return normalize(row.title).includes(value) ||
+                 normalize(row.shortTitle).includes(value);
+        case 'Person':
+          return normalize(row.author?.label).includes(value);
+        case 'Place':
+          return normalize(row.printPlace?.label).includes(value);
+        case 'RISM / VD16 / Brown ID':
+          return normalize(row.rism).includes(value)      ||
+                 normalize(row.otherRism).includes(value) ||
+                 normalize(row.vd16).includes(value)      ||
+                 normalize(row.otherVD16).includes(value);
+        case 'Description / Comment':
+          return normalize(row.description).includes(value) ||
+                 normalize(row.comment).includes(value);
+        case 'Bibliography':
+          return normalize(row.bibliography).includes(value);
+        default:
+          return false;
+      }
+    }
+
+    $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
+      if (settings.nTable.id !== 'sourcesTable') return true;
+      const active = getActiveRows();
+      if (active.length === 0) return true;
+      const rowData = getTable().row(dataIndex).data();
+      if (!rowData) return true;
+      /* OR logic: show row if it matches ANY active search criterion */
+      return active.some(({ field, value }) => rowMatches(rowData, field, value));
+    });
+
+    function redraw() { getTable().draw(); }
+
+    rowsEl.addEventListener('input',  redraw);
+    rowsEl.addEventListener('change', redraw); /* field selector changes */
+    rowsEl.addEventListener('click',  e => {
+      if (e.target.closest('.remove-btn')) setTimeout(redraw, 0);
     });
   })();
 
