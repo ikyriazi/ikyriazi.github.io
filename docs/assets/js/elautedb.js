@@ -79,7 +79,6 @@ window.addEventListener('load', function () {
   const manuallyHiddenContent = new Set();
   let isManualToggle   = false;
   let table;                     // set after fetch → DataTable init
-  let currentSearchTerm = '';    // always empty; highlighting done via applyHighlights()
   let isExpandAllActive = false;
   let isDescCommentsOpen = false;
 
@@ -87,16 +86,7 @@ window.addEventListener('load', function () {
      Shared utilities
      ───────────────────────────────────────────── */
 
-  // Normalize German umlauts: ü/ue→u, ä/ae→a, ö/oe→o
-  function normalizeUmlauts(text) {
-    if (!text) return '';
-    return text
-      .replace(/ü/gi, 'u').replace(/ä/gi, 'a').replace(/ö/gi, 'o')
-      .replace(/ue/gi, 'u').replace(/ae/gi, 'a').replace(/oe/gi, 'o');
-  }
 
-  // Shorthand: normalize + lowercase
-  function normalize(val) { return normalizeUmlauts((val || '').toLowerCase()); }
 
   // Escape regex special characters
   function escapeRegex(str) {
@@ -200,68 +190,104 @@ window.addEventListener('load', function () {
      DataTable rendering helpers
      ───────────────────────────────────────────── */
 
-  // Highlight matching term inside HTML content (DOM-aware, preserves tags)
   function highlightText(text, term) {
     if (!text) return '';
     const str = String(text);
     const t = (term || '').trim();
-    if (!t) return str;
+    if (!t) return str; // Return original HTML content without escaping
+
     try {
+      // Create a temporary div to parse HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = str;
-      const plainText = (tempDiv.textContent || tempDiv.innerText || '');
-      const pattern = createUmlautPattern(t);
-      const regex = new RegExp(pattern, 'gi');
-      if (!regex.test(plainText)) return str;
-      regex.lastIndex = 0;
-      const matches = [];
-      let match;
-      while ((match = regex.exec(plainText)) !== null) {
-        matches.push({ start: match.index, end: match.index + match[0].length });
-        regex.lastIndex = match.index + 1;
+
+      // Get plain text content (without HTML tags)
+      const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
+
+      // Check if the search term exists as a phrase in the plain text
+      if (!plainText.includes(t.toLowerCase())) {
+        return str; // Term not found, return original
       }
+
+      // Find ALL occurrences of the search term in plain text
+      const searchLower = t.toLowerCase();
+      const matches = [];
+      let pos = 0;
+      while ((pos = plainText.indexOf(searchLower, pos)) !== -1) {
+        matches.push({ start: pos, end: pos + t.length });
+        pos += 1; // Move forward by 1 to find overlapping matches
+      }
+
       if (matches.length === 0) return str;
-      let currentPos = 0, matchIndex = 0;
+
+      // Now traverse the DOM and highlight all matching ranges
+      let currentPos = 0;
+      let matchIndex = 0;
+
       function highlightNode(node) {
         if (node.nodeType === Node.TEXT_NODE) {
           const textContent = node.textContent;
-          const nodeStart = currentPos, nodeEnd = currentPos + textContent.length;
+          const nodeStart = currentPos;
+          const nodeEnd = currentPos + textContent.length;
+
+          // Find all matches that overlap with this text node
           const nodeMatches = [];
           for (let i = matchIndex; i < matches.length; i++) {
-            const m = matches[i];
-            if (m.end <= nodeStart) { matchIndex = i + 1; continue; }
-            if (m.start >= nodeEnd) break;
-            nodeMatches.push(m);
+            const match = matches[i];
+            if (match.end <= nodeStart) {
+              matchIndex = i + 1;
+              continue;
+            }
+            if (match.start >= nodeEnd) break;
+            nodeMatches.push(match);
           }
+
           if (nodeMatches.length > 0) {
             const span = document.createElement('span');
             let lastIndex = 0;
-            nodeMatches.forEach(m => {
-              const hs = Math.max(0, m.start - nodeStart);
-              const he = Math.min(textContent.length, m.end - nodeStart);
-              if (hs > lastIndex) span.appendChild(document.createTextNode(textContent.substring(lastIndex, hs)));
+
+            nodeMatches.forEach(match => {
+              const highlightStart = Math.max(0, match.start - nodeStart);
+              const highlightEnd = Math.min(textContent.length, match.end - nodeStart);
+
+              // Add text before this highlight (if any)
+              if (highlightStart > lastIndex) {
+                span.appendChild(document.createTextNode(textContent.substring(lastIndex, highlightStart)));
+              }
+
+              // Add highlighted portion
               const mark = document.createElement('mark');
               mark.className = 'search-highlight';
-              mark.textContent = textContent.substring(hs, he);
+              mark.textContent = textContent.substring(highlightStart, highlightEnd);
               span.appendChild(mark);
-              lastIndex = he;
+
+              lastIndex = highlightEnd;
             });
-            if (lastIndex < textContent.length)
+
+            // Add remaining text after last highlight (if any)
+            if (lastIndex < textContent.length) {
               span.appendChild(document.createTextNode(textContent.substring(lastIndex)));
+            }
+
             node.parentNode.replaceChild(span, node);
           }
+
           currentPos = nodeEnd;
         } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // Recursively process child nodes
           Array.from(node.childNodes).forEach(highlightNode);
         }
       }
+
       highlightNode(tempDiv);
       return tempDiv.innerHTML;
-    } catch (e) { return str; }
+    } catch (e) {
+      return str; // Return original on error
+    }
   }
 
   function generateSimpleRow(labelText, value, skipHighlight = false) {
-    const displayValue = skipHighlight ? value : highlightText(value, currentSearchTerm);
+    const displayValue = skipHighlight ? value : highlightText(value, getActiveTitleTerm());
     return '<tr><td class="details-placeholder"></td><td class="details-label">' + labelText +
       '</td><td class="details-value">' + displayValue + '</td><td class="details-CD" colspan="7"></td></tr>';
   }
@@ -273,23 +299,23 @@ window.addEventListener('load', function () {
       if (!item.label) return;
       const labelCell = getFirstLabel(index, labelText);
       const parts = ['description', 'comment'].filter(type => item[type]);
-      const searchTerm = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
+      const searchTerm = (getActiveTitleTerm() || '').toLowerCase().trim();
       const hasSearchMatch = searchTerm && parts.some(type =>
-        normalizeUmlauts(stripHtml(item[type]).toLowerCase()).includes(searchTerm)
+        stripHtml(item[type]).toLowerCase().includes(searchTerm)
       );
       const badges = parts.map(type => {
-        const isActive = searchTerm && normalizeUmlauts(stripHtml(item[type]).toLowerCase()).includes(searchTerm);
+        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
         const iconName = isActive ? 'minus-circle' : 'plus-circle';
         return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
-      const highlightedLabel = highlightText(item.label, currentSearchTerm);
+      const highlightedLabel = highlightText(item.label, getActiveTitleTerm());
       const rowClass = hasSearchMatch ? ' class="cd-expanded"' : '';
       rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
       parts.forEach(type => {
         const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
-        const isActive = searchTerm && normalizeUmlauts(stripHtml(item[type]).toLowerCase()).includes(searchTerm);
+        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
         const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : (isActive ? 'block' : 'none');
-        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], currentSearchTerm)}</div></div>`;
+        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], getActiveTitleTerm())}</div></div>`;
       });
       rows += '</td></tr>';
     });
@@ -406,7 +432,7 @@ window.addEventListener('load', function () {
 
   function renderWithHighlight(data, type, removeBracket = false) {
     if (type === 'sort') return (removeBracket && data) ? data.replace(/^\[/, '') : (data || '');
-    return (type === 'display') ? highlightText(data, currentSearchTerm) : (data || '');
+    return (type === 'display') ? highlightText(data, getActiveTitleTerm()) : (data || '');
   }
 
   function combineValues(row, primaryField, otherField) {
@@ -423,7 +449,7 @@ window.addEventListener('load', function () {
     if (type !== 'display') return '';
     const values = [];
     if (row[primaryField] && row[primaryField].label) {
-      const h = highlightText(row[primaryField].label, currentSearchTerm);
+      const h = highlightText(row[primaryField].label, getActiveTitleTerm());
       values.push(row[primaryField].url
         ? `<a href="${row[primaryField].url}" target="_blank" rel="noopener noreferrer">${h}</a>`
         : h);
@@ -432,7 +458,7 @@ window.addEventListener('load', function () {
       const items = Array.isArray(row[otherField]) ? row[otherField] : [row[otherField]];
       items.forEach(item => {
         if (item && item.label) {
-          const h = highlightText(item.label, currentSearchTerm);
+          const h = highlightText(item.label, getActiveTitleTerm());
           values.push(item.url
             ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${h}</a>`
             : h);
@@ -1004,9 +1030,20 @@ window.addEventListener('load', function () {
       const field = (row.querySelector('.field-select') || {}).value || 'All fields';
       const inp   = row.querySelector('.builder-input, .p2b-text');
       const value = inp ? inp.value.trim() : '';
-      if (value) active.push({ field, value: normalize(value) });
+      if (value) active.push({ field, value: (value || '').toLowerCase() });
     });
     return active;
+  }
+
+  function getActiveTitleTerm() {
+    let term = '';
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp   = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if ((field === 'Title' || field === 'All fields') && value) term = value;
+    });
+    return term;
   }
 
   function rowMatches(row, field, value) {
@@ -1017,24 +1054,24 @@ window.addEventListener('load', function () {
           row.date?.label, row.author?.label, row.publisher?.label,
           row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
           row.description, row.comment, row.bibliography
-        ].some(v => normalize(v).includes(value));
+        ].some(v => (v || '').toLowerCase().includes(value));
       case 'Title':
-        return normalize(row.title).includes(value) ||
-               normalize(row.alternativeTitle).includes(value);
+        return (row.title || '').toLowerCase().includes(value) ||
+               (row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        return normalize(row.author?.label).includes(value);
+        return (row.author?.label || '').toLowerCase().includes(value);
       case 'Place':
-        return normalize(row.printPlace?.label).includes(value);
+        return (row.printPlace?.label || '').toLowerCase().includes(value);
       case 'RISM / VD16 / Brown ID':
-        return normalize(row.rism).includes(value)      ||
-               normalize(row.otherRism).includes(value) ||
-               normalize(row.vd16).includes(value)      ||
-               normalize(row.otherVD16).includes(value);
+        return (row.rism || '').toLowerCase().includes(value)      ||
+               (row.otherRism || '').toLowerCase().includes(value) ||
+               (row.vd16 || '').toLowerCase().includes(value)      ||
+               (row.otherVD16 || '').toLowerCase().includes(value);
       case 'Description / Comment':
-        return normalize(row.description).includes(value) ||
-               normalize(row.comment).includes(value);
+        return (row.description || '').toLowerCase().includes(value) ||
+               (row.comment || '').toLowerCase().includes(value);
       case 'Bibliography':
-        return normalize(row.bibliography).includes(value);
+        return (row.bibliography || '').toLowerCase().includes(value);
       default:
         return false;
     }
@@ -1054,49 +1091,6 @@ window.addEventListener('load', function () {
      Post-draw highlighting
      ───────────────────────────────────────────── */
 
-  // Highlight active Title / All-fields terms in the Title cell (col 2)
-  // and in the Alternative title cell inside any open child row
-  function applyHighlights() {
-    const active = getActiveRows();
-    const terms  = active.filter(r => r.field === 'Title' || r.field === 'All fields');
-
-    table.rows({ page: 'current' }).nodes().each(function (node) {
-      const cell = node.cells[2];
-      if (cell) {
-        const plain = (cell.textContent || '').trim();
-        if (plain) {
-          let html = plain.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          terms.forEach(function ({ value }) {
-            try {
-              const re = new RegExp(umlautHighlightPattern(value), 'gi');
-              html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
-            } catch (e) {}
-          });
-          cell.innerHTML = html;
-        }
-      }
-
-      if (terms.length > 0) {
-        $(node).next('tr.child').find('.details-label').each(function () {
-          if ($(this).text().trim() === 'Alternative title:') {
-            const $val = $(this).next('.details-value');
-            const plain = $val.text().trim();
-            if (plain) {
-              let html = plain.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-              terms.forEach(function ({ value }) {
-                try {
-                  const re = new RegExp(umlautHighlightPattern(value), 'gi');
-                  html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
-                } catch (e) {}
-              });
-              $val.html(html);
-            }
-            return false; /* break — only one alternative title per row */
-          }
-        });
-      }
-    });
-  }
 
   // Expand child rows whose match is only in alternativeTitle.
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
@@ -1109,7 +1103,7 @@ window.addEventListener('load', function () {
       const rowData = this.data();
       if (!rowData || !rowData.alternativeTitle) return;
       if (this.child.isShown()) return;
-      const hasAltMatch = titleTerms.some(({ value }) => normalize(rowData.alternativeTitle).includes(value));
+      const hasAltMatch = titleTerms.some(({ value }) => (rowData.alternativeTitle || '').toLowerCase().includes(value));
       if (hasAltMatch) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
@@ -1117,11 +1111,41 @@ window.addEventListener('load', function () {
     });
   }
 
+  function refreshOpenAltTitleHighlights() {
+    table.rows({ page: 'current' }).every(function () {
+      if (!this.child.isShown()) return;
+      const $child = $(this.node()).next('tr.child');
+      const $labelCells = $child.find('.details-label');
+      if ($labelCells.length === 0) return;
+      $labelCells.each(function () {
+        if ($(this).text().trim() !== 'Alternative title:') return;
+        const $val = $(this).next('.details-value');
+        const plain = $val.text();
+        $val.html(highlightText(plain, getActiveTitleTerm()));
+        return false; // break
+      });
+    });
+  }
+
   // Wire search builder inputs to DataTable draws
-  builderRowsEl.addEventListener('input',  () => { if (table) table.draw(); });
-  builderRowsEl.addEventListener('change', () => { if (table) table.draw(); });
+  builderRowsEl.addEventListener('input',  () => { 
+    if (table) {
+      table.draw();
+    }
+  });
+  builderRowsEl.addEventListener('change', () => { 
+    if (table) {
+      table.draw();
+    }
+  });
   builderRowsEl.addEventListener('click',  e => {
-    if (e.target.closest('.remove-btn')) setTimeout(() => { if (table) table.draw(); }, 0);
+    if (e.target.closest('.remove-btn')) {
+      setTimeout(() => {
+        if (table) {
+          table.draw();
+        }
+      }, 0);
+    }
   });
 
   /* ─────────────────────────────────────────────
@@ -1150,7 +1174,7 @@ window.addEventListener('load', function () {
             defaultContent: '',
             render: function(data, type, row) {
               if (type === 'display') {
-                const highlighted = highlightText(data, currentSearchTerm);
+                const highlighted = highlightText(data, getActiveTitleTerm());
                 if (row.shelfmark && row.shelfmark.url) {
                   return `<a href="${row.shelfmark.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`;
                 }
@@ -1183,7 +1207,7 @@ window.addEventListener('load', function () {
                 }
                 return 0;
               }
-              if (type === 'display') return highlightText(data, currentSearchTerm);
+              if (type === 'display') return highlightText(data, getActiveTitleTerm());
               return data || '';
             }
           },
@@ -1355,10 +1379,10 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Expand alt-title matches first, then highlight
+        // Expand alt-title matches first, then refresh highlights
         setTimeout(function() {
           expandAltTitleMatches();
-          applyHighlights();
+          refreshOpenAltTitleHighlights();
         }, 0);
 
         const wasExpandAllActive = isExpandAllActive;
@@ -1379,7 +1403,9 @@ window.addEventListener('load', function () {
         const row = table.row(tr);
         const isShown = row.child.isShown();
         toggleChildRow(row, tr, !isShown);
-        if (!isShown) scheduleApplyCdClass(tr);
+        if (!isShown) {
+          scheduleApplyCdClass(tr);
+        }
         updateExpandCollapseButton();
         setTimeout(updateToggleDescCommentsBtn, 50);
         feather.replace();
