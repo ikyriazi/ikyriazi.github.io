@@ -635,7 +635,7 @@ window.addEventListener('load', function () {
     });
   })();
 
-  /* ── Search builder → DataTable OR-logic filtering ── */
+  /* ── Search builder → DataTable AND-logic filtering ── */
   (function () {
     const rowsEl = document.getElementById('builderRows1');
     /* Get the DataTable instance lazily (only when actually needed, i.e. inside
@@ -643,7 +643,15 @@ window.addEventListener('load', function () {
        before ex15.js has finished initialising the table via fetch(). */
     function getTable() { return $('#sourcesTable').DataTable(); }
 
-    function normalize(val) { return (val || '').toLowerCase(); }
+    /* Umlaut normalization — mirrors ex15.js so ü/ue/u all collapse to 'u' etc. */
+    function normalizeUmlauts(text) {
+      if (!text) return '';
+      return text
+        .replace(/ü/gi, 'u').replace(/ä/gi, 'a').replace(/ö/gi, 'o')
+        .replace(/ue/gi, 'u').replace(/ae/gi, 'a').replace(/oe/gi, 'o');
+    }
+
+    function normalize(val) { return normalizeUmlauts((val || '').toLowerCase()); }
 
     function getActiveRows() {
       const active = [];
@@ -651,7 +659,7 @@ window.addEventListener('load', function () {
         const field = (row.querySelector('.field-select') || {}).value || 'All fields';
         const inp   = row.querySelector('.builder-input, .p2b-text');
         const value = inp ? inp.value.trim() : '';
-        if (value) active.push({ field, value: value.toLowerCase() });
+        if (value) active.push({ field, value: normalize(value) });
       });
       return active;
     }
@@ -660,14 +668,14 @@ window.addEventListener('load', function () {
       switch (field) {
         case 'All fields':
           return [
-            row.shelfmark?.label, row.title, row.shortTitle, row.date?.label,
-            row.author?.label, row.publisher?.label, row.printPlace?.label,
-            row.rism, row.otherRism, row.vd16, row.otherVD16,
+            row.shelfmark?.label, row.title, row.alternativeTitle,
+            row.date?.label, row.author?.label, row.publisher?.label,
+            row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
             row.description, row.comment, row.bibliography
           ].some(v => normalize(v).includes(value));
         case 'Title':
           return normalize(row.title).includes(value) ||
-                 normalize(row.shortTitle).includes(value);
+                 normalize(row.alternativeTitle).includes(value);
         case 'Person':
           return normalize(row.author?.label).includes(value);
         case 'Place':
@@ -697,7 +705,107 @@ window.addEventListener('load', function () {
       return active.every(({ field, value }) => rowMatches(rowData, field, value));
     });
 
+    /* ── Highlighting ────────────────────────────────────────────────────────
+       Build a regex from a *normalised* term (ü/ue/u all reduced to 'u' etc.)
+       that matches every original umlaut variant in the cell text.
+       Longer sequences are listed first so the regex engine prefers them
+       before falling back to single-char alternatives. */
+    function escapeRegExp(str) {
+      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function umlautHighlightPattern(normTerm) {
+      const e = escapeRegExp(normTerm);
+      return e
+        .replace(/u/g, '(?:ue|Ue|UE|ü|Ü|u|U)')
+        .replace(/a/g, '(?:ae|Ae|AE|ä|Ä|a|A)')
+        .replace(/o/g, '(?:oe|Oe|OE|ö|Ö|o|O)');
+    }
+
+    /* Highlight active Title / All-fields terms in:
+       - the Title (col 2) cell of every visible main row
+       - the Alternative title cell inside any open child row */
+    function applyHighlights() {
+      const active = getActiveRows();
+      const terms  = active.filter(r => r.field === 'Title' || r.field === 'All fields');
+
+      getTable().rows({ page: 'current' }).nodes().each(function (node) {
+        /* ── Main Title cell (col 2) ── */
+        const cell = node.cells[2];
+        if (cell) {
+          const plain = (cell.textContent || '').trim();
+          if (plain) {
+            let html = plain
+              .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            terms.forEach(function ({ value }) {
+              try {
+                const re = new RegExp(umlautHighlightPattern(value), 'gi');
+                html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
+              } catch (e) {}
+            });
+            cell.innerHTML = html;
+          }
+        }
+
+        /* ── Alternative title cell in open child row ── */
+        if (terms.length > 0) {
+          $(node).next('tr.child').find('.details-label').each(function () {
+            if ($(this).text().trim() === 'Alternative title:') {
+              const $val = $(this).next('.details-value');
+              const plain = $val.text().trim();
+              if (plain) {
+                let html = plain
+                  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                terms.forEach(function ({ value }) {
+                  try {
+                    const re = new RegExp(umlautHighlightPattern(value), 'gi');
+                    html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
+                  } catch (e) {}
+                });
+                $val.html(html);
+              }
+              return false; /* break — only one alternative title per row */
+            }
+          });
+        }
+      });
+    }
+
+    /* Expand child rows whose match is only in alternativeTitle.
+       Uses a native DOM click on cells[0] (the dt-control chevron column) —
+       a real browser event that bubbles and reliably triggers ex15.js's
+       delegated $('#sourcesTable tbody').on('click','td.dt-control',...) handler. */
+    function expandAltTitleMatches() {
+      const active = getActiveRows();
+      const titleTerms = active.filter(r => r.field === 'Title' || r.field === 'All fields');
+      if (titleTerms.length === 0) return;
+
+      getTable().rows({ page: 'current' }).every(function () {
+        const rowData = this.data();
+        if (!rowData || !rowData.alternativeTitle) return;
+        if (this.child.isShown()) return;
+        const hasAltMatch = titleTerms.some(({ value }) =>
+          normalize(rowData.alternativeTitle).includes(value)
+        );
+        if (hasAltMatch) {
+          const chevron = this.node().cells[0];
+          if (chevron) chevron.click();
+        }
+      });
+    }
+
     function redraw() { getTable().draw(); }
+
+    /* On every draw: expand alt-title rows FIRST (so child rows exist in the DOM),
+       then apply highlights to both main rows and open child rows.
+       IMPORTANT: must use 'draw.dt' — DataTables fires the event as 'draw.dt'
+       and jQuery only dispatches to handlers whose namespace matches the trigger. */
+    $('#sourcesTable').on('draw.dt', function () {
+      setTimeout(function () {
+        expandAltTitleMatches(); /* expand first — child rows must exist before highlighting */
+        applyHighlights();       /* then highlight main Title cells + child alt-title cells */
+      }, 0);
+    });
 
     rowsEl.addEventListener('input',  redraw);
     rowsEl.addEventListener('change', redraw); /* field selector changes */

@@ -149,11 +149,6 @@ $(document).ready(function() {
     return div.innerHTML;
   }
 
-  // Helper to escape regex special characters
-  function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
-
   // Helper function to apply cd-expanded class to rows with visible CD-content
   function applyCdExpandedClass($table) {
     $table.find('tbody tr').each(function() {
