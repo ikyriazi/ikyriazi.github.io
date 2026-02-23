@@ -580,33 +580,35 @@ window.addEventListener('load', function () {
   });
 
   /* ══════════════════════════════════════
-     Option A — hover to open, auto-close
+     Click icon to open / close drawer
      ══════════════════════════════════════ */
   const iconWrap = document.getElementById('searchIconWrap');
   const icon     = document.getElementById('searchIconBtn');
   const dropdown = document.getElementById('searchDropdown');
   const overlay  = document.getElementById('searchOverlay');
-  let hoverTimer;
 
   function openDropdown() {
-    clearTimeout(hoverTimer);
     dropdown.classList.add('open');
     icon.classList.add('drawer-open');
     overlay.classList.add('show');
   }
 
-  function scheduleClose() {
-    hoverTimer = setTimeout(() => {
-      dropdown.classList.remove('open');
-      icon.classList.remove('drawer-open');
-      overlay.classList.remove('show');
-    }, 120);
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    icon.classList.remove('drawer-open');
+    overlay.classList.remove('show');
   }
 
-  iconWrap.addEventListener('mouseenter',   openDropdown);
-  iconWrap.addEventListener('mouseleave',   scheduleClose);
-  dropdown.addEventListener('mouseenter',   () => clearTimeout(hoverTimer));
-  dropdown.addEventListener('mouseleave',   scheduleClose);
+  icon.addEventListener('click', () => {
+    if (dropdown.classList.contains('open')) {
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  });
+
+  /* Clicking the overlay also closes the drawer */
+  overlay.addEventListener('click', closeDropdown);
 
   /* ── Clear all search fields (search panel) ── */
   (function () {
