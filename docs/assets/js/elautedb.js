@@ -1,6 +1,8 @@
 window.addEventListener('load', function () {
 
-  /* ── Data ── */
+  /* ─────────────────────────────────────────────
+     Data constants
+     ───────────────────────────────────────────── */
   const FIELDS = [
     'All fields', 'Title', 'Person', 'Place', 'RISM / VD16 / Brown ID',
     'Description / Comment', 'Bibliography'
@@ -54,7 +56,9 @@ window.addEventListener('load', function () {
   const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
   const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
 
-  /* ── Icons ── */
+  /* ─────────────────────────────────────────────
+     Icons
+     ───────────────────────────────────────────── */
   const SVG_CHEVRON = '<svg class="phys-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
   const SVG_X    = feather.icons['x'].toSvg({ width: 13, height: 13, 'stroke-width': 2 });
   const SVG_PLUS = feather.icons['plus'].toSvg({ width: 13, height: 13, 'stroke-width': 3 });
@@ -69,7 +73,378 @@ window.addEventListener('load', function () {
     btn.style.gap = '6px';
   });
 
-  /* ── Filter panel template ── */
+  /* ─────────────────────────────────────────────
+     Shared state
+     ───────────────────────────────────────────── */
+  const manuallyHiddenContent = new Set();
+  let isManualToggle   = false;
+  let table;                     // set after fetch → DataTable init
+  let currentSearchTerm = '';    // always empty; highlighting done via applyHighlights()
+  let isExpandAllActive = false;
+  let isDescCommentsOpen = false;
+
+  /* ─────────────────────────────────────────────
+     Shared utilities
+     ───────────────────────────────────────────── */
+
+  // Normalize German umlauts: ü/ue→u, ä/ae→a, ö/oe→o
+  function normalizeUmlauts(text) {
+    if (!text) return '';
+    return text
+      .replace(/ü/gi, 'u').replace(/ä/gi, 'a').replace(/ö/gi, 'o')
+      .replace(/ue/gi, 'u').replace(/ae/gi, 'a').replace(/oe/gi, 'o');
+  }
+
+  // Shorthand: normalize + lowercase
+  function normalize(val) { return normalizeUmlauts((val || '').toLowerCase()); }
+
+  // Escape regex special characters
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  // Normalize to array
+  function toArray(val) {
+    return Array.isArray(val) ? val : [val];
+  }
+
+  // Escape HTML entities
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Strip HTML tags, return plain text
+  function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  }
+
+  // Recursively extract text from any value (string, number, array, object)
+  function extractText(val) {
+    if (!val) return '';
+    if (typeof val === 'string') return stripHtml(val);
+    if (typeof val === 'number') return String(val);
+    if (Array.isArray(val)) return val.map(v => extractText(v)).join(' ');
+    if (typeof val === 'object') {
+      const parts = [];
+      if (val.label)        parts.push(stripHtml(val.label));
+      if (val.description)  parts.push(stripHtml(val.description));
+      if (val.comment)      parts.push(stripHtml(val.comment));
+      if (val.bookShort)    parts.push(stripHtml(val.bookShort));
+      if (val.referenceSource && val.referenceSource.bookShort)
+        parts.push(stripHtml(val.referenceSource.bookShort));
+      if (val.referencePages) parts.push(stripHtml(val.referencePages));
+      return parts.join(' ');
+    }
+    return '';
+  }
+
+  function updateChevron($element, isExpanded) {
+    $element.attr('data-feather', isExpanded ? 'chevron-down' : 'chevron-right');
+  }
+
+  function getTypeSuffix(type) { return type === 'description' ? 'desc' : 'comm'; }
+
+  function getFirstLabel(index, labelText) { return index === 0 ? labelText : ''; }
+
+  function getColumnWidths() {
+    const widths = [];
+    const $firstRow = $('#sourcesTable tbody tr:not(.child):first td');
+    if ($firstRow.length > 0) {
+      $firstRow.slice(0, 3).each(function() { widths.push($(this).outerWidth() + 'px'); });
+    } else {
+      $('#sourcesTable thead th').slice(0, 3).each(function() { widths.push($(this).outerWidth() + 'px'); });
+    }
+    return widths;
+  }
+
+  function applyCdExpandedClass($table) {
+    $table.find('tbody tr').each(function() {
+      const $row = $(this);
+      $row.toggleClass('cd-expanded', $row.find('.CD-content:visible').length > 0);
+    });
+  }
+
+  /* ─────────────────────────────────────────────
+     Umlaut pattern helpers (two distinct uses)
+     ───────────────────────────────────────────── */
+
+  // Used by highlightText (raw search term, bidirectional umlaut matching)
+  function createUmlautPattern(searchTerm) {
+    const escaped = escapeRegex(searchTerm);
+    return escaped
+      .replace(/ü/gi, '(?:ü|Ü|ue|Ue|UE|u|U)')
+      .replace(/ä/gi, '(?:ä|Ä|ae|Ae|AE|a|A)')
+      .replace(/ö/gi, '(?:ö|Ö|oe|Oe|OE|o|O)')
+      .replace(/ue/gi, '(?:ue|Ue|UE|ü|Ü|u|U)')
+      .replace(/ae/gi, '(?:ae|Ae|AE|ä|Ä|a|A)')
+      .replace(/oe/gi, '(?:oe|Oe|OE|ö|Ö|o|O)')
+      .replace(/u/gi, '(?:u|U|ü|Ü|ue|Ue|UE)')
+      .replace(/a/gi, '(?:a|A|ä|Ä|ae|Ae|AE)')
+      .replace(/o/gi, '(?:o|O|ö|Ö|oe|Oe|OE)');
+  }
+
+  // Used by applyHighlights (pre-normalized term → original variants for DOM highlighting)
+  function umlautHighlightPattern(normTerm) {
+    const e = escapeRegex(normTerm);
+    return e
+      .replace(/u/g, '(?:ue|Ue|UE|ü|Ü|u|U)')
+      .replace(/a/g, '(?:ae|Ae|AE|ä|Ä|a|A)')
+      .replace(/o/g, '(?:oe|Oe|OE|ö|Ö|o|O)');
+  }
+
+  /* ─────────────────────────────────────────────
+     DataTable rendering helpers
+     ───────────────────────────────────────────── */
+
+  // Highlight matching term inside HTML content (DOM-aware, preserves tags)
+  function highlightText(text, term) {
+    if (!text) return '';
+    const str = String(text);
+    const t = (term || '').trim();
+    if (!t) return str;
+    try {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = str;
+      const plainText = (tempDiv.textContent || tempDiv.innerText || '');
+      const pattern = createUmlautPattern(t);
+      const regex = new RegExp(pattern, 'gi');
+      if (!regex.test(plainText)) return str;
+      regex.lastIndex = 0;
+      const matches = [];
+      let match;
+      while ((match = regex.exec(plainText)) !== null) {
+        matches.push({ start: match.index, end: match.index + match[0].length });
+        regex.lastIndex = match.index + 1;
+      }
+      if (matches.length === 0) return str;
+      let currentPos = 0, matchIndex = 0;
+      function highlightNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const textContent = node.textContent;
+          const nodeStart = currentPos, nodeEnd = currentPos + textContent.length;
+          const nodeMatches = [];
+          for (let i = matchIndex; i < matches.length; i++) {
+            const m = matches[i];
+            if (m.end <= nodeStart) { matchIndex = i + 1; continue; }
+            if (m.start >= nodeEnd) break;
+            nodeMatches.push(m);
+          }
+          if (nodeMatches.length > 0) {
+            const span = document.createElement('span');
+            let lastIndex = 0;
+            nodeMatches.forEach(m => {
+              const hs = Math.max(0, m.start - nodeStart);
+              const he = Math.min(textContent.length, m.end - nodeStart);
+              if (hs > lastIndex) span.appendChild(document.createTextNode(textContent.substring(lastIndex, hs)));
+              const mark = document.createElement('mark');
+              mark.className = 'search-highlight';
+              mark.textContent = textContent.substring(hs, he);
+              span.appendChild(mark);
+              lastIndex = he;
+            });
+            if (lastIndex < textContent.length)
+              span.appendChild(document.createTextNode(textContent.substring(lastIndex)));
+            node.parentNode.replaceChild(span, node);
+          }
+          currentPos = nodeEnd;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          Array.from(node.childNodes).forEach(highlightNode);
+        }
+      }
+      highlightNode(tempDiv);
+      return tempDiv.innerHTML;
+    } catch (e) { return str; }
+  }
+
+  function generateSimpleRow(labelText, value, skipHighlight = false) {
+    const displayValue = skipHighlight ? value : highlightText(value, currentSearchTerm);
+    return '<tr><td class="details-placeholder"></td><td class="details-label">' + labelText +
+      '</td><td class="details-value">' + displayValue + '</td><td class="details-CD" colspan="7"></td></tr>';
+  }
+
+  function generateSubtableRows(data, labelText, idPrefix, recordId = '') {
+    let rows = '';
+    if (!data) return rows;
+    toArray(data).forEach((item, index) => {
+      if (!item.label) return;
+      const labelCell = getFirstLabel(index, labelText);
+      const parts = ['description', 'comment'].filter(type => item[type]);
+      const searchTerm = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
+      const hasSearchMatch = searchTerm && parts.some(type =>
+        normalizeUmlauts(stripHtml(item[type]).toLowerCase()).includes(searchTerm)
+      );
+      const badges = parts.map(type => {
+        const isActive = searchTerm && normalizeUmlauts(stripHtml(item[type]).toLowerCase()).includes(searchTerm);
+        const iconName = isActive ? 'minus-circle' : 'plus-circle';
+        return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
+      }).join('');
+      const highlightedLabel = highlightText(item.label, currentSearchTerm);
+      const rowClass = hasSearchMatch ? ' class="cd-expanded"' : '';
+      rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
+      parts.forEach(type => {
+        const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
+        const isActive = searchTerm && normalizeUmlauts(stripHtml(item[type]).toLowerCase()).includes(searchTerm);
+        const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : (isActive ? 'block' : 'none');
+        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], currentSearchTerm)}</div></div>`;
+      });
+      rows += '</td></tr>';
+    });
+    return rows;
+  }
+
+  function generateBibliographyRows(items, labelText, typeFilter) {
+    let rows = '';
+    const filtered = items.filter(item => {
+      if (!item.referenceSource) return false;
+      if (typeFilter === null)
+        return item.referenceSource.referencebookType !== 'Edition' &&
+               item.referenceSource.referencebookType !== 'Catalogue';
+      return item.referenceSource.referencebookType === typeFilter;
+    });
+    filtered.forEach((item, index) => {
+      let valueText = item.referenceSource.bookShort || '';
+      if (item.referencePages)
+        valueText += ': <span class="reference-pages">' + item.referencePages + '</span>';
+      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText);
+    });
+    return rows;
+  }
+
+  function wrapInSubgroup(rowHtml, subgroup, replaceAll = false) {
+    const pattern = replaceAll ? /<tr(?:\s+class="([^"]*)")?\s*>/g : /<tr(?:\s+class="([^"]*)")?\s*>/;
+    return rowHtml.replace(pattern, (match, existingClasses) => {
+      const classes = existingClasses ? `subgroup-content ${existingClasses}` : 'subgroup-content';
+      return `<tr class="${classes}" data-subgroup="${subgroup}" style="display:none">`;
+    });
+  }
+
+  function generateSubgroupHeading(title, subgroup) {
+    return `<tr class="subgroup-heading-row" data-subgroup="${subgroup}"><td class="details-placeholder"></td><td colspan="9" class="details-heading"><span class="heading-toggle">${title}</span></td></tr>`;
+  }
+
+  function generateSpacerRow(subgroup = null, small = false) {
+    const className = small ? 'subgroup-spacer-small' : 'subgroup-spacer';
+    const subgroupAttr = subgroup ? ` subgroup-content" data-subgroup="${subgroup}" style="display:none` : '';
+    return `<tr class="${className}${subgroupAttr}"><td colspan="10"></td></tr>`;
+  }
+
+  function formatDetails(row) {
+    const recordId = row.id ? row.id.split('/').pop() : Math.random().toString(36).substr(2, 9);
+    const typeValue = row.physicalType ?
+      row.physicalType.charAt(0).toUpperCase() + row.physicalType.slice(1) : '';
+    let rows = '';
+
+    if (row.alternativeTitle) rows += generateSimpleRow('Alternative title:', row.alternativeTitle);
+    rows += generateSimpleRow('Type:', typeValue, true);
+    rows += generateSpacerRow(null, true);
+
+    if (row.provenance || row.function || row.fundamenta !== undefined || row.codicology) {
+      rows += generateSubgroupHeading('Contextual Metadata', 'contextual');
+      let contextualRows = '';
+      contextualRows += generateSubtableRows(row.provenance, 'Provenance:', 'prov', recordId);
+      contextualRows += generateSubtableRows(row.function, 'Function:', 'func', recordId);
+      contextualRows += generateSimpleRow('Fundamenta:', row.fundamenta == 1 ? 'Yes' : 'No', true);
+      contextualRows += generateSubtableRows(row.codicology, 'Codicology:', 'codic', recordId);
+      rows += wrapInSubgroup(contextualRows, 'contextual', true);
+      rows += generateSpacerRow('contextual');
+    }
+
+    if (row.brown || row.otherShelfmark) {
+      rows += generateSubgroupHeading('Further Identifiers', 'identifiers');
+      let identifiersRows = '';
+      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown);
+      if (row.otherShelfmark) {
+        toArray(row.otherShelfmark).forEach((item, index) => {
+          if (item && item.label) {
+            const value = item.url
+              ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.label}</a>`
+              : item.label;
+            identifiersRows += generateSimpleRow(getFirstLabel(index, 'Other shelfmarks:'), value);
+          }
+        });
+      }
+      rows += wrapInSubgroup(identifiersRows, 'identifiers', true);
+      rows += generateSpacerRow('identifiers');
+    }
+
+    if (row.referencedBy || row.relatedResource) {
+      rows += generateSubgroupHeading('Bibliography and Related Resources', 'bibliography');
+      let bibliographyRows = '';
+      if (row.referencedBy) {
+        const refs = toArray(row.referencedBy);
+        bibliographyRows += generateBibliographyRows(refs, 'Editions:', 'Edition');
+        bibliographyRows += generateBibliographyRows(refs, 'Catalogues:', 'Catalogue');
+        bibliographyRows += generateBibliographyRows(refs, 'Other bibliography:', null);
+      }
+      if (row.relatedResource) {
+        toArray(row.relatedResource).forEach((item, index) => {
+          if (item && item.label) {
+            const value = item.url
+              ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.label}</a>`
+              : item.label;
+            bibliographyRows += generateSimpleRow(getFirstLabel(index, 'Related resources:'), value);
+          }
+        });
+      }
+      rows += wrapInSubgroup(bibliographyRows, 'bibliography', true);
+      rows += generateSpacerRow();
+    }
+
+    const widths = getColumnWidths();
+    return '<div class="child-wrapper"><table class="details-table">' +
+      '<colgroup>' +
+      '<col style="width: ' + widths[0] + ';">' +
+      '<col style="width: ' + widths[1] + ';">' +
+      '<col style="width: ' + widths[2] + ';">' +
+      '<col><col><col><col><col><col><col>' +
+      '</colgroup>' + rows + '</table></div>';
+  }
+
+  function renderWithHighlight(data, type, removeBracket = false) {
+    if (type === 'sort') return (removeBracket && data) ? data.replace(/^\[/, '') : (data || '');
+    return (type === 'display') ? highlightText(data, currentSearchTerm) : (data || '');
+  }
+
+  function combineValues(row, primaryField, otherField) {
+    const values = [];
+    if (row[primaryField] && row[primaryField].label) values.push(row[primaryField].label);
+    if (row[otherField]) {
+      const items = Array.isArray(row[otherField]) ? row[otherField] : [row[otherField]];
+      items.forEach(item => { if (item && item.label) values.push(item.label); });
+    }
+    return values.join('<br/>');
+  }
+
+  function renderCombinedField(row, primaryField, otherField, type) {
+    if (type !== 'display') return '';
+    const values = [];
+    if (row[primaryField] && row[primaryField].label) {
+      const h = highlightText(row[primaryField].label, currentSearchTerm);
+      values.push(row[primaryField].url
+        ? `<a href="${row[primaryField].url}" target="_blank" rel="noopener noreferrer">${h}</a>`
+        : h);
+    }
+    if (row[otherField]) {
+      const items = Array.isArray(row[otherField]) ? row[otherField] : [row[otherField]];
+      items.forEach(item => {
+        if (item && item.label) {
+          const h = highlightText(item.label, currentSearchTerm);
+          values.push(item.url
+            ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${h}</a>`
+            : h);
+        }
+      });
+    }
+    return values.join('<br/>');
+  }
+
+  /* ─────────────────────────────────────────────
+     Filter panel template
+     ───────────────────────────────────────────── */
   function accordion(prefix, label, n, contentClass, content) {
     return `
     <div class="phys-accordion" id="${prefix}Accordion${n}">
@@ -110,7 +485,9 @@ window.addEventListener('load', function () {
     ].join('');
   }
 
-  /* ── Render chips and radio lists ── */
+  /* ─────────────────────────────────────────────
+     Render chips and radio lists
+     ───────────────────────────────────────────── */
   function renderChipGrid(el, data) {
     data.forEach(item => {
       if (item.heading !== undefined) {
@@ -149,10 +526,11 @@ window.addEventListener('load', function () {
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
 
-  /* ── P2c mode-dropdown widget (Person / Place fields) ── */
+  /* ─────────────────────────────────────────────
+     P2c mode-dropdown widget (Person / Place fields)
+     ───────────────────────────────────────────── */
   function initModeDropdownEl(tabs, input, list, wrap, items) {
     let mode = 'free', highlighted = -1, listMemory = '';
-
     function showSelected(name) { input.value = name; input.style.display = ''; input.style.fontWeight = '600'; }
     function hideInput() { input.value = ''; input.style.display = 'none'; }
     function renderList() {
@@ -212,7 +590,9 @@ window.addEventListener('load', function () {
     return wrap;
   }
 
-  /* ── Search builder ── */
+  /* ─────────────────────────────────────────────
+     Search builder
+     ───────────────────────────────────────────── */
   function createSearchWidget({ builderRowsId, addFieldBtnId, logicSectionId,
       logicToggleId, labelAndId, labelOrId, smartInputs = {}, showLogic = true, useCustomSelect = false }) {
 
@@ -318,16 +698,15 @@ window.addEventListener('load', function () {
     addRow('Title', false);
 
     function reset() {
-      builderRowsEl.innerHTML = '';
-      rows = [];
-      nextId = 0;
-      addRow('All fields', false);
-      addRow('Title', false);
+      builderRowsEl.innerHTML = ''; rows = []; nextId = 0;
+      addRow('All fields', false); addRow('Title', false);
     }
     return reset;
   }
 
-  /* ── Filter panel + physical type wiring ── */
+  /* ─────────────────────────────────────────────
+     Filter panel + physical type wiring
+     ───────────────────────────────────────────── */
   function setupSplitAccordion(n, updateSelectionUI, smartInputs = {}, options = {}) {
     const withLogic = options.showLogic !== false;
     const resetSearch = createSearchWidget({
@@ -357,7 +736,9 @@ window.addEventListener('load', function () {
     return { setVal, resetSearch };
   }
 
-  /* ── Date range accordion ── */
+  /* ─────────────────────────────────────────────
+     Date range accordion
+     ───────────────────────────────────────────── */
   function initDateAccordion({ n, minYear = 1450, maxYear = 1620, onFilterChange = null }) {
     const accordion  = document.getElementById(`dateAccordion${n}`);
     const toggleZone = document.getElementById(`dateToggleZone${n}`);
@@ -408,7 +789,9 @@ window.addEventListener('load', function () {
     return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
   }
 
-  /* ── Chip shelfmarks / functions accordion ── */
+  /* ─────────────────────────────────────────────
+     Chip shelfmarks / functions accordion
+     ───────────────────────────────────────────── */
   function initChipShelfmarksAccordion({ n, prefix = 'shelf', showValues = false, onFilterChange = null }) {
     const accordion   = document.getElementById(`${prefix}Accordion${n}`);
     const toggleZone  = document.getElementById(`${prefix}ToggleZone${n}`);
@@ -432,23 +815,16 @@ window.addEventListener('load', function () {
       const selected = list.querySelectorAll('.sm-chip.selected');
       const count = selected.length;
       if (onFilterChange) onFilterChange(count > 0);
-
       if (showValues) {
         pillRow.innerHTML = '';
         Array.from(selected).forEach((chip, i) => {
-          if (i > 0) {
-            const sep = document.createElement('span');
-            sep.className = 'pill-or'; sep.textContent = 'or';
-            pillRow.appendChild(sep);
-          }
+          if (i > 0) { const sep = document.createElement('span'); sep.className = 'pill-or'; sep.textContent = 'or'; pillRow.appendChild(sep); }
           const pill = document.createElement('span');
           pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
           pill.textContent = chip.textContent;
-          const x = document.createElement('span');
-          x.className = 'pill-chip-x'; x.textContent = '×';
+          const x = document.createElement('span'); x.className = 'pill-chip-x'; x.textContent = '×';
           x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); });
-          pill.appendChild(x);
-          pillRow.appendChild(pill);
+          pill.appendChild(x); pillRow.appendChild(pill);
         });
       } else {
         tag.style.visibility = count === 0 ? 'hidden' : 'visible';
@@ -475,7 +851,9 @@ window.addEventListener('load', function () {
     return resetChips;
   }
 
-  /* ── Fundamenta accordion ── */
+  /* ─────────────────────────────────────────────
+     Fundamenta accordion
+     ───────────────────────────────────────────── */
   function initFundamentaAccordion({ n, onFilterChange = null }) {
     const accordion  = document.getElementById(`fundaAccordion${n}`);
     const toggleZone = document.getElementById(`fundaToggleZone${n}`);
@@ -498,7 +876,9 @@ window.addEventListener('load', function () {
     return () => setVal('Both');
   }
 
-  /* ── Active-state pill (Option D) ── */
+  /* ─────────────────────────────────────────────
+     Active-state pill
+     ───────────────────────────────────────────── */
   const pill = document.getElementById('searchPill');
   const pillState = { fields: 0, filters: 0 };
 
@@ -512,10 +892,11 @@ window.addEventListener('load', function () {
     pill.classList.add('visible');
   }
 
-  /* Count builder rows with non-empty input */
-  document.getElementById('builderRows1').addEventListener('input', () => {
+  const builderRowsEl = document.getElementById('builderRows1');
+
+  builderRowsEl.addEventListener('input', () => {
     let count = 0;
-    document.querySelectorAll('#builderRows1 .builder-row').forEach(row => {
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
       const inp = row.querySelector('.builder-input, .p2b-text');
       if (inp && inp.value.trim()) count++;
     });
@@ -523,8 +904,10 @@ window.addEventListener('load', function () {
     updatePill();
   });
 
-  /* ── Initialise search interface ── */
-  let resetSearch; /* exposed for clear-search button below */
+  /* ─────────────────────────────────────────────
+     Initialise search interface
+     ───────────────────────────────────────────── */
+  let resetSearch;
 
   const CARD_CONFIGS = [
     { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } }
@@ -568,10 +951,7 @@ window.addEventListener('load', function () {
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener('click', () => {
         setVal('Both');
-        resetDate();
-        resetShelf();
-        resetFn();
-        resetFunda();
+        resetDate(); resetShelf(); resetFn(); resetFunda();
         document.getElementById(`filterPanel${n}`)
           .querySelectorAll('.phys-accordion.expanded')
           .forEach(a => a.classList.remove('expanded'));
@@ -579,239 +959,553 @@ window.addEventListener('load', function () {
     }
   });
 
-  /* ══════════════════════════════════════
-     Click icon to open / close drawer
-     ══════════════════════════════════════ */
-  const iconWrap = document.getElementById('searchIconWrap');
+  /* ─────────────────────────────────────────────
+     Drawer open / close
+     ───────────────────────────────────────────── */
   const icon     = document.getElementById('searchIconBtn');
   const dropdown = document.getElementById('searchDropdown');
   const overlay  = document.getElementById('searchOverlay');
 
-  function openDropdown() {
-    dropdown.classList.add('open');
-    icon.classList.add('drawer-open');
-    overlay.classList.add('show');
-  }
+  function openDropdown()  { dropdown.classList.add('open');    icon.classList.add('drawer-open');    overlay.classList.add('show'); }
+  function closeDropdown() { dropdown.classList.remove('open'); icon.classList.remove('drawer-open'); overlay.classList.remove('show'); }
 
-  function closeDropdown() {
-    dropdown.classList.remove('open');
-    icon.classList.remove('drawer-open');
-    overlay.classList.remove('show');
-  }
-
-  icon.addEventListener('click', () => {
-    if (dropdown.classList.contains('open')) {
-      closeDropdown();
-    } else {
-      openDropdown();
-    }
-  });
-
-  /* Clicking the overlay also closes the drawer */
+  icon.addEventListener('click', () => dropdown.classList.contains('open') ? closeDropdown() : openDropdown());
   overlay.addEventListener('click', closeDropdown);
 
-  /* ── Clear all search fields (search panel) ── */
+  /* ─────────────────────────────────────────────
+     Clear search fields button
+     ───────────────────────────────────────────── */
   (function () {
     const clearBtn = document.getElementById('clearSearchBtn1');
-    const rowsEl   = document.getElementById('builderRows1');
 
-    function update() {
-      const hasInput = Array.from(rowsEl.querySelectorAll('.builder-input, .p2b-text'))
+    function updateClearBtn() {
+      const hasInput = Array.from(builderRowsEl.querySelectorAll('.builder-input, .p2b-text'))
         .some(inp => inp.value.trim());
       clearBtn.style.display = hasInput ? '' : 'none';
     }
 
-    rowsEl.addEventListener('input', update);
-    rowsEl.addEventListener('click', e => {
-      if (e.target.closest('.remove-btn')) setTimeout(update, 0);
-    });
+    builderRowsEl.addEventListener('input', updateClearBtn);
+    builderRowsEl.addEventListener('click', e => { if (e.target.closest('.remove-btn')) setTimeout(updateClearBtn, 0); });
 
     clearBtn.addEventListener('click', () => {
-      resetSearch();           /* reset to 2 default rows */
-      pillState.fields = 0;
-      updatePill();
-      update();
-      $('#sourcesTable').DataTable().draw();
+      resetSearch();
+      pillState.fields = 0; updatePill();
+      updateClearBtn();
+      if (table) table.draw();
     });
   })();
 
-  /* ── Search builder → DataTable AND-logic filtering ── */
-  (function () {
-    const rowsEl = document.getElementById('builderRows1');
-    /* Get the DataTable instance lazily (only when actually needed, i.e. inside
-       a DataTables callback or a user-event handler) so we never call .DataTable()
-       before ex15.js has finished initialising the table via fetch(). */
-    function getTable() { return $('#sourcesTable').DataTable(); }
-
-    /* Umlaut normalization — mirrors ex15.js so ü/ue/u all collapse to 'u' etc. */
-    function normalizeUmlauts(text) {
-      if (!text) return '';
-      return text
-        .replace(/ü/gi, 'u').replace(/ä/gi, 'a').replace(/ö/gi, 'o')
-        .replace(/ue/gi, 'u').replace(/ae/gi, 'a').replace(/oe/gi, 'o');
-    }
-
-    function normalize(val) { return normalizeUmlauts((val || '').toLowerCase()); }
-
-    function getActiveRows() {
-      const active = [];
-      rowsEl.querySelectorAll('.builder-row').forEach(row => {
-        const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-        const inp   = row.querySelector('.builder-input, .p2b-text');
-        const value = inp ? inp.value.trim() : '';
-        if (value) active.push({ field, value: normalize(value) });
-      });
-      return active;
-    }
-
-    function rowMatches(row, field, value) {
-      switch (field) {
-        case 'All fields':
-          return [
-            row.shelfmark?.label, row.title, row.alternativeTitle,
-            row.date?.label, row.author?.label, row.publisher?.label,
-            row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
-            row.description, row.comment, row.bibliography
-          ].some(v => normalize(v).includes(value));
-        case 'Title':
-          return normalize(row.title).includes(value) ||
-                 normalize(row.alternativeTitle).includes(value);
-        case 'Person':
-          return normalize(row.author?.label).includes(value);
-        case 'Place':
-          return normalize(row.printPlace?.label).includes(value);
-        case 'RISM / VD16 / Brown ID':
-          return normalize(row.rism).includes(value)      ||
-                 normalize(row.otherRism).includes(value) ||
-                 normalize(row.vd16).includes(value)      ||
-                 normalize(row.otherVD16).includes(value);
-        case 'Description / Comment':
-          return normalize(row.description).includes(value) ||
-                 normalize(row.comment).includes(value);
-        case 'Bibliography':
-          return normalize(row.bibliography).includes(value);
-        default:
-          return false;
-      }
-    }
-
-    $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
-      if (settings.nTable.id !== 'sourcesTable') return true;
-      const active = getActiveRows();
-      if (active.length === 0) return true;
-      const rowData = getTable().row(dataIndex).data();
-      if (!rowData) return true;
-      /* AND logic: show row only if it matches ALL active search criteria */
-      return active.every(({ field, value }) => rowMatches(rowData, field, value));
+  /* ─────────────────────────────────────────────
+     Search/filter logic (AND-logic between fields)
+     ───────────────────────────────────────────── */
+  function getActiveRows() {
+    const active = [];
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp   = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (value) active.push({ field, value: normalize(value) });
     });
+    return active;
+  }
 
-    /* ── Highlighting ────────────────────────────────────────────────────────
-       Build a regex from a *normalised* term (ü/ue/u all reduced to 'u' etc.)
-       that matches every original umlaut variant in the cell text.
-       Longer sequences are listed first so the regex engine prefers them
-       before falling back to single-char alternatives. */
-    function escapeRegExp(str) {
-      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  function rowMatches(row, field, value) {
+    switch (field) {
+      case 'All fields':
+        return [
+          row.shelfmark?.label, row.title, row.alternativeTitle,
+          row.date?.label, row.author?.label, row.publisher?.label,
+          row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
+          row.description, row.comment, row.bibliography
+        ].some(v => normalize(v).includes(value));
+      case 'Title':
+        return normalize(row.title).includes(value) ||
+               normalize(row.alternativeTitle).includes(value);
+      case 'Person':
+        return normalize(row.author?.label).includes(value);
+      case 'Place':
+        return normalize(row.printPlace?.label).includes(value);
+      case 'RISM / VD16 / Brown ID':
+        return normalize(row.rism).includes(value)      ||
+               normalize(row.otherRism).includes(value) ||
+               normalize(row.vd16).includes(value)      ||
+               normalize(row.otherVD16).includes(value);
+      case 'Description / Comment':
+        return normalize(row.description).includes(value) ||
+               normalize(row.comment).includes(value);
+      case 'Bibliography':
+        return normalize(row.bibliography).includes(value);
+      default:
+        return false;
     }
+  }
 
-    function umlautHighlightPattern(normTerm) {
-      const e = escapeRegExp(normTerm);
-      return e
-        .replace(/u/g, '(?:ue|Ue|UE|ü|Ü|u|U)')
-        .replace(/a/g, '(?:ae|Ae|AE|ä|Ä|a|A)')
-        .replace(/o/g, '(?:oe|Oe|OE|ö|Ö|o|O)');
-    }
+  $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
+    if (settings.nTable.id !== 'sourcesTable') return true;
+    if (!table) return true;
+    const active = getActiveRows();
+    if (active.length === 0) return true;
+    const rowData = table.row(dataIndex).data();
+    if (!rowData) return true;
+    return active.every(({ field, value }) => rowMatches(rowData, field, value));
+  });
 
-    /* Highlight active Title / All-fields terms in:
-       - the Title (col 2) cell of every visible main row
-       - the Alternative title cell inside any open child row */
-    function applyHighlights() {
-      const active = getActiveRows();
-      const terms  = active.filter(r => r.field === 'Title' || r.field === 'All fields');
+  /* ─────────────────────────────────────────────
+     Post-draw highlighting
+     ───────────────────────────────────────────── */
 
-      getTable().rows({ page: 'current' }).nodes().each(function (node) {
-        /* ── Main Title cell (col 2) ── */
-        const cell = node.cells[2];
-        if (cell) {
-          const plain = (cell.textContent || '').trim();
-          if (plain) {
-            let html = plain
-              .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            terms.forEach(function ({ value }) {
-              try {
-                const re = new RegExp(umlautHighlightPattern(value), 'gi');
-                html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
-              } catch (e) {}
-            });
-            cell.innerHTML = html;
-          }
-        }
+  // Highlight active Title / All-fields terms in the Title cell (col 2)
+  // and in the Alternative title cell inside any open child row
+  function applyHighlights() {
+    const active = getActiveRows();
+    const terms  = active.filter(r => r.field === 'Title' || r.field === 'All fields');
 
-        /* ── Alternative title cell in open child row ── */
-        if (terms.length > 0) {
-          $(node).next('tr.child').find('.details-label').each(function () {
-            if ($(this).text().trim() === 'Alternative title:') {
-              const $val = $(this).next('.details-value');
-              const plain = $val.text().trim();
-              if (plain) {
-                let html = plain
-                  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                terms.forEach(function ({ value }) {
-                  try {
-                    const re = new RegExp(umlautHighlightPattern(value), 'gi');
-                    html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
-                  } catch (e) {}
-                });
-                $val.html(html);
-              }
-              return false; /* break — only one alternative title per row */
-            }
+    table.rows({ page: 'current' }).nodes().each(function (node) {
+      const cell = node.cells[2];
+      if (cell) {
+        const plain = (cell.textContent || '').trim();
+        if (plain) {
+          let html = plain.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          terms.forEach(function ({ value }) {
+            try {
+              const re = new RegExp(umlautHighlightPattern(value), 'gi');
+              html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
+            } catch (e) {}
           });
+          cell.innerHTML = html;
+        }
+      }
+
+      if (terms.length > 0) {
+        $(node).next('tr.child').find('.details-label').each(function () {
+          if ($(this).text().trim() === 'Alternative title:') {
+            const $val = $(this).next('.details-value');
+            const plain = $val.text().trim();
+            if (plain) {
+              let html = plain.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              terms.forEach(function ({ value }) {
+                try {
+                  const re = new RegExp(umlautHighlightPattern(value), 'gi');
+                  html = html.replace(re, m => `<mark class="search-highlight">${m}</mark>`);
+                } catch (e) {}
+              });
+              $val.html(html);
+            }
+            return false; /* break — only one alternative title per row */
+          }
+        });
+      }
+    });
+  }
+
+  // Expand child rows whose match is only in alternativeTitle.
+  // Uses a native DOM click on cells[0] (the dt-control chevron column) —
+  // a real browser event that bubbles and reliably triggers the delegated click handler.
+  function expandAltTitleMatches() {
+    const active = getActiveRows();
+    const titleTerms = active.filter(r => r.field === 'Title' || r.field === 'All fields');
+    if (titleTerms.length === 0) return;
+    table.rows({ page: 'current' }).every(function () {
+      const rowData = this.data();
+      if (!rowData || !rowData.alternativeTitle) return;
+      if (this.child.isShown()) return;
+      const hasAltMatch = titleTerms.some(({ value }) => normalize(rowData.alternativeTitle).includes(value));
+      if (hasAltMatch) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
+
+  // Wire search builder inputs to DataTable draws
+  builderRowsEl.addEventListener('input',  () => { if (table) table.draw(); });
+  builderRowsEl.addEventListener('change', () => { if (table) table.draw(); });
+  builderRowsEl.addEventListener('click',  e => {
+    if (e.target.closest('.remove-btn')) setTimeout(() => { if (table) table.draw(); }, 0);
+  });
+
+  /* ─────────────────────────────────────────────
+     DataTable initialization
+     ───────────────────────────────────────────── */
+  fetch('/assets/Q1.json')
+    .then(response => response.json())
+    .then(json => {
+      const data = json['@graph'] || [];
+
+      table = $('#sourcesTable').DataTable({
+        data: data,
+        columns: [
+          {
+            className: 'dt-control',
+            orderable: false,
+            data: null,
+            defaultContent: '',
+            render: function() {
+              return '<span class="chev" data-feather="chevron-right"></span>';
+            }
+          },
+          {
+            data: 'shelfmark.label',
+            title: 'Shelfmark',
+            defaultContent: '',
+            render: function(data, type, row) {
+              if (type === 'display') {
+                const highlighted = highlightText(data, currentSearchTerm);
+                if (row.shelfmark && row.shelfmark.url) {
+                  return `<a href="${row.shelfmark.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`;
+                }
+                return highlighted;
+              }
+              return data || '';
+            }
+          },
+          {
+            data: 'title',
+            title: 'Title',
+            defaultContent: '',
+            render: (data, type) => renderWithHighlight(data, type, true)
+          },
+          {
+            data: 'shortTitle',
+            title: 'Short title',
+            defaultContent: '',
+            render: renderWithHighlight
+          },
+          {
+            data: 'date.label',
+            title: 'Dates',
+            defaultContent: '',
+            type: 'num',
+            render: function(data, type, row) {
+              if (type === 'sort') {
+                if (row.date && row.date.timespan && row.date.timespan.earliestDate && row.date.timespan.earliestDate.value) {
+                  return parseInt(row.date.timespan.earliestDate.value) || 0;
+                }
+                return 0;
+              }
+              if (type === 'display') return highlightText(data, currentSearchTerm);
+              return data || '';
+            }
+          },
+          {
+            data: 'author.label',
+            title: 'Author / Editor',
+            defaultContent: '',
+            render: (data, type) => renderWithHighlight(data, type, true)
+          },
+          {
+            data: 'publisher.label',
+            title: 'Publisher',
+            defaultContent: '',
+            render: (data, type) => renderWithHighlight(data, type, true)
+          },
+          {
+            data: 'printPlace.label',
+            title: 'Printing place',
+            defaultContent: '',
+            width: '120px',
+            render: (data, type) => renderWithHighlight(data, type, true)
+          },
+          {
+            data: 'rism',
+            title: 'RISM',
+            render: (data, type, row) => renderCombinedField(row, 'rism', 'otherRism', type)
+          },
+          {
+            data: 'vd16',
+            title: 'VD16',
+            render: (data, type, row) => renderCombinedField(row, 'vd16', 'otherVD16', type)
+          }
+        ],
+        paging: true,
+        searching: true,
+        info: false,
+        ordering: true,
+        order: [[1, 'asc']],
+        pageLength: 25,
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        dom: 'lrtp',
+        stripeClasses: [],
+        drawCallback: function() {
+          const api = this.api();
+          const totalRecords = api.page.info().recordsDisplay;
+          const $lengthDiv = $('.dataTables_length');
+          if ($lengthDiv.length && !$lengthDiv.parent().hasClass('length-wrapper')) {
+            $lengthDiv.wrap('<div class="length-wrapper"></div>');
+          }
+          const $wrapper = $('.length-wrapper');
+          let $recordCount = $wrapper.find('.record-count');
+          if ($recordCount.length === 0) {
+            $recordCount = $('<div class="record-count"></div>');
+            $wrapper.append($recordCount);
+          }
+          $recordCount.text(totalRecords + ' Records');
+        },
+        initComplete: function() {
+          $('#sourcesTable').css('opacity', '1');
+          feather.replace();
         }
       });
-    }
 
-    /* Expand child rows whose match is only in alternativeTitle.
-       Uses a native DOM click on cells[0] (the dt-control chevron column) —
-       a real browser event that bubbles and reliably triggers ex15.js's
-       delegated $('#sourcesTable tbody').on('click','td.dt-control',...) handler. */
-    function expandAltTitleMatches() {
-      const active = getActiveRows();
-      const titleTerms = active.filter(r => r.field === 'Title' || r.field === 'All fields');
-      if (titleTerms.length === 0) return;
+      /* ── Child row helpers ── */
 
-      getTable().rows({ page: 'current' }).every(function () {
-        const rowData = this.data();
-        if (!rowData || !rowData.alternativeTitle) return;
-        if (this.child.isShown()) return;
-        const hasAltMatch = titleTerms.some(({ value }) =>
-          normalize(rowData.alternativeTitle).includes(value)
-        );
-        if (hasAltMatch) {
-          const chevron = this.node().cells[0];
-          if (chevron) chevron.click();
+      function toggleChildRow(row, tr, expand) {
+        if (expand) {
+          row.child(formatDetails(row.data())).show();
+          tr.addClass('shown');
+        } else {
+          row.child.hide();
+          tr.removeClass('shown');
         }
+        updateChevron(tr.find('td.dt-control .chev'), expand);
+      }
+
+      function applyChildTableCdClass(tr) {
+        const $childTable = tr.next('.child').find('.details-table');
+        if ($childTable.length) applyCdExpandedClass($childTable);
+      }
+
+      function applyAllChildTablesCdClass() {
+        $('.child .details-table').each(function() { applyCdExpandedClass($(this)); });
+      }
+
+      function scheduleApplyCdClass(tr = null) {
+        setTimeout(() => tr ? applyChildTableCdClass(tr) : applyAllChildTablesCdClass(), 0);
+      }
+
+      function collapseAllDetails() {
+        table.rows().every(function() {
+          if (this.child.isShown()) {
+            const tr = $(this.node());
+            this.child.hide();
+            tr.removeClass('shown');
+            updateChevron(tr.find('td.dt-control .chev'), false);
+          }
+        });
+      }
+
+      function toggleAllSubgroups(show) {
+        $('.subgroup-heading-row').each(function() {
+          const $row = $(this);
+          const subgroup = $row.data('subgroup');
+          $(`.subgroup-content[data-subgroup="${subgroup}"]`).toggle(show);
+          updateChevron($row.find('.chev'), show);
+        });
+      }
+
+      function toggleAllRowsAndSubgroups(expand) {
+        table.rows().every(function() {
+          const tr = $(this.node());
+          if (expand !== this.child.isShown()) toggleChildRow(this, tr, expand);
+        });
+        if (expand) scheduleApplyCdClass();
+        toggleAllSubgroups(expand);
+      }
+
+      /* ── Expand all rows on current page ── */
+      function expandAllCurrentPageRows() {
+        table.rows({ page: 'current' }).nodes().each(function(node) {
+          const tr = $(node);
+          const row = table.row(node);
+          if (!row || row.length === 0) return;
+          if (row.child.isShown()) { row.child.hide(); }
+          row.child.remove();
+          tr.removeClass('shown');
+          const childContent = formatDetails(row.data());
+          const $childTr = $('<tr class="child"><td colspan="' + tr.children('td').length + '">' + childContent + '</td></tr>');
+          tr.after($childTr);
+          tr.addClass('shown');
+          updateChevron(tr.find('td.dt-control .chev'), true);
+          row.child(childContent);
+          $childTr.find('.subgroup-content').show();
+        });
+        scheduleApplyCdClass();
+        feather.replace();
+        if (isDescCommentsOpen) {
+          setTimeout(function() { openAllDescCommentsOnPage(); updateToggleDescCommentsBtn(); }, 50);
+        } else {
+          updateToggleDescCommentsBtn();
+        }
+        isExpandAllActive = true;
+        $('#expandCollapseBtn').text('Collapse All');
+      }
+
+      /* ── Expand/collapse button state ── */
+      function updateExpandCollapseButton() {
+        const $btn = $('#expandCollapseBtn');
+        const visibleRows = table.rows({ search: 'applied', page: 'current' });
+        const totalRows = visibleRows.count();
+        let expandedRows = 0, hasCollapsedSubgroup = false;
+        visibleRows.every(function() {
+          if (this.child.isShown()) {
+            expandedRows++;
+            $(this.child()).find('.subgroup-content').each(function() {
+              if (this.style.display === 'none' || window.getComputedStyle(this).display === 'none') {
+                hasCollapsedSubgroup = true; return false;
+              }
+            });
+          }
+        });
+        const allExpanded = totalRows > 0 && expandedRows === totalRows && !hasCollapsedSubgroup;
+        $btn.text(allExpanded ? 'Collapse All' : 'Expand All');
+        isExpandAllActive = allExpanded;
+      }
+
+      /* ── Draw handler (combined) ── */
+      table.on('draw', function() {
+        feather.replace();
+
+        // Expand alt-title matches first, then highlight
+        setTimeout(function() {
+          expandAltTitleMatches();
+          applyHighlights();
+        }, 0);
+
+        const wasExpandAllActive = isExpandAllActive;
+        updateExpandCollapseButton();
+
+        if (wasExpandAllActive && !isManualToggle) {
+          setTimeout(function() {
+            requestAnimationFrame(function() { expandAllCurrentPageRows(); });
+          }, 100);
+        }
+
+        setTimeout(updateToggleDescCommentsBtn, 100);
       });
-    }
 
-    function redraw() { getTable().draw(); }
+      /* ── dt-control click → open/close child row ── */
+      $('#sourcesTable tbody').on('click', 'td.dt-control', function() {
+        const tr = $(this).closest('tr');
+        const row = table.row(tr);
+        const isShown = row.child.isShown();
+        toggleChildRow(row, tr, !isShown);
+        if (!isShown) scheduleApplyCdClass(tr);
+        updateExpandCollapseButton();
+        setTimeout(updateToggleDescCommentsBtn, 50);
+        feather.replace();
+      });
 
-    /* On every draw: expand alt-title rows FIRST (so child rows exist in the DOM),
-       then apply highlights to both main rows and open child rows.
-       IMPORTANT: must use 'draw.dt' — DataTables fires the event as 'draw.dt'
-       and jQuery only dispatches to handlers whose namespace matches the trigger. */
-    $('#sourcesTable').on('draw.dt', function () {
-      setTimeout(function () {
-        expandAltTitleMatches(); /* expand first — child rows must exist before highlighting */
-        applyHighlights();       /* then highlight main Title cells + child alt-title cells */
-      }, 0);
-    });
+      /* ── cd-badge click → toggle description/comment ── */
+      $('#sourcesTable tbody').on('click', '.cd-badge', function(e) {
+        isManualToggle = true;
+        e.preventDefault(); e.stopPropagation();
+        const targetId = $(this).data('target');
+        const $targetRow = $('#' + targetId);
+        const $row = $(this).closest('tr');
+        const $badge = $(this);
+        if ($targetRow.is(':visible')) {
+          $targetRow.hide(); $badge.removeClass('active');
+          if (targetId) manuallyHiddenContent.add(targetId);
+          $badge.find('svg').replaceWith(feather.icons['plus-circle'].toSvg({ width: 12, height: 12, style: 'vertical-align: -2px; margin-right: 4px;' }));
+          if ($row.find('.CD-content:visible').length === 0) $row.removeClass('cd-expanded');
+        } else {
+          $targetRow.show(); $badge.addClass('active');
+          manuallyHiddenContent.delete(targetId);
+          $badge.find('svg').replaceWith(feather.icons['minus-circle'].toSvg({ width: 12, height: 12, style: 'vertical-align: -2px; margin-right: 4px;' }));
+          $row.addClass('cd-expanded');
+        }
+        updateToggleDescCommentsBtn();
+        setTimeout(() => { isManualToggle = false; }, 400);
+      });
 
-    rowsEl.addEventListener('input',  redraw);
-    rowsEl.addEventListener('change', redraw); /* field selector changes */
-    rowsEl.addEventListener('click',  e => {
-      if (e.target.closest('.remove-btn')) setTimeout(redraw, 0);
-    });
-  })();
+      /* ── Subgroup heading click → collapse/expand ── */
+      $('#sourcesTable tbody').on('click', '.heading-toggle', function(e) {
+        e.stopPropagation();
+        const $row = $(this).closest('.subgroup-heading-row');
+        const subgroup = $row.data('subgroup');
+        $row.closest('table').find('.subgroup-content[data-subgroup="' + subgroup + '"]')
+          .toggle({ duration: 300, easing: 'swing' });
+      });
+
+      /* ── Buttons ── */
+      $('.dataTables_length').after('<button id="expandCollapseBtn">Expand All</button><button id="toggleDescCommentsBtn">Open Descriptions/Comments</button>');
+
+      /* ── Descriptions/Comments toggle ── */
+      function hasCollapsedDescriptionBadges() {
+        let found = false;
+        $('#sourcesTable .cd-badge:visible:not(.active)').each(function() { found = true; return false; });
+        return found;
+      }
+
+      function hasExpandedDescriptionBadges() {
+        return $('#sourcesTable .cd-badge:visible.active').length > 0;
+      }
+
+      function updateToggleDescCommentsBtn() {
+        const $btn = $('#toggleDescCommentsBtn');
+        const hasCollapsed = hasCollapsedDescriptionBadges();
+        const hasExpanded  = hasExpandedDescriptionBadges();
+        if (hasCollapsed || hasExpanded) {
+          $btn.addClass('visible');
+          $btn.text(hasCollapsed ? 'Open Descriptions/Comments' : 'Close Descriptions/Comments');
+        } else {
+          $btn.removeClass('visible');
+        }
+      }
+
+      function openAllDescCommentsOnPage() {
+        $('#sourcesTable .cd-badge:visible:not(.active)').each(function() {
+          const $badge = $(this);
+          const targetId = $badge.data('target');
+          const $targetRow = $('#' + targetId);
+          $targetRow.show(); $badge.addClass('active');
+          manuallyHiddenContent.delete(targetId);
+          $badge.find('svg').replaceWith(feather.icons['minus-circle'].toSvg({ width: 12, height: 12, style: 'vertical-align: -2px; margin-right: 4px;' }));
+          $badge.closest('tr').addClass('cd-expanded');
+        });
+      }
+
+      $('#toggleDescCommentsBtn').on('click', function() {
+        const $btn = $(this);
+        const isOpening = $btn.text() === 'Open Descriptions/Comments';
+        $('#sourcesTable .cd-badge:visible').each(function() {
+          const $badge = $(this);
+          const targetId = $badge.data('target');
+          const $targetRow = $('#' + targetId);
+          const isActive = $badge.hasClass('active');
+          if (isOpening && !isActive) {
+            $targetRow.show(); $badge.addClass('active');
+            manuallyHiddenContent.delete(targetId);
+            $badge.find('svg').replaceWith(feather.icons['minus-circle'].toSvg({ width: 12, height: 12, style: 'vertical-align: -2px; margin-right: 4px;' }));
+            $badge.closest('tr').addClass('cd-expanded');
+          } else if (!isOpening && isActive) {
+            $targetRow.hide(); $badge.removeClass('active');
+            manuallyHiddenContent.add(targetId);
+            $badge.find('svg').replaceWith(feather.icons['plus-circle'].toSvg({ width: 12, height: 12, style: 'vertical-align: -2px; margin-right: 4px;' }));
+            const $row = $badge.closest('tr');
+            if ($row.find('.CD-content:visible').length === 0) $row.removeClass('cd-expanded');
+          }
+        });
+        $btn.text(isOpening ? 'Close Descriptions/Comments' : 'Open Descriptions/Comments');
+        isDescCommentsOpen = isOpening;
+      });
+
+      /* ── Expand/Collapse All button ── */
+      $('#expandCollapseBtn').on('click', function() {
+        const $btn = $(this);
+        const isExpanding = $btn.text() === 'Expand All';
+        toggleAllRowsAndSubgroups(isExpanding);
+        $btn.text(isExpanding ? 'Collapse All' : 'Expand All');
+        isExpandAllActive = isExpanding;
+        feather.replace();
+        setTimeout(updateToggleDescCommentsBtn, 100);
+      });
+
+    })
+    .catch(error => { console.error('Error loading data:', error); });
+
+  /* ─────────────────────────────────────────────
+     Scroll-based fade effect for search box
+     ───────────────────────────────────────────── */
+  window.addEventListener('scroll', function() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const fadeStart = 50, fadeEnd = 150;
+    let opacity;
+    if (scrollTop <= fadeStart) { opacity = 1; }
+    else if (scrollTop >= fadeEnd) { opacity = 0; }
+    else { opacity = 1 - (scrollTop - fadeStart) / (fadeEnd - fadeStart); }
+    const searchContainer = document.querySelector('.global-search-container');
+    if (searchContainer) searchContainer.style.opacity = opacity;
+  });
 
 });
