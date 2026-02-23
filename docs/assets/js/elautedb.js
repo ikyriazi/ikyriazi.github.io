@@ -691,8 +691,8 @@ window.addEventListener('load', function () {
       if (active.length === 0) return true;
       const rowData = getTable().row(dataIndex).data();
       if (!rowData) return true;
-      /* OR logic: show row if it matches ANY active search criterion */
-      return active.some(({ field, value }) => rowMatches(rowData, field, value));
+      /* AND logic: show row only if it matches ALL active search criteria */
+      return active.every(({ field, value }) => rowMatches(rowData, field, value));
     });
 
     function redraw() { getTable().draw(); }
