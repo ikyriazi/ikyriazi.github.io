@@ -1114,16 +1114,9 @@ window.addEventListener('load', function () {
   function refreshOpenAltTitleHighlights() {
     table.rows({ page: 'current' }).every(function () {
       if (!this.child.isShown()) return;
-      const $child = $(this.node()).next('tr.child');
-      const $labelCells = $child.find('.details-label');
-      if ($labelCells.length === 0) return;
-      $labelCells.each(function () {
-        if ($(this).text().trim() !== 'Alternative title:') return;
-        const $val = $(this).next('.details-value');
-        const plain = $val.text();
-        $val.html(highlightText(plain, getActiveTitleTerm()));
-        return false; // break
-      });
+      // Fully re-render the child row content with the current search term,
+      // so all highlights (not just the alt-title cell) are generated fresh.
+      this.child(formatDetails(this.data())).show();
     });
   }
 
