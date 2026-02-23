@@ -41,14 +41,14 @@ $(document).ready(function() {
       if (item.label) {
         const labelCell = getFirstLabel(index, labelText);
         const parts = ['description', 'comment'].filter(type => item[type]);
-        
+
         // Check if search term exists in description or comment
         const searchTerm = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
         const hasSearchMatch = searchTerm && parts.some(type => {
           const text = normalizeUmlauts(stripHtml(item[type]).toLowerCase());
           return text.includes(searchTerm);
         });
-        
+
         // Generate badges with active class if match found
         const badges = parts.map(type => {
           const text = normalizeUmlauts(stripHtml(item[type]).toLowerCase());
@@ -192,24 +192,24 @@ $(document).ready(function() {
     const str = String(text);
     const t = (term || '').trim();
     if (!t) return str; // Return original HTML content without escaping
-    
+
     try {
       // Create a temporary div to parse HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = str;
-      
+
       // Get plain text content (without HTML tags)
       const plainText = (tempDiv.textContent || tempDiv.innerText || '');
-      
+
       // Create regex pattern that matches the search term with umlaut variants
       const pattern = createUmlautPattern(t);
       const regex = new RegExp(pattern, 'gi');
-      
+
       // Check if the search term exists using the regex
       if (!regex.test(plainText)) {
         return str; // Term not found, return original
       }
-      
+
       // Find ALL occurrences of the search term in plain text using regex
       regex.lastIndex = 0; // Reset regex after test()
       const matches = [];
@@ -280,7 +280,7 @@ $(document).ready(function() {
           Array.from(node.childNodes).forEach(highlightNode);
         }
       }
-      
+
       highlightNode(tempDiv);
       return tempDiv.innerHTML;
     } catch (e) {
@@ -292,7 +292,7 @@ $(document).ready(function() {
   function formatDetails(row) {
     // Extract unique record ID from row.id (e.g., "https://e-laute.info/data/sources/1" -> "1")
     const recordId = row.id ? row.id.split('/').pop() : Math.random().toString(36).substr(2, 9);
-    
+
     // Capitalize first letter of physicalType
     const typeValue = row.physicalType ?
       row.physicalType.charAt(0).toUpperCase() + row.physicalType.slice(1) : '';
@@ -306,13 +306,13 @@ $(document).ready(function() {
 
     // Add type row (not searchable, skip highlighting)
     rows += generateSimpleRow('Type:', typeValue, true);
-    
+
     // Add empty spacing row after first subgroup with smaller height
     rows += generateSpacerRow(null, true);
 
     // Check if Contextual Metadata subgroup has any content
     const hasContextualMetadata = row.provenance || row.function || row.fundamenta !== undefined || row.codicology;
-    
+
     if (hasContextualMetadata) {
       // Add Contextual Metadata heading
       rows += generateSubgroupHeading('Contextual Metadata', 'contextual');
@@ -334,7 +334,7 @@ $(document).ready(function() {
 
     // Check if Further Identifiers subgroup has any content
     const hasFurtherIdentifiers = row.brown || row.otherShelfmark;
-    
+
     if (hasFurtherIdentifiers) {
       // Add Further Identifiers subgroup heading
       rows += generateSubgroupHeading('Further Identifiers', 'identifiers');
@@ -365,7 +365,7 @@ $(document).ready(function() {
 
     // Check if Bibliography and Related Resources subgroup has any content
     const hasBibliography = row.referencedBy || row.relatedResource;
-    
+
     if (hasBibliography) {
       // Add Bibliography and Related Resources subgroup heading
       rows += generateSubgroupHeading('Bibliography and Related Resources', 'bibliography');
@@ -522,175 +522,13 @@ $(document).ready(function() {
       .replace(/oe/gi, 'o');
   }
 
-  // Helper to build searchable text from row data fields
-  function buildSearchableText(rowData, detailOnly = false) {
-    const fields = detailOnly ? [
-      'alternativeTitle', 'brown', 'provenance', 'function', 
-      'codicology', 'otherShelfmark', 'referencedBy', 'relatedResource'
-    ] : [
-      'shelfmark', 'title', 'shortTitle', 'date', 'author', 'publisher',
-      'printPlace', 'rism', 'vd16', 'alternativeTitle',
-      'provenance', 'function', 'codicology', 'brown', 'otherShelfmark',
-      'referencedBy', 'relatedResource'
-    ];
-    const text = fields.map(field => extractText(rowData[field])).join(' ').toLowerCase();
-    return normalizeUmlauts(text);
-  }
-
-  // Global search variable
+  // State variables
   let table;
-  let currentSearchTerm = '';
+  let currentSearchTerm = ''; // Always empty; search/highlighting handled by elautedb.js
   let isExpandAllActive = false; // Track if "Expand All" is active
   let isDescCommentsOpen = false; // Track if descriptions/comments are open
 
   // Fetch data from Q1.json
-  let lastSearchValue = '';
-
-  // Initialize filter variables
-  const minYear = 1450;
-  const maxYear = 1620;
-  let minDate = minYear;
-  let maxDate = maxYear;
-  let physicalTypeFilter = 'both';
-  let fundamentaFilter = 'both';
-  let selectedShortTitles = new Set();
-  let selectedPersons = new Set();
-  let selectedPlaces = new Set();
-  let selectedFunctions = new Set();
-  let selectedShelfmarks = new Set();
-
-  // Constants
-  const NO_RECORDS_MESSAGE = '<div style="color: #666;">No matching records available</div>';
-
-  // Generic helper to extract values from a record based on field configuration
-  function getValuesFromRecord(row, fields) {
-    const values = [];
-    fields.forEach(field => {
-      // Navigate nested paths (e.g., "author.normalizedName")
-      const pathParts = field.path.split('.');
-      let data = row;
-      for (const part of pathParts) {
-        if (!data) break;
-        data = data[part];
-      }
-
-      if (data) {
-        const items = Array.isArray(data) ? data : [data];
-        items.forEach(item => {
-          const value = field.property ? item[field.property] : item;
-          if (value) values.push(value);
-        });
-      }
-    });
-    return values.length > 0 ? values : ['—'];
-  }
-
-  // Field configurations for each filter type
-  const FILTER_CONFIGS = {
-    shortTitles: [{ path: 'shortTitle' }],
-    persons: [
-      { path: 'author', property: 'normalizedName' },
-      { path: 'publisher', property: 'normalizedName' }
-    ],
-    places: [
-      { path: 'printPlace', property: 'normalizedName' },
-      { path: 'provenance', property: 'normalizedName' }
-    ],
-    functions: [{ path: 'function', property: 'label' }],
-    shelfmarks: [
-      { path: 'shelfmark', property: 'label' },
-      { path: 'otherShelfmark', property: 'label' }
-    ]
-  };
-
-  // Wrapper functions for backward compatibility
-  function getShortTitlesFromRecord(row) {
-    return getValuesFromRecord(row, FILTER_CONFIGS.shortTitles);
-  }
-
-  function getPersonsFromRecord(row) {
-    return getValuesFromRecord(row, FILTER_CONFIGS.persons);
-  }
-
-  function getPlacesFromRecord(row) {
-    return getValuesFromRecord(row, FILTER_CONFIGS.places);
-  }
-
-  function getFunctionsFromRecord(row) {
-    return getValuesFromRecord(row, FILTER_CONFIGS.functions);
-  }
-
-  function getShelfmarksFromRecord(row) {
-    return getValuesFromRecord(row, FILTER_CONFIGS.shelfmarks);
-  }
-
-  // Helper function to check multi-select filter (OR logic: at least one match)
-  function checkMultiSelectFilter(recordValues, selectedSet) {
-    if (selectedSet.size === 0) return true;
-    return recordValues.some(value => selectedSet.has(value));
-  }
-
-  // Shared filter function (excludeShortTitles/excludePersons/excludePlaces/excludeFunctions/excludeShelfmarks: whether to skip those filters)
-  function applyFilters(row, excludeShortTitles = false, excludePersons = false, excludePlaces = false, excludeFunctions = false, excludeShelfmarks = false) {
-    const searchTerm = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
-    if (searchTerm && !buildSearchableText(row).includes(searchTerm)) {
-      return false;
-    }
-
-    if (row.date && row.date.timespan && row.date.timespan.earliestDate && row.date.timespan.earliestDate.value) {
-      const recordDate = parseInt(row.date.timespan.earliestDate.value);
-      if (recordDate < minDate || recordDate > maxDate) {
-        return false;
-      }
-    }
-
-    if (physicalTypeFilter !== 'both') {
-      const recordType = (row.physicalType || '').toLowerCase();
-      if (recordType !== physicalTypeFilter) {
-        return false;
-      }
-    }
-
-    if (fundamentaFilter !== 'both') {
-      const recordFundamenta = row.fundamenta;
-      if (fundamentaFilter === 'yes' && recordFundamenta !== 1) {
-        return false;
-      }
-      if (fundamentaFilter === 'no' && recordFundamenta !== 0) {
-        return false;
-      }
-    }
-
-    // Check multi-select filters using helper function
-    if (!excludeShortTitles && !checkMultiSelectFilter(getShortTitlesFromRecord(row), selectedShortTitles)) {
-      return false;
-    }
-
-    if (!excludePersons && !checkMultiSelectFilter(getPersonsFromRecord(row), selectedPersons)) {
-      return false;
-    }
-
-    if (!excludePlaces && !checkMultiSelectFilter(getPlacesFromRecord(row), selectedPlaces)) {
-      return false;
-    }
-
-    if (!excludeFunctions && !checkMultiSelectFilter(getFunctionsFromRecord(row), selectedFunctions)) {
-      return false;
-    }
-
-    if (!excludeShelfmarks && !checkMultiSelectFilter(getShelfmarksFromRecord(row), selectedShelfmarks)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  // Add custom search function for searching all fields including hidden ones
-  $.fn.dataTable.ext.search.push(function(settings, searchData, dataIndex, rowData) {
-    if (settings.nTable.id !== 'sourcesTable') return true;
-    return applyFilters(rowData);
-  });
-
   fetch('/assets/Q1.json')
     .then(response => response.json())
     .then(json => {
@@ -818,65 +656,42 @@ $(document).ready(function() {
         initComplete: function() {
           $('#sourcesTable').css('opacity', '1');
           feather.replace();
-          // Update all filter lists
-          const updateFunctions = [updateShortTitlesList, updatePersonsList, updatePlacesList, updateFunctionsList, updateShelfmarksList];
-          updateFunctions.forEach(fn => setTimeout(fn, 0));
-
-          // Expand matching rows if there's a search term from URL
-          const term = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
-          if (term) {
-            setTimeout(function() {
-              expandDetailRowsWithMatches(term);
-              expandSubgroupsWithMatches(term);
-              updateExpandCollapseButton();
-              feather.replace();
-            }, 100);
-          }
         }
       });
-
-      // Helper to update all filter lists
-      function updateAllFilterLists() {
-        updateShortTitlesList();
-        updatePersonsList();
-        updatePlacesList();
-        updateFunctionsList();
-        updateShelfmarksList();
-      }
 
       // Helper function to expand all rows on current page
       function expandAllCurrentPageRows() {
         // Get rows on current page using DataTables API, then work with actual DOM nodes
         const currentPageRows = table.rows({ page: 'current' });
-        
+
         // Process each row's actual DOM node
         currentPageRows.nodes().each(function(node) {
           const tr = $(node);
           const row = table.row(node);
-          
+
           if (!row || row.length === 0) {
             return; // continue to next
           }
-          
+
           // Force destroy existing child first
           if (row.child.isShown()) {
             row.child.hide();
           }
           row.child.remove();
           tr.removeClass('shown');
-          
+
           // Create child content and manually insert it into the DOM
           const childContent = formatDetails(row.data());
           const $childTr = $('<tr class="child"><td colspan="' + tr.children('td').length + '">' + childContent + '</td></tr>');
-          
+
           // Insert child row directly after the parent row in DOM
           tr.after($childTr);
           tr.addClass('shown');
           updateChevron(tr.find('td.dt-control .chev'), true);
-          
+
           // Also tell DataTables about the child (for internal tracking)
           row.child(childContent);
-          
+
           // Expand all subgroups within this child row
           $childTr.find('.subgroup-content').show();
         });
@@ -901,10 +716,9 @@ $(document).ready(function() {
         $('#expandCollapseBtn').text('Collapse All');
       }
 
-      // Replace Feather icons after table is drawn and update persons, functions and shelfmarks lists
+      // Replace Feather icons after table is drawn
       table.on('draw', function() {
         feather.replace();
-        updateAllFilterLists();
 
         // Save the expand all state BEFORE updateExpandCollapseButton changes it
         const wasExpandAllActive = isExpandAllActive;
@@ -912,7 +726,7 @@ $(document).ready(function() {
         updateExpandCollapseButton();
 
         // If "Expand All" was active before this draw, expand all rows on the current page
-        if (wasExpandAllActive && !isManualToggle && !currentSearchTerm.trim()) {
+        if (wasExpandAllActive && !isManualToggle) {
           // Use longer delay and requestAnimationFrame to ensure DOM is ready
           setTimeout(function() {
             requestAnimationFrame(function() {
@@ -924,7 +738,6 @@ $(document).ready(function() {
         setTimeout(updateToggleDescCommentsBtn, 100);
       });
 
-      // Handle search input
       // Helper function to toggle all subgroups (show or hide)
       function toggleAllSubgroups(show) {
         $('.subgroup-heading-row').each(function() {
@@ -943,54 +756,6 @@ $(document).ready(function() {
 
       function expandAllSubgroups() {
         toggleAllSubgroups(true);
-      }
-
-      // Helper function to expand detail rows that have matches
-      function expandDetailRowsWithMatches(term) {
-        table.rows({ search: 'applied' }).every(function() {
-          const rowData = this.data();
-          const tr = $(this.node());
-          const row = this;
-
-          // Build searchable text from ONLY detail fields (excluding main table columns)
-          const detailText = buildSearchableText(rowData, true);
-
-          // Only expand if detail content (not main columns) has a match
-          if (detailText.includes(term)) {
-            toggleChildRow(row, tr, true);
-
-            // Apply cd-expanded class to rows with visible CD-content
-            scheduleApplyCdClass(tr);
-          }
-        });
-      }
-
-      // Helper function to expand subgroups that have matches
-      function expandSubgroupsWithMatches(term) {
-        $('.subgroup-heading-row').each(function() {
-          const $row = $(this);
-          const subgroup = $row.data('subgroup');
-          // Scope selector to the same details-table (same record), not globally
-          const $detailsTable = $row.closest('.details-table');
-          const $subgroupContent = $detailsTable.find(`.subgroup-content[data-subgroup="${subgroup}"]`);
-
-          // Check if any row in this subgroup contains the search term (including in CD-content)
-          let hasMatch = false;
-          $subgroupContent.each(function() {
-            const $contentRow = $(this);
-            // Check visible text and also CD-content divs
-            const visibleText = normalizeUmlauts($contentRow.clone().find('.CD-content').remove().end().text().toLowerCase());
-            const cdText = normalizeUmlauts($contentRow.find('.CD-content').text().toLowerCase());
-            if (visibleText.includes(term) || cdText.includes(term)) {
-              hasMatch = true;
-              return false; // break
-            }
-          });
-
-          // Expand or collapse subgroup based on matches
-          $subgroupContent.toggle(hasMatch);
-          updateChevron($row.find('.chev'), hasMatch);
-        });
       }
 
       // Helper function to clear child row cache
@@ -1054,12 +819,12 @@ $(document).ready(function() {
         visibleRows.every(function() {
           if (this.child.isShown()) {
             expandedRows++;
-            
+
             // Get the child row element using DataTables API
             // this.child() returns the child row(s) jQuery object
             const $childRow = $(this.child());
             const $subgroups = $childRow.find('.subgroup-content');
-            
+
             // Find all subgroup-content elements and check if any are hidden
             $subgroups.each(function() {
               // Check both inline style and computed style
@@ -1075,7 +840,7 @@ $(document).ready(function() {
         // 1. All rows are expanded, AND
         // 2. No subgroups are collapsed
         const allExpanded = totalRows > 0 && expandedRows === totalRows && !hasCollapsedSubgroup;
-        
+
         if (allExpanded) {
           $btn.text('Collapse All');
           isExpandAllActive = true;
@@ -1084,54 +849,6 @@ $(document).ready(function() {
           isExpandAllActive = false;
         }
       }
-
-      // Create global search handler function
-      let globalSearchHandler = function() {
-        if (isManualToggle) {
-          return;
-        }
-        // Skip if search value hasn't actually changed
-        if (this.value === lastSearchValue) {
-          return;
-        }
-        lastSearchValue = this.value;
-        currentSearchTerm = this.value;
-        manuallyHiddenContent.clear(); // Clear manual toggle tracking on new search
-        
-        // Reset expand all state when search changes - search should only expand matching detail rows
-        isExpandAllActive = false;
-        
-        table.rows().invalidate();
-
-        const term = normalizeUmlauts(currentSearchTerm.toLowerCase().trim());
-
-        if (!term) {
-          collapseAllDetails();
-        }
-
-        table.draw();
-
-        if (!term) {
-          table.one('draw', function() {
-            collapseAllDetails();
-            collapseAllSubgroups();
-            updateExpandCollapseButton();
-            feather.replace();
-          });
-          return;
-        }
-
-        // Use setTimeout to ensure draw completes before processing
-        setTimeout(function() {
-          collapseAllDetails();
-          expandDetailRowsWithMatches(term);
-          expandSubgroupsWithMatches(term);
-          updateExpandCollapseButton();
-          feather.replace();
-        }, 50);
-      };
-
-      $('#globalSearch').on('input keyup change', globalSearchHandler);
 
       // Add event listener for opening and closing details
       $('#sourcesTable tbody').on('click', 'td.dt-control', function() {
@@ -1205,13 +922,13 @@ $(document).ready(function() {
         const $row = $(this).closest('.subgroup-heading-row');
         const subgroup = $row.data('subgroup');
         const $contentRows = $row.closest('table').find('.subgroup-content[data-subgroup="' + subgroup + '"]');
-        
+
         $contentRows.toggle({
           duration: 300,
           easing: 'swing'
         });
       });
-      
+
       // Add expand/collapse all button after DataTable is initialized
       $('.dataTables_length').after('<button id="expandCollapseBtn">Expand All</button><button id="toggleDescCommentsBtn">Open Descriptions/Comments</button>');
 
@@ -1298,7 +1015,7 @@ $(document).ready(function() {
           $badge.closest('tr').addClass('cd-expanded');
         });
       }
-      
+
       // Helper function to collapse all detail rows
       function collapseAllDetails() {
         table.rows().every(function() {
@@ -1311,7 +1028,7 @@ $(document).ready(function() {
           }
         });
       }
-      
+
       // Helper function to toggle all rows and subgroups
       function toggleAllRowsAndSubgroups(expand) {
         table.rows().every(function() {
@@ -1331,7 +1048,7 @@ $(document).ready(function() {
 
         toggleAllSubgroups(expand);
       }
-      
+
       // Handle expand/collapse all button
       $('#expandCollapseBtn').on('click', function() {
         const $btn = $(this);
@@ -1344,658 +1061,11 @@ $(document).ready(function() {
         setTimeout(updateToggleDescCommentsBtn, 100);
       });
 
-      // ===== FILTER MODAL AND DATE SLIDER =====
-      
-      const $filterContainer = $('#filterContainer');
-      
-      // Create date range slider with external label
-      const $dateWrapper = $('<div>').attr('id', 'dateWrapper');
-      const $dateLabel = $('<div>').addClass('filter-label').text('Date');
-      const $dateSliderContainer = $('<div>').attr('id', 'dateSliderContainer');
-      
-      const $dateSliderValues = $('<div>')
-        .attr('id', 'dateSliderValues')
-        .html('<input type="text" id="minDateInput" value="1450"><span id="minDateValue">1450</span><span id="maxDateValue">1620</span><input type="text" id="maxDateInput" value="1620">');
-      
-      const $dateSliderTrack = $('<div>').attr('id', 'dateSliderTrack');
-      
-      const $dateSliderRange = $('<div>').attr('id', 'dateSliderRange');
-      
-      const $dateSliderHandleMin = $('<div>')
-        .attr('id', 'dateSliderHandleMin')
-        .addClass('date-slider-handle');
-      
-      const $dateSliderHandleMax = $('<div>')
-        .attr('id', 'dateSliderHandleMax')
-        .addClass('date-slider-handle');
-      
-      $dateSliderTrack.append($dateSliderRange, $dateSliderHandleMin, $dateSliderHandleMax);
-      $dateSliderContainer.append($dateSliderValues, $dateSliderTrack);
-      $dateWrapper.append($dateLabel, $dateSliderContainer);
-      
-      // Add date slider to filter container
-      $filterContainer.append($dateWrapper);
-
-      // Helper function to increment value counts in a map
-      function incrementValueCounts(valuesInRecord, valuesMap) {
-        const uniqueValues = new Set(valuesInRecord);
-        uniqueValues.forEach(value => {
-          valuesMap.set(value, (valuesMap.get(value) || 0) + 1);
-        });
-      }
-
-      // Generic function to update filter list
-      function updateFilterList(config) {
-        if (!table) return;
-
-        const searchTerm = $(config.searchInputId).val().toLowerCase().trim();
-        const valuesMap = new Map();
-        const selectedSet = config.selectedSet;
-
-        // Calculate counts
-        table.rows().data().each(function(row) {
-          if (!applyFilters(row, ...config.excludeParams)) return;
-          incrementValueCounts(config.getValuesFunc(row), valuesMap);
-        });
-
-        // Sort results
-        const sortedValues = Array.from(valuesMap.entries())
-          .sort((a, b) => {
-            if (a[0] === '—') return -1;
-            if (b[0] === '—') return 1;
-            return a[0].localeCompare(b[0]);
-          });
-
-        const $list = $(config.listId);
-        $list.empty();
-
-        if (sortedValues.length === 0) {
-          $(config.searchInputId).hide();
-          $list.append(NO_RECORDS_MESSAGE);
-          return;
-        }
-
-        $(config.searchInputId).show();
-
-        sortedValues.forEach(([name, count]) => {
-          const id = config.idPrefix + name.replace(/[^a-zA-Z0-9]/g, '-');
-          const isChecked = selectedSet.has(name);
-          const matches = !searchTerm || name.toLowerCase().includes(searchTerm);
-
-          const countHtml = config.showCount ? `<span class="checkbox-item-count">${count}</span>` : '';
-          const $item = $(`
-            <div class="checkbox-item ${config.itemClass || ''}" style="display: ${matches ? 'flex' : 'none'}">
-              <input type="checkbox" id="${id}" data-${config.dataAttr}="${name}" ${isChecked ? 'checked' : ''}>
-              <label for="${id}">${name}</label>
-              ${countHtml}
-            </div>
-          `);
-          $list.append($item);
-        });
-
-        // Re-attach event handlers
-        $(`${config.listId} input[type="checkbox"]`).off('change').on('change', function() {
-          const value = $(this).data(config.dataAttr);
-          if (this.checked) {
-            selectedSet.add(value);
-          } else {
-            selectedSet.delete(value);
-          }
-          applyFilterChange();
-        });
-      }
-
-      // Configuration for filter list updates
-      const FILTER_LIST_CONFIGS = {
-        shortTitles: {
-          searchInputId: '#shortTitlesSearch',
-          listId: '#shortTitlesCheckboxList',
-          selectedSet: selectedShortTitles,
-          getValuesFunc: getShortTitlesFromRecord,
-          excludeParams: [true, false, false, false, false],
-          showCount: false,
-          idPrefix: 'shorttitle-',
-          dataAttr: 'shorttitle',
-          itemClass: 'shorttitle-item'
-        },
-        persons: {
-          searchInputId: '#personsSearch',
-          listId: '#personsCheckboxList',
-          selectedSet: selectedPersons,
-          getValuesFunc: getPersonsFromRecord,
-          excludeParams: [false, true, false, false, false],
-          showCount: true,
-          idPrefix: 'person-',
-          dataAttr: 'person'
-        },
-        places: {
-          searchInputId: '#placesSearch',
-          listId: '#placesCheckboxList',
-          selectedSet: selectedPlaces,
-          getValuesFunc: getPlacesFromRecord,
-          excludeParams: [false, false, true, false, false],
-          showCount: true,
-          idPrefix: 'place-',
-          dataAttr: 'place'
-        },
-        functions: {
-          searchInputId: '#functionsSearch',
-          listId: '#functionsCheckboxList',
-          selectedSet: selectedFunctions,
-          getValuesFunc: getFunctionsFromRecord,
-          excludeParams: [false, false, false, true, false],
-          showCount: true,
-          idPrefix: 'function-',
-          dataAttr: 'function'
-        }
-      };
-
-      // Create update functions dynamically from configs
-      function updateShortTitlesList() {
-        updateFilterList(FILTER_LIST_CONFIGS.shortTitles);
-      }
-
-      function updatePersonsList() {
-        updateFilterList(FILTER_LIST_CONFIGS.persons);
-      }
-
-      function updatePlacesList() {
-        updateFilterList(FILTER_LIST_CONFIGS.places);
-      }
-
-      function updateFunctionsList() {
-        updateFilterList(FILTER_LIST_CONFIGS.functions);
-      }
-
-      // Accordion toggle
-      $('.filter-accordion-header').on('click', function() {
-        const $accordion = $(this).closest('.filter-accordion');
-        const $content = $accordion.find('.filter-accordion-content');
-
-        if ($accordion.hasClass('expanded')) {
-          // Collapsing: set exact height first, then animate to 0
-          const currentHeight = $content[0].scrollHeight;
-          $content.css('max-height', currentHeight + 'px');
-          setTimeout(() => {
-            $accordion.removeClass('expanded');
-            $content.css('max-height', '0');
-          }, 10);
-        } else {
-          // Expanding: set to exact content height
-          $accordion.addClass('expanded');
-          const targetHeight = $content[0].scrollHeight;
-          $content.css('max-height', targetHeight + 'px');
-        }
-      });
-
-      // Helper function to process a single shelfmark and add to country groups
-      function processShelfmark(shelf, countryGroups) {
-        if (!shelf || !shelf.label) return;
-
-        const countryCode = shelf.holdingInstitution?.countryCode || null;
-        const country = shelf.holdingInstitution?.country || null;
-        const countryKey = countryCode ? `${countryCode}|||${country}` : 'Other';
-
-        if (!countryGroups.has(countryKey)) {
-          countryGroups.set(countryKey, {
-            countryCode: countryCode,
-            country: country,
-            shelfmarks: new Map()
-          });
-        }
-
-        const group = countryGroups.get(countryKey);
-        group.shelfmarks.set(shelf.label, (group.shelfmarks.get(shelf.label) || 0) + 1);
-      }
-
-      // Function to update shelfmarks list based on currently filtered results
-      function updateShelfmarksList() {
-        if (!table) return;
-
-        const shelfmarksSearchTerm = $('#shelfmarksSearch').val().toLowerCase().trim();
-        const countryGroups = new Map(); // Map of countryKey -> {countryCode, country, shelfmarks: Map}
-        const availableShelfmarks = new Set(); // Track all available shelfmarks
-
-        // Collect shelfmarks only from records that pass the other filters
-        table.rows().data().each(function(row) {
-          // Apply all filters EXCEPT shelfmarks filter
-          if (!applyFilters(row, false, false, false, false, true)) return;
-
-          // Process main shelfmark
-          if (row.shelfmark && row.shelfmark.label) {
-            availableShelfmarks.add(row.shelfmark.label);
-          }
-          processShelfmark(row.shelfmark, countryGroups);
-
-          // Process other shelfmarks
-          if (row.otherShelfmark) {
-            const otherArray = Array.isArray(row.otherShelfmark) ? row.otherShelfmark : [row.otherShelfmark];
-            otherArray.forEach(shelf => {
-              if (shelf && shelf.label) {
-                availableShelfmarks.add(shelf.label);
-              }
-              processShelfmark(shelf, countryGroups);
-            });
-          }
-        });
-
-        // Remove any selected shelfmarks that are no longer available
-        selectedShelfmarks.forEach(shelfmark => {
-          if (!availableShelfmarks.has(shelfmark)) {
-            selectedShelfmarks.delete(shelfmark);
-          }
-        });
-
-        const $shelfmarksList = $('#shelfmarksCheckboxList');
-        $shelfmarksList.empty();
-
-        if (countryGroups.size === 0) {
-          $('#shelfmarksSearch').hide();
-          $shelfmarksList.append(NO_RECORDS_MESSAGE);
-          return;
-        }
-
-        $('#shelfmarksSearch').show();
-
-        // Sort country groups: alphabetically by country code, "Other" last
-        const sortedCountryKeys = Array.from(countryGroups.keys()).sort((a, b) => {
-          if (a === 'Other') return 1;
-          if (b === 'Other') return -1;
-          return a.localeCompare(b);
-        });
-
-        sortedCountryKeys.forEach(countryKey => {
-          const group = countryGroups.get(countryKey);
-
-          // Create heading
-          const headingText = countryKey === 'Other' ? 'Other' : `${group.countryCode} - ${group.country}`;
-          const $heading = $('<div class="shelfmark-group-heading"></div>').text(headingText);
-          $shelfmarksList.append($heading);
-
-          // Sort shelfmarks within group
-          const sortedShelfmarks = Array.from(group.shelfmarks.entries()).sort((a, b) => {
-            if (a[0] === '—') return -1;
-            if (b[0] === '—') return 1;
-            return a[0].localeCompare(b[0]);
-          });
-
-          // Add shelfmarks
-          sortedShelfmarks.forEach(([name, count]) => {
-            const id = 'shelfmark-' + name.replace(/[^a-zA-Z0-9]/g, '-');
-            const isChecked = selectedShelfmarks.has(name);
-            const matches = !shelfmarksSearchTerm || name.toLowerCase().includes(shelfmarksSearchTerm);
-
-            const $item = $(`
-              <div class="checkbox-item shelfmark-item" style="display: ${matches ? 'flex' : 'none'};">
-                <input type="checkbox" id="${id}" data-shelfmark="${name}" ${isChecked ? 'checked' : ''}>
-                <label for="${id}">${name}</label>
-              </div>
-            `);
-            $shelfmarksList.append($item);
-          });
-        });
-
-        // Re-attach event handlers to new checkboxes
-        $('#shelfmarksCheckboxList input[type="checkbox"]').off('change').on('change', function() {
-          const shelfmarkName = $(this).data('shelfmark');
-          if (this.checked) {
-            // Add the selected shelfmark
-            selectedShelfmarks.add(shelfmarkName);
-
-            // Find all records that contain this shelfmark and auto-select their other shelfmarks
-            table.rows().data().each(function(row) {
-              const shelfmarksInRecord = getShelfmarksFromRecord(row);
-              if (shelfmarksInRecord.includes(shelfmarkName)) {
-                // Auto-select all other shelfmarks from this record
-                shelfmarksInRecord.forEach(shelf => {
-                  selectedShelfmarks.add(shelf);
-                });
-              }
-            });
-          } else {
-            selectedShelfmarks.delete(shelfmarkName);
-          }
-          applyFilterChange();
-        });
-      }
-      
-      // Filter search input handlers (consolidated)
-      const SEARCH_INPUT_HANDLERS = {
-        '#shortTitlesSearch': updateShortTitlesList,
-        '#personsSearch': updatePersonsList,
-        '#placesSearch': updatePlacesList,
-        '#functionsSearch': updateFunctionsList,
-        '#shelfmarksSearch': updateShelfmarksList
-      };
-
-      Object.entries(SEARCH_INPUT_HANDLERS).forEach(([selector, updateFunc]) => {
-        $(selector).on('input', updateFunc);
-      });
-      
-      // Date slider functionality
-      let isDraggingMin = false;
-      let isDraggingMax = false;
-      
-      // Function to update filter button label and modal header count
-      function updateFilterButtonLabel() {
-        const activeFilters = [
-          minDate !== minYear || maxDate !== maxYear,
-          physicalTypeFilter !== 'both',
-          fundamentaFilter !== 'both',
-          selectedShortTitles.size > 0,
-          selectedPersons.size > 0,
-          selectedPlaces.size > 0,
-          selectedFunctions.size > 0,
-          selectedShelfmarks.size > 0
-        ];
-        const totalFilters = activeFilters.filter(Boolean).length;
-        
-        if (totalFilters > 0) {
-          $('#filterBtn span').text(`${totalFilters} Filter${totalFilters !== 1 ? 's' : ''}`);
-          $('#filterCount').html(`${totalFilters} filter${totalFilters !== 1 ? 's' : ''} selected`).show();
-        } else {
-          $('#filterBtn span').text('Filters');
-          $('#filterCount').hide();
-        }
-      }
-
-      // Function to update visual indicators on accordion titles
-      function updateAccordionIndicators() {
-        // Map of accordion IDs to their filter variables/sets
-        const accordionFilters = {
-          'shelfmarksAccordion': selectedShelfmarks.size > 0,
-          'shortTitlesAccordion': selectedShortTitles.size > 0,
-          'personsAccordion': selectedPersons.size > 0,
-          'placesAccordion': selectedPlaces.size > 0,
-          'functionsAccordion': selectedFunctions.size > 0,
-          'physicalTypeContainer': physicalTypeFilter !== 'both',
-          'fundamentaContainer': fundamentaFilter !== 'both',
-          'dateWrapper': minDate !== minYear || maxDate !== maxYear
-        };
-
-        // Update each accordion
-        Object.entries(accordionFilters).forEach(([accordionId, hasFilter]) => {
-          const $accordion = $(`#${accordionId}`);
-
-          if ($accordion.length) {
-            // Toggle filter-active class on accordion (affects chevron styling)
-            if (hasFilter) {
-              $accordion.addClass('filter-active');
-            } else {
-              $accordion.removeClass('filter-active');
-            }
-          }
-        });
-      }
-
-      function updateSliderDisplay() {
-        const minPercent = ((minDate - minYear) / (maxYear - minYear)) * 100;
-        const maxPercent = ((maxDate - minYear) / (maxYear - minYear)) * 100;
-
-        $dateSliderHandleMin.css('left', minPercent + '%');
-        $dateSliderHandleMax.css('left', maxPercent + '%');
-        $dateSliderRange.css({
-          'left': minPercent + '%',
-          'right': (100 - maxPercent) + '%'
-        });
-
-        $('#minDateValue').text(minDate);
-        $('#maxDateValue').text(maxDate);
-        $('#minDateInput').val(minDate);
-        $('#maxDateInput').val(maxDate);
-      }
-      
-      function getYearFromPosition(clientX) {
-        const trackRect = $dateSliderTrack[0].getBoundingClientRect();
-        const percent = Math.max(0, Math.min(1, (clientX - trackRect.left) / trackRect.width));
-        return Math.round(minYear + percent * (maxYear - minYear));
-      }
-      
-      $dateSliderHandleMin.on('mousedown', function(e) {
-        isDraggingMin = true;
-        e.preventDefault();
-      });
-      
-      $dateSliderHandleMax.on('mousedown', function(e) {
-        isDraggingMax = true;
-        e.preventDefault();
-      });
-      
-      $(document).on('mousemove', function(e) {
-        if (isDraggingMin) {
-          const newMin = getYearFromPosition(e.clientX);
-          if (minDate !== newMin && newMin < maxDate) {
-            minDate = Math.min(newMin, maxDate - 1);
-            updateSliderDisplay();
-            table.draw();
-          }
-        } else if (isDraggingMax) {
-          const newMax = getYearFromPosition(e.clientX);
-          if (maxDate !== newMax && newMax > minDate) {
-            maxDate = Math.max(newMax, minDate + 1);
-            updateSliderDisplay();
-            table.draw();
-          }
-        }
-      });
-      
-      $(document).on('mouseup', function() {
-        if (isDraggingMin || isDraggingMax) {
-          updateFilterUI();
-        }
-        isDraggingMin = false;
-        isDraggingMax = false;
-      });
-      
-      // Initialize slider display
-      updateSliderDisplay();
-
-      // Initialize Physical Type and Fundamenta buttons
-      setActiveSegmentButton('physicalTypeContainer', 'both');
-      setActiveSegmentButton('fundamentaContainer', 'both');
-
-      // Configuration for checkbox lists
-      const CHECKBOX_CONFIGS = [
-        { set: () => selectedShortTitles, listId: 'shortTitlesCheckboxList', dataAttr: 'shorttitle' },
-        { set: () => selectedPersons, listId: 'personsCheckboxList', dataAttr: 'person' },
-        { set: () => selectedPlaces, listId: 'placesCheckboxList', dataAttr: 'place' },
-        { set: () => selectedFunctions, listId: 'functionsCheckboxList', dataAttr: 'function' },
-        { set: () => selectedShelfmarks, listId: 'shelfmarksCheckboxList', dataAttr: 'shelfmark' }
-      ];
-
-      // Helper to check checkboxes for a filter set
-      const checkFilterBoxes = (set, listId, dataAttr) => {
-        if (set.size > 0) {
-          set.forEach(value => {
-            $(`#${listId} input[data-${dataAttr}="${value}"]`).prop('checked', true);
-          });
-        }
-      };
-
-      // Helper to clear all filter sets
-      function clearAllFilterSets() {
-        selectedShortTitles.clear();
-        selectedPersons.clear();
-        selectedPlaces.clear();
-        selectedFunctions.clear();
-        selectedShelfmarks.clear();
-      }
-
-      // Helper to clear all checkboxes
-      function clearAllCheckboxes() {
-        CHECKBOX_CONFIGS.forEach(config => {
-          $(`#${config.listId} input[type="checkbox"]`).prop('checked', false);
-        });
-      }
-
-      // Date input handlers (consolidated)
-      function createDateInputHandler(type) {
-        return function() {
-          const value = parseInt($(this).val());
-          let isValid, currentValue;
-
-          if (type === 'min') {
-            isValid = value >= minYear && value < maxDate;
-            currentValue = minDate;
-            if (isValid) minDate = value;
-          } else { // type === 'max'
-            isValid = value <= maxYear && value > minDate;
-            currentValue = maxDate;
-            if (isValid) maxDate = value;
-          }
-
-          if (isValid) {
-            updateSliderDisplay();
-            table.draw();
-            updateFilterUI();
-          } else {
-            $(this).val(currentValue);
-          }
-        };
-      }
-
-      $('#minDateInput').on('change', createDateInputHandler('min'));
-      $('#maxDateInput').on('change', createDateInputHandler('max'));
-
-      // Helper to toggle modal
-      function toggleModal(show) {
-        $('#filterModal').toggleClass('show', show);
-
-        // Collapse all filter accordions when modal closes
-        if (!show) {
-          $('.filter-accordion').removeClass('expanded');
-          $('.filter-accordion-content').css('max-height', '0');
-        }
-      }
-      
-      // Helper to update all filter UI elements (consolidated pattern)
-      function updateFilterUI() {
-        updateFilterButtonLabel();
-        updateAccordionIndicators();
-      }
-
-      // Helper to apply filter changes
-      function applyFilterChange() {
-        table.draw();
-        updateFilterUI();
-      }
-      
-      // Modal open/close handlers
-      $('#filterBtn').on('click', () => toggleModal(true));
-      $('#closeModal, #applyFilters').on('click', () => toggleModal(false));
-      
-      // Close modal on overlay click
-      $('#filterModal').on('click', (e) => {
-        if ($(e.target).is('#filterModal')) toggleModal(false);
-      });
-      
-      // Persons checkbox handler
-      $('#personsCheckboxList').on('change', 'input[type="checkbox"]', function() {
-        const person = $(this).data('person');
-        selectedPersons[this.checked ? 'add' : 'delete'](person);
-        applyFilterChange();
-      });
-      
-      // Segmented button handler (handles both Physical type and Fundamenta)
-      $('.segment-btn').on('click', function() {
-        const $container = $(this).closest('[id$="Container"]');
-        const value = $(this).data('value');
-        const containerId = $container.attr('id');
-
-        // Update button states
-        setActiveSegmentButton(containerId, value);
-
-        // Update filter value
-        if (containerId === 'physicalTypeContainer') {
-          physicalTypeFilter = value;
-        } else if (containerId === 'fundamentaContainer') {
-          fundamentaFilter = value;
-        }
-
-        applyFilterChange();
-      });
-      
-      // Reset slider to default values
-      function resetSlider() {
-        minDate = minYear;
-        maxDate = maxYear;
-        updateSliderDisplay();
-      }
-      
-      // Helper to set active segment button
-      function setActiveSegmentButton(containerId, value) {
-        const $container = $(`#${containerId}`);
-        $container.find('.segment-btn').removeClass('active');
-        $container.find(`.segment-btn[data-value="${value}"]`).addClass('active');
-      }
-
-      // Helper to reset all segment buttons to 'both'
-      function resetAllSegmentButtons() {
-        setActiveSegmentButton('physicalTypeContainer', 'both');
-        setActiveSegmentButton('fundamentaContainer', 'both');
-      }
-
-      // Alias for backward compatibility
-      function resetSegmentButtons() {
-        resetAllSegmentButtons();
-      }
-      
-      // Reset all filters to default values
-      function resetAllFilters(resetSearch = false) {
-        resetSlider();
-        physicalTypeFilter = 'both';
-        fundamentaFilter = 'both';
-        clearAllFilterSets();
-        manuallyHiddenContent.clear(); // Clear manually hidden content tracking
-        resetSegmentButtons();
-        clearAllCheckboxes();
-        collapseAllDetails();
-        $('#expandCollapseBtn').text('Expand All');
-        isExpandAllActive = false; // Reset expand all state
-        isDescCommentsOpen = false; // Reset descriptions/comments state
-
-        // Collapse all filter accordions
-        $('.filter-accordion').removeClass('expanded');
-        $('.filter-accordion-content').css('max-height', '0');
-
-        // Reset page length to default (25)
-        table.page.len(25).draw();
-
-        // Clear all child row data cache to force regeneration
-        clearChildRowCache();
-
-        if (resetSearch) {
-          // Set flag to prevent search handler from running during reset
-          isManualToggle = true;
-
-          // Update search tracking variables
-          lastSearchValue = '';
-          currentSearchTerm = '';
-          $('#globalSearch').val('');
-          table.order([[1, 'asc']]).search('').rows().invalidate().draw();
-
-          // Clear the flag after a delay
-          setTimeout(() => {
-            isManualToggle = false;
-          }, 100);
-        } else {
-          table.rows().invalidate().draw();
-        }
-
-        updateFilterUI();
-      }
-
-      $('#clearFilters').on('click', () => resetAllFilters());
-      $('#resetBtn').on('click', () => resetAllFilters(true));
-
-      // Update filter button label and accordion indicators initially
-      updateFilterButtonLabel();
-      updateAccordionIndicators();
     })
     .catch(error => {
       console.error('Error loading data:', error);
     });
-  
+
   // Scroll-based fade effect for search box
   window.addEventListener('scroll', function() {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
