@@ -1017,7 +1017,7 @@ window.addEventListener('load', function () {
       resetSearch();
       pillState.fields = 0; updatePill();
       updateClearBtn();
-      if (table) table.draw();
+      if (table) { table.rows().invalidate('data'); table.draw(); }
     });
   })();
 
@@ -1123,11 +1123,13 @@ window.addEventListener('load', function () {
   // Wire search builder inputs to DataTable draws
   builderRowsEl.addEventListener('input',  () => { 
     if (table) {
+      table.rows().invalidate('data');
       table.draw();
     }
   });
   builderRowsEl.addEventListener('change', () => { 
     if (table) {
+      table.rows().invalidate('data');
       table.draw();
     }
   });
@@ -1135,6 +1137,7 @@ window.addEventListener('load', function () {
     if (e.target.closest('.remove-btn')) {
       setTimeout(() => {
         if (table) {
+          table.rows().invalidate('data');
           table.draw();
         }
       }, 0);
