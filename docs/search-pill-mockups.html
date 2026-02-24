@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Pill Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f0f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 0 0 80px;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #e2e2e2;
+    padding: 28px 48px 24px;
+    margin-bottom: 48px;
+  }
+  .page-header h1 { font-size: 20px; font-weight: 600; color: #111; }
+  .page-header p  { font-size: 13px; color: #777; margin-top: 4px; line-height: 1.5; }
+
+  /* ── Option sections ── */
+  .option-section {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 56px;
+  }
+  .option-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #999;
+    margin-bottom: 16px;
+    padding: 0 4px;
+  }
+  .option-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 4px;
+    padding: 0 4px;
+  }
+  .option-desc {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.55;
+    margin-bottom: 24px;
+    padding: 0 4px;
+  }
+
+  /* ── Demo canvas ── */
+  .demo-canvas {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e2e2;
+    padding: 0;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* States column */
+  .state-col {
+    flex: 1;
+    padding: 28px 28px 32px;
+    border-right: 1px solid #f0f0f0;
+  }
+  .state-col:last-child { border-right: none; }
+  .state-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #bbb;
+    margin-bottom: 20px;
+  }
+  .state-bg {
+    background: #fafafa;
+    border-radius: 12px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+    position: relative;
+  }
+
+  /* ── SHARED PARTS ── */
+  /* Search icon button — used in all options */
+  .search-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #d0d0d0;
+    background: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #2c2c2c;
+    box-shadow: 0 4px 16px rgba(0,0,0,.22), 0 1px 4px rgba(0,0,0,.12);
+    flex-shrink: 0;
+    position: relative;
+  }
+  .search-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .search-btn.active {
+    border-color: #2c2c2c;
+    box-shadow: 0 0 0 3px rgba(44,44,44,.12), 0 4px 16px rgba(0,0,0,.22);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION A — Pill with integrated ×
+     ═══════════════════════════════════════════════════════ */
+  .a-wrap { display: flex; align-items: center; gap: 8px; }
+
+  .pill-a {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 8px 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 7px;
+    cursor: default;
+  }
+  .pill-a.only-text { padding: 5px 12px; }
+  .pill-a-x {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .pill-a-x:hover { background: rgba(255,255,255,.35); }
+  .pill-a-x svg { width: 9px; height: 9px; stroke: #fff; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; }
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION B — Compound search+pill button
+     ═══════════════════════════════════════════════════════ */
+  .b-wrap { display: flex; align-items: center; gap: 0; }
+
+  .btn-compound {
+    height: 40px;
+    border-radius: 20px;
+    border: 1.5px solid #d0d0d0;
+    background: #fff;
+    cursor: pointer;
+    display: flex; align-items: center;
+    color: #2c2c2c;
+    box-shadow: 0 4px 16px rgba(0,0,0,.22), 0 1px 4px rgba(0,0,0,.12);
+    overflow: hidden;
+    gap: 0;
+  }
+  .btn-compound.active { border-color: #2c2c2c; }
+  .btn-compound-icon {
+    width: 40px; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .btn-compound-icon svg { width: 17px; height: 17px; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .btn-compound-divider {
+    width: 1px; background: #e0e0e0; align-self: stretch; margin: 8px 0;
+  }
+  .btn-compound-pill {
+    font-size: 10px; font-weight: 600;
+    padding: 0 10px 0 10px;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+    color: #2c2c2c;
+  }
+  .btn-compound-x {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #ebebeb;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .btn-compound-x:hover { background: #d9d9d9; }
+  .btn-compound-x svg { width: 9px; height: 9px; stroke: #333; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; }
+
+  /* only icon state */
+  .btn-icon-only {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #d0d0d0;
+    background: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #2c2c2c;
+    box-shadow: 0 4px 16px rgba(0,0,0,.22), 0 1px 4px rgba(0,0,0,.12);
+  }
+  .btn-icon-only svg { width: 17px; height: 17px; stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION C — Badge on icon + separate clear chip
+     ═══════════════════════════════════════════════════════ */
+  .c-wrap { display: flex; align-items: center; gap: 8px; }
+
+  .btn-badged { position: relative; }
+  .badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    min-width: 18px; height: 18px;
+    border-radius: 9px;
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 9.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+    border: 2px solid #fafafa;
+    line-height: 1;
+  }
+
+  .pill-c {
+    height: 32px;
+    border-radius: 16px;
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px; font-weight: 600;
+    padding: 0 10px 0 13px;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap;
+    cursor: default;
+  }
+  .pill-c-x {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background .15s;
+  }
+  .pill-c-x:hover { background: rgba(255,255,255,.35); }
+  .pill-c-x svg { width: 9px; height: 9px; stroke: #fff; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; }
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION D — Tag strip above icon
+     ═══════════════════════════════════════════════════════ */
+  .d-wrap {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 7px;
+  }
+  .d-tag-row {
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end;
+  }
+  .d-tag {
+    height: 24px;
+    border-radius: 12px;
+    border: 1.5px solid #dadada;
+    background: #fff;
+    color: #333;
+    font-size: 10px; font-weight: 500;
+    padding: 0 9px;
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .d-tag svg { width: 9px; height: 9px; stroke: #999; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; cursor: pointer; }
+  .d-tag svg:hover { stroke: #333; }
+  .d-tag.filter-tag { border-color: #b0b8d0; color: #2a3a6a; background: #f0f3ff; }
+  .d-tag.filter-tag svg { stroke: #8a9ac8; }
+  .d-clear-all {
+    height: 24px;
+    border-radius: 12px;
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px; font-weight: 600;
+    padding: 0 11px;
+    display: flex; align-items: center;
+    cursor: pointer; white-space: nowrap;
+    border: none;
+  }
+  .d-row-bottom { display: flex; align-items: center; gap: 8px; }
+
+  /* ── Notes box ── */
+  .notes {
+    margin-top: 18px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px; color: #555; line-height: 1.6;
+  }
+  .notes strong { color: #222; }
+
+  /* ── SVGs inline ── */
+  svg.icon { display: block; }
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION E — Pill A variant with hover toolbox
+     ═══════════════════════════════════════════════════════ */
+  .e-anchor {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* The pill itself — same look as Option A */
+  .pill-e {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 8px 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: default;
+    position: relative;
+  }
+  .pill-e-x {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background .15s;
+  }
+  .pill-e-x:hover { background: rgba(255,255,255,.35); }
+  .pill-e-x svg { width: 9px; height: 9px; stroke: #fff; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Toolbox — floats below the pill */
+  .e-toolbox {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;                   /* aligns right edge with the icon button */
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.13), 0 2px 8px rgba(0,0,0,.07);
+    padding: 10px 0 6px;
+    z-index: 10;
+    pointer-events: auto;
+  }
+
+  .e-toolbox-section {
+    padding: 2px 14px 3px;
+  }
+  .e-toolbox-section + .e-toolbox-section {
+    border-top: 1px solid #f0f0f0;
+    margin-top: 5px;
+    padding-top: 7px;
+  }
+  .e-toolbox-heading {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #bbb;
+    margin-bottom: 6px;
+  }
+
+  /* Each active item row */
+  .e-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .e-item-label {
+    font-size: 11.5px;
+    color: #222;
+    line-height: 1.3;
+  }
+  .e-item-sub {
+    font-size: 10px;
+    color: #888;
+    font-weight: 400;
+  }
+  .e-item-remove {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #f2f2f2;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background .15s;
+  }
+  .e-item-remove:hover { background: #e0e0e0; }
+  .e-item-remove svg { width: 9px; height: 9px; stroke: #555; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Filter items get a blue tint */
+  .e-item.filter .e-item-label { color: #2a3a6a; }
+  .e-item.filter .e-item-remove { background: #edf0fa; }
+  .e-item.filter .e-item-remove:hover { background: #dce1f5; }
+  .e-item.filter .e-item-remove svg { stroke: #6676b0; }
+
+  /* Option E demo canvas — needs visible overflow so the toolbox isn't clipped */
+  .demo-canvas-e {
+    overflow: visible;
+  }
+
+  /* In the demo, each state column shows pill+icon then toolbox stacked below */
+  .e-demo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 20px 20px 24px;
+  }
+  .e-pill-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* In the demo the toolbox is static (not absolute) so it expands the column */
+  .e-toolbox-demo {
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.13), 0 2px 8px rgba(0,0,0,.07);
+    padding: 10px 0 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Search pill · design options</h1>
+  <p>Each option shows three states: no active search/filters · search fields only · search fields + filters.<br>
+     The pill / badge indicates what is active; the <strong>×</strong> clears everything at once.</p>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION A — Dark pill with integrated × 
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section">
+  <div class="option-label">Option A</div>
+  <div class="option-name">Dark pill · integrated × inside the pill</div>
+  <div class="option-desc">
+    When nothing is active the pill is hidden and only the search icon is shown.
+    As soon as a field or filter is set, a dark pill slides in to the left of the icon.
+    The pill contains the summary text and a small circular × button that clears everything.
+  </div>
+  <div class="demo-canvas">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields -->
+    <div class="state-col">
+      <div class="state-label">2 search fields</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <div class="pill-a">
+            2 search fields
+            <span class="pill-a-x">
+              <svg><line x1="2" y1="2" x2="7" y2="7"/><line x1="7" y1="2" x2="2" y2="7"/></svg>
+            </span>
+          </div>
+          <button class="search-btn active">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 2 search fields + 3 filters -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · 3 filters</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <div class="pill-a">
+            2 search fields · 3 filters
+            <span class="pill-a-x">
+              <svg><line x1="2" y1="2" x2="7" y2="7"/><line x1="7" y1="2" x2="2" y2="7"/></svg>
+            </span>
+          </div>
+          <button class="search-btn active">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="notes">
+    <strong>Pros:</strong> Minimal footprint; pill + icon feel like a single unit. Clear contrast. The × is only visible when there is something to clear.<br>
+    <strong>Cons:</strong> Pill and × are small targets on mobile.
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION B — Compound pill+icon button (stretches)
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section">
+  <div class="option-label">Option B</div>
+  <div class="option-name">Compound button · icon + label + ×</div>
+  <div class="option-desc">
+    Idle state: a plain circular icon button. Active state: the button stretches into a pill-shaped
+    compound widget — icon on the left, divider, summary text, then a circular × button on the right —
+    all in a single bordered element.
+  </div>
+  <div class="demo-canvas">
+
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="b-wrap">
+          <div class="btn-icon-only">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-col">
+      <div class="state-label">2 search fields</div>
+      <div class="state-bg">
+        <div class="b-wrap">
+          <div class="btn-compound active">
+            <div class="btn-compound-icon">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </div>
+            <div class="btn-compound-divider"></div>
+            <div class="btn-compound-pill">
+              2 search fields
+              <span class="btn-compound-x">
+                <svg><line x1="2" y1="2" x2="7" y2="7"/><line x1="7" y1="2" x2="2" y2="7"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-col">
+      <div class="state-label">2 search fields · 3 filters</div>
+      <div class="state-bg">
+        <div class="b-wrap">
+          <div class="btn-compound active">
+            <div class="btn-compound-icon">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </div>
+            <div class="btn-compound-divider"></div>
+            <div class="btn-compound-pill">
+              2 search fields · 3 filters
+              <span class="btn-compound-x">
+                <svg><line x1="2" y1="2" x2="7" y2="7"/><line x1="7" y1="2" x2="2" y2="7"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="notes">
+    <strong>Pros:</strong> The whole widget is one visual element; very clean. The icon half opens the panel, the × half clears — two distinct interaction zones.<br>
+    <strong>Cons:</strong> Needs a divider to clearly separate the two click targets; button width varies with text.
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION C — Numeric badge on icon + separate clear chip
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section">
+  <div class="option-label">Option C</div>
+  <div class="option-name">Numeric badge on icon + separate clear chip</div>
+  <div class="option-desc">
+    The search icon carries a small numeric badge (total active count).
+    A separate "2 fields · 3 filters ×" chip appears to the left. The chip is tinted
+    dark and acts as the clear button (or contains an inline ×).
+  </div>
+  <div class="demo-canvas">
+
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="c-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-col">
+      <div class="state-label">2 search fields</div>
+      <div class="state-bg">
+        <div class="c-wrap">
+          <div class="pill-c">
+            2 search fields
+            <span class="pill-c-x">
+              <svg><line x1="2" y1="2" x2="7" y2="7"/><line x1="7" y1="2" x2="2" y2="7"/></svg>
+            </span>
+          </div>
+          <button class="search-btn active btn-badged">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            <span class="badge">2</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-col">
+      <div class="state-label">2 search fields · 3 filters</div>
+      <div class="state-bg">
+        <div class="c-wrap">
+          <div class="pill-c">
+            2 search fields · 3 filters
+            <span class="pill-c-x">
+              <svg><line x1="2" y1="2" x2="7" y2="7"/><line x1="7" y1="2" x2="2" y2="7"/></svg>
+            </span>
+          </div>
+          <button class="search-btn active btn-badged">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            <span class="badge">5</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="notes">
+    <strong>Pros:</strong> Badge is a compact and universally understood "active count" signal.
+    Even when the drawer is closed the badge remains visible on the icon, reminding the user
+    that a search is active.<br>
+    <strong>Cons:</strong> Two separate elements (badge + chip) may feel redundant.
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION D — Individual tags + "Clear all" button
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section">
+  <div class="option-label">Option D</div>
+  <div class="option-name">Individual field/filter tags + "Clear all"</div>
+  <div class="option-desc">
+    Each active search field and filter is shown as a small individual tag above the icon row.
+    Search tags are neutral; filter tags are tinted blue. Each tag has its own × to remove it
+    individually. A "Clear all" pill appears when there is more than one active item.
+  </div>
+  <div class="demo-canvas">
+
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="d-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-col">
+      <div class="state-label">2 search fields</div>
+      <div class="state-bg">
+        <div class="d-wrap">
+          <div class="d-tag-row">
+            <div class="d-tag">Title: "ambraser" <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg></div>
+            <div class="d-tag">Person: "gerle" <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg></div>
+          </div>
+          <div class="d-row-bottom">
+            <button class="d-clear-all">Clear all</button>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters</div>
+      <div class="state-bg">
+        <div class="d-wrap">
+          <div class="d-tag-row">
+            <div class="d-tag">Title: "ambraser" <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg></div>
+            <div class="d-tag filter-tag">Print <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg></div>
+            <div class="d-tag filter-tag">1500–1520 <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg></div>
+          </div>
+          <div class="d-row-bottom">
+            <button class="d-clear-all">Clear all</button>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="notes">
+    <strong>Pros:</strong> Maximum expressiveness — the user can see <em>what</em> they searched and
+    remove individual items without reopening the panel. Filter tags in a distinct colour
+    (blue tint here) distinguish them from search fields at a glance.<br>
+    <strong>Cons:</strong> Takes more vertical space; tags show the value which may be long.
+    Most complex to implement (needs per-item wiring).
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION E — Pill A + hover toolbox
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section">
+  <div class="option-label">Option E</div>
+  <div class="option-name">Dark pill · hover toolbox with per-item removal</div>
+  <div class="option-desc">
+    Same pill as Option A. On hover a small card drops below the pill listing every active
+    search field and filter. Each item shows its field name and value with a circular × to
+    remove it individually. Filters are tinted blue. The pill's own × still clears everything at once.
+    The second and third columns simulate the hover state with the toolbox fully visible.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e">
+              2 search fields
+              <span class="pill-e-x">
+                <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+              </span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title <span class="e-item-sub">· "ambraser"</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person <span class="e-item-sub">· "gerle"</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e">
+              1 search field · 2 filters
+              <span class="pill-e-x">
+                <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+              </span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title <span class="e-item-sub">· "ambraser"</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-item filter">
+                <div class="e-item-label">Print</div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+              <div class="e-item filter">
+                <div class="e-item-label">1500–1520</div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Clean default appearance identical to Option A; hover reveals full context
+    without opening the drawer. Users can remove individual items on the fly.
+    Search fields and filters are visually separated with section headings.
+    The pill's × is still the fastest way to clear everything.<br>
+    <strong>Cons:</strong> Hover-only on desktop; would need a tap toggle on touch screens.
+    The toolbox must stay open while the user moves to click an item (needs
+    a small hover-delay / grace area in CSS or JS).
+  </div>
+</div>
+
+</body>
+</html>
