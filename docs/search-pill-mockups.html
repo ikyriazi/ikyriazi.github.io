@@ -594,6 +594,127 @@
     margin-left: 0;
   }
   
+  /* Option H1 — Clear text on pill */
+  .pill-h-with-clear {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 8px 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    cursor: default;
+    position: relative;
+  }
+  .pill-clear-text {
+    font-size: 9.5px;
+    color: rgba(255,255,255,.5);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .15s;
+    text-transform: lowercase;
+  }
+  .pill-clear-text:hover {
+    color: rgba(255,255,255,.8);
+  }
+  
+  /* Option H2 — Clear as divider + text */
+  .pill-h2-with-clear {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 10px 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+    position: relative;
+  }
+  .pill-divider {
+    width: 1px;
+    height: 12px;
+    background: rgba(255,255,255,.2);
+  }
+  .pill-h2-clear-text {
+    font-size: 9.5px;
+    color: rgba(255,255,255,.5);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .pill-h2-clear-text:hover {
+    color: rgba(255,255,255,.8);
+  }
+  
+  /* Option H3 — Clear as small button */
+  .pill-h3-with-clear-btn {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 6px 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: default;
+    position: relative;
+  }
+  .pill-clear-btn {
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 8.5px;
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .pill-clear-btn:hover {
+    background: #e0e0e0;
+    color: #000;
+  }
+  
+  /* Option H4 — Wider toolbox (1.5x width) */
+  .option-h4-variant .e-toolbox-demo {
+    min-width: 330px;
+  }
+  
+  /* Option H5 — Clear button in toolbox top right */
+  .option-h5-variant .e-toolbox-demo {
+    min-width: 330px;
+    padding-top: 14px;
+    position: relative;
+  }
+  .toolbox-clear-btn {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 8.5px;
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border: none;
+  }
+  .toolbox-clear-btn:hover {
+    background: #e0e0e0;
+  }
+  
   .option-e-dark .e-filter-pill-x {
     background: #2a2a2a;
   }
@@ -1357,6 +1478,583 @@
   <div class="notes">
     <strong>Pros:</strong> Values are the visual focus — immediately readable. Field labels and controls recede into the background, reducing visual noise.<br>
     <strong>Cons:</strong> Muted × buttons may feel less interactive; users might overlook removal controls.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H1 — H + Clear text on pill
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant">
+  <div class="option-label">Option H1</div>
+  <div class="option-name">Option H + "clear" text on pill</div>
+  <div class="option-desc">
+    Same as Option H, with a subtle "clear" text at the end of the pill
+    for quick removal of all active items.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h-with-clear">
+              2 search fields
+              <span class="pill-clear-text">clear</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser liederbuch</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h-with-clear">
+              1 search field · 2 filters
+              <span class="pill-clear-text">clear</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Minimal and unobtrusive. Clear text is part of the pill. Single location for clear-all action.<br>
+    <strong>Cons:</strong> Text may be too subtle. No visual separation from summary text.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H2 — H + Clear with divider on pill
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant">
+  <div class="option-label">Option H2</div>
+  <div class="option-name">Option H + divider + "Clear" on pill</div>
+  <div class="option-desc">
+    Same as Option H, with a vertical divider and "Clear" text on the pill
+    to visually separate the summary from the action.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h2-with-clear">
+              2 search fields
+              <span class="pill-divider"></span>
+              <span class="pill-h2-clear-text">Clear</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser liederbuch</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h2-with-clear">
+              1 search field · 2 filters
+              <span class="pill-divider"></span>
+              <span class="pill-h2-clear-text">Clear</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Clear visual hierarchy with divider. "Clear" text is more prominent and distinct from summary.<br>
+    <strong>Cons:</strong> Slightly wider pill. Divider adds visual complexity.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H3 — H + Clear as button on pill
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant">
+  <div class="option-label">Option H3</div>
+  <div class="option-name">Option H + "CLEAR" button on pill</div>
+  <div class="option-desc">
+    Same as Option H, with "CLEAR" styled as a small pill-button on the main pill
+    for an obviously clickable clear-all action.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h3-with-clear-btn">
+              2 search fields
+              <span class="pill-clear-btn">Clear</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser liederbuch</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h3-with-clear-btn">
+              1 search field · 2 filters
+              <span class="pill-clear-btn">Clear</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Most obvious and button-like. Clear affordance for interaction. Familiar button pattern.<br>
+    <strong>Cons:</strong> Adds visual weight to the pill. Takes more space than text-only approaches.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H4 — H + Wider toolbox
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant option-h4-variant">
+  <div class="option-label">Option H4</div>
+  <div class="option-name">Option H + wider toolbox (1.5× width)</div>
+  <div class="option-desc">
+    Same as Option H, but the toolbox is 50% wider (330px instead of 220px),
+    expanding to the left while staying right-aligned with the search icon.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h3-with-clear-btn">
+              2 search fields 
+              <span class="pill-clear-btn">Clear all</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser liederbuch</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-h3-with-clear-btn">
+              1 search field · 2 filters
+              <span class="pill-clear-btn">Clear all</span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> More space for content. Easier to scan with wider layout. Better visibility for longer field values.<br>
+    <strong>Cons:</strong> Takes up more screen real estate. May feel oversized for simple queries.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H5 — H4 + Clear button in toolbox top right
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant option-h5-variant">
+  <div class="option-label">Option H5</div>
+  <div class="option-name">Option H4 + "Clear all" in toolbox top right</div>
+  <div class="option-desc">
+    Same as Option H4 (wider toolbox), but the "Clear all" button is positioned
+    at the top right of the toolbox instead of on the pill.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e-no-x">
+              2 search fields
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <button class="toolbox-clear-btn">Clear all</button>
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser liederbuch</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e-no-x">
+              1 search field · 2 filters
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <button class="toolbox-clear-btn">Clear all</button>
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Clear action is always visible in consistent location. Doesn't add to pill width. Clear separation between summary (pill) and action (toolbox).<br>
+    <strong>Cons:</strong> Requires opening toolbox to access clear functionality. Button position may compete with content.
   </div>
 </div>
 
