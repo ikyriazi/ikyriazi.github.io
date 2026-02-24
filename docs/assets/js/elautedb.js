@@ -286,8 +286,8 @@ window.addEventListener('load', function () {
     }
   }
 
-  function generateSimpleRow(labelText, value, skipHighlight = false) {
-    const displayValue = skipHighlight ? value : highlightText(value, getActiveTitleTerm());
+  function generateSimpleRow(labelText, value, skipHighlight = false, term = undefined) {
+    const displayValue = skipHighlight ? value : highlightText(value, term !== undefined ? term : getActiveTitleTerm());
     return '<tr><td class="details-placeholder"></td><td class="details-label">' + labelText +
       '</td><td class="details-value">' + displayValue + '</td><td class="details-CD" colspan="7"></td></tr>';
   }
@@ -382,7 +382,7 @@ window.addEventListener('load', function () {
     if (row.brown || row.otherShelfmark) {
       rows += generateSubgroupHeading('Further Identifiers', 'identifiers');
       let identifiersRows = '';
-      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown);
+      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown, false, getTermForColumn('rism'));
       if (row.otherShelfmark) {
         toArray(row.otherShelfmark).forEach((item, index) => {
           if (item && item.label) {
@@ -1070,15 +1070,29 @@ window.addEventListener('load', function () {
     return term;
   }
 
+  // Extract all searchable text labels from a combined field (primary object + other array/object)
+  function extractLabels(row, primaryField, otherField) {
+    const labels = [];
+    if (row[primaryField]?.label) labels.push(row[primaryField].label);
+    if (row[otherField]) {
+      toArray(row[otherField]).forEach(item => { if (item?.label) labels.push(item.label); });
+    }
+    return labels;
+  }
+
   function rowMatches(row, field, value) {
+    const matchesAny = arr => arr.some(v => (v || '').toLowerCase().includes(value));
     switch (field) {
       case 'All fields':
-        return [
+        return matchesAny([
           row.shelfmark?.label, row.title, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
-          row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
+          row.printPlace?.label,
+          ...extractLabels(row, 'rism', 'otherRism'),
+          ...extractLabels(row, 'vd16', 'otherVD16'),
+          row.brown,
           row.description, row.comment, row.bibliography
-        ].some(v => (v || '').toLowerCase().includes(value));
+        ]);
       case 'Title':
         return (row.title || '').toLowerCase().includes(value) ||
                (row.alternativeTitle || '').toLowerCase().includes(value);
@@ -1087,10 +1101,11 @@ window.addEventListener('load', function () {
       case 'Place':
         return (row.printPlace?.label || '').toLowerCase().includes(value);
       case 'RISM / VD16 / Brown ID':
-        return (row.rism || '').toLowerCase().includes(value)      ||
-               (row.otherRism || '').toLowerCase().includes(value) ||
-               (row.vd16 || '').toLowerCase().includes(value)      ||
-               (row.otherVD16 || '').toLowerCase().includes(value);
+        return matchesAny([
+          ...extractLabels(row, 'rism', 'otherRism'),
+          ...extractLabels(row, 'vd16', 'otherVD16'),
+          row.brown
+        ]);
       case 'Description / Comment':
         return (row.description || '').toLowerCase().includes(value) ||
                (row.comment || '').toLowerCase().includes(value);
@@ -1135,12 +1150,42 @@ window.addEventListener('load', function () {
     });
   }
 
+  // Expand child rows whose match is only in brown (Further Identifiers subtable).
+  function expandBrownMatches() {
+    const active = getActiveRows();
+    const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
+    if (rismTerms.length === 0) return;
+    table.rows({ page: 'current' }).every(function () {
+      const rowData = this.data();
+      if (!rowData || !rowData.brown) return;
+      if (this.child.isShown()) return;
+      const hasBrownMatch = rismTerms.some(({ value }) => (rowData.brown || '').toLowerCase().includes(value));
+      if (hasBrownMatch) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
+
   function refreshOpenAltTitleHighlights() {
+    const active = getActiveRows();
+    const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
     table.rows({ page: 'current' }).every(function () {
       if (!this.child.isShown()) return;
       // Fully re-render the child row content with the current search term,
       // so all highlights (not just the alt-title cell) are generated fresh.
       this.child(formatDetails(this.data())).show();
+      // If this row has a brown match, expand the Further Identifiers subgroup.
+      const rowData = this.data();
+      if (rismTerms.length > 0 && rowData.brown) {
+        const hasBrownMatch = rismTerms.some(({ value }) => (rowData.brown || '').toLowerCase().includes(value));
+        if (hasBrownMatch) {
+          const $child = this.child();
+          if ($child && $child.length) {
+            $child.find('.subgroup-content[data-subgroup="identifiers"]').show();
+          }
+        }
+      }
     });
   }
 
@@ -1399,9 +1444,10 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Expand alt-title matches first, then refresh highlights
+        // Expand alt-title and brown matches first, then refresh highlights
         setTimeout(function() {
           expandAltTitleMatches();
+          expandBrownMatches();
           refreshOpenAltTitleHighlights();
         }, 0);
 
