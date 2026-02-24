@@ -439,6 +439,217 @@
     box-shadow: 0 8px 28px rgba(0,0,0,.13), 0 2px 8px rgba(0,0,0,.07);
     padding: 10px 0 6px;
   }
+
+  /* ═══════════════════════════════════════════════════════
+     OPTION F — Accordion pill
+     ═══════════════════════════════════════════════════════ */
+  .f-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Accordion pill — expands on click to reveal items */
+  .pill-f-button {
+    background: #2c2c2c;
+    color: #fff;
+    border: none;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 8px 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+    transition: border-radius 0.2s;
+    position: relative;
+    max-width: 240px;
+  }
+
+  .pill-f-close {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+    padding: 0;
+  }
+  .pill-f-close:hover { background: rgba(255,255,255,.35); }
+  .demo-canvas-e .state-col:nth-child(1),
+  .demo-canvas-e .state-col:nth-child(2) {
+    display: none;
+  }
+
+  .demo-canvas-e {
+    flex-direction: column;
+  }
+
+  .demo-canvas-e .state-col {
+    border-right: none;
+    border-bottom: none;
+    flex: none;
+  }
+
+  .pill-f-chevron {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.6);
+    flex-shrink: 0;
+    transition: none;
+  }
+  .pill-f-button.expanded .pill-f-chevron {
+    transform: none;
+    color: rgba(255,255,255,.5);
+  }
+  .pill-f-chevron svg { width: 14px; height: 14px; }
+
+  /* Expanded state */
+  .pill-f-button.expanded {
+    border-radius: 12px;
+    padding: 8px 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 240px;
+    max-width: none;
+    white-space: normal;
+    min-height: auto;
+    align-self: flex-start;
+    overflow: visible;
+    height: auto;
+  }
+
+  /* Adjust state-bg when F expands */
+  .demo-canvas-e .state-bg {
+    height: auto;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .demo-canvas-e .state-col:nth-child(3) .state-bg {
+    align-items: flex-end;
+  }
+
+  .f-pill-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .f-pill-header-text {
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .f-pill-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .f-item-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .f-item-group-heading {
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: rgba(255,255,255,.5);
+    margin-top: 6px;
+    margin-bottom: 4px;
+    padding: 0 2px;
+  }
+
+  .f-item-group:first-child .f-item-group-heading {
+    margin-top: 0;
+  }
+
+  .f-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 0;
+  }
+
+  .f-item-label {
+    font-size: 10px;
+    color: #fff;
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .f-item-sub {
+    font-size: 9px;
+    color: rgba(255,255,255,.6);
+    font-weight: 400;
+  }
+
+  .f-item-remove {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+    padding: 0;
+  }
+
+  .f-item-remove:hover { background: rgba(255,255,255,.3); }
+
+  .f-item-remove svg { width: 8px; height: 8px; stroke: #fff; fill: none;
+    stroke-width: 2.5; stroke-linecap: round; }
+
+  /* Filter item styling */
+  .f-item.filter .f-item-label { color: #e8f0ff; }
+  .f-item.filter .f-item-sub { color: rgba(200,220,255,.6); }
+
+  /* Demo column for Option F */
+  .f-demo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 20px;
+  }
+
+  /* For expanded state, allow content to be visible */
+  .demo-canvas-e .state-col:nth-child(3) .f-demo-col {
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+
+  .demo-canvas-e .state-col:nth-child(3) .pill-f-button.expanded {
+    align-items: stretch;
+    width: 250px;
+  }
+
 </style>
 </head>
 <body>
@@ -849,6 +1060,108 @@
     <strong>Cons:</strong> Hover-only on desktop; would need a tap toggle on touch screens.
     The toolbox must stay open while the user moves to click an item (needs
     a small hover-delay / grace area in CSS or JS).
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION F — Accordion pill
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section">
+  <div class="option-label">Option F</div>
+  <div class="option-name">Accordion pill · inline expansion</div>
+  <div class="option-desc">
+    Same pill as Options A and E. On click the pill expands inline (border-radius becomes less rounded,
+    width stretches) and reveals all active items stacked vertically. Search fields and filters are in
+    separate groups. Each item has a remove × button. Click the pill itself or the top × to collapse.
+    Ideal when hover is not reliable (touch screens) and no separate drawer is desired.
+  </div>
+  <div class="demo-canvas demo-canvas-e">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="f-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, collapsed -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · collapsed</div>
+      <div class="state-bg">
+        <div class="f-wrap">
+          <button class="pill-f-button" onclick="this.classList.add('expanded'); this.nextElementSibling?.classList.add('hidden');">
+            2 search fields
+            <span class="pill-f-chevron">
+              <svg viewBox="0 0 12 12"><polyline points="3 4 6 7 9 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <button class="search-btn active">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search + 2 filters, expanded -->
+    <div class="state-col">
+      <div class="state-label">1 search · 2 filters · expanded</div>
+      <div class="state-bg">
+        <div class="f-demo-col">
+          <button class="pill-f-button expanded" onclick="this.classList.remove('expanded');">
+            <div class="f-pill-header">
+              <span class="f-pill-header-text">1 search field · 2 filters</span>
+              <span class="pill-f-chevron">
+                <svg viewBox="0 0 12 12"><polyline points="3 4 6 7 9 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+            <div class="f-pill-items">
+              <div class="f-item-group">
+                <div class="f-item-group-heading">Search</div>
+                <div class="f-item">
+                  <div class="f-item-label">Title <span class="f-item-sub">· "ambraser"</span></div>
+                  <button class="f-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="f-item-group">
+                <div class="f-item-group-heading">Filters</div>
+                <div class="f-item filter">
+                  <div class="f-item-label">Print</div>
+                  <button class="f-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+                <div class="f-item filter">
+                  <div class="f-item-label">1500–1520</div>
+                  <button class="f-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </button>
+          <button class="search-btn active">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Single element (the pill) elegantly contains both states. Clicking the pill
+    itself toggles expand/collapse, making it intuitive. Works well on touch screens. Filters are
+    color-tinted (lighter blue) to distinguish from search fields. Each item removable individually.
+    Compact when collapsed, self-expanding when interactive.<br>
+    <strong>Cons:</strong> The pill changes size/shape on expand; needs smooth CSS transition.
+    May feel cramped if there are many items. The item layout inside occupies more vertical space
+    than Options A–E at rest.
   </div>
 </div>
 
