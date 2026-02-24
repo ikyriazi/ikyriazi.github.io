@@ -715,6 +715,117 @@
     background: #e0e0e0;
   }
   
+  /* Option H6 — Chevron-triggered toolbox aligned with pill */
+  .pill-with-chevron {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 8px 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: default;
+    position: relative;
+  }
+  .pill-chevron {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s, transform .2s;
+  }
+  .pill-chevron:hover {
+    background: rgba(255,255,255,.35);
+  }
+  .pill-chevron.open {
+    transform: rotate(180deg);
+  }
+  .pill-chevron svg {
+    width: 10px;
+    height: 10px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  .option-h6-variant .e-demo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 20px 20px 24px;
+  }
+  .option-h6-variant .h6-pill-toolbox-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+  .option-h6-variant .h6-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .option-h6-variant .e-toolbox-demo {
+    min-width: 330px;
+    padding-top: 14px;
+    position: relative;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s ease-out, opacity 0.25s ease-out;
+  }
+  .option-h6-variant .e-toolbox-demo.visible {
+    max-height: 500px;
+    opacity: 1;
+  }
+  
+  /* Option H7 — H6 with toolbox right edge aligned with pill right edge */
+  .option-h7-variant .e-demo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 20px 20px 24px;
+    position: relative;
+  }
+  .option-h7-variant .h7-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .option-h7-variant .h7-pill-toolbox-wrapper {
+    position: relative;
+  }
+  .option-h7-variant .e-toolbox-demo {
+    min-width: 330px;
+    padding-top: 14px;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s ease-out, opacity 0.25s ease-out;
+  }
+  .option-h7-variant .e-toolbox-demo.visible {
+    max-height: 500px;
+    opacity: 1;
+  }
+  
   .option-e-dark .e-filter-pill-x {
     background: #2a2a2a;
   }
@@ -2057,6 +2168,172 @@
     <strong>Cons:</strong> Requires opening toolbox to access clear functionality. Button position may compete with content.
   </div>
 </div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H6 — H5 + Chevron-triggered toolbox aligned with pill
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant option-h6-variant">
+  <div class="option-label">Option H6</div>
+  <div class="option-name">Interactive: Chevron on pill toggles toolbox (aligned with pill)</div>
+  <div class="option-desc">
+    Based on H5 State 3. The pill has a chevron icon - clicking it toggles the toolbox.
+    The toolbox aligns with the pill's right edge, not the search icon. Click the chevron to try it!
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- Interactive demo -->
+    <div class="state-col" style="flex: 1; border-right: none;">
+      <div class="state-label">Interactive — Click chevron to toggle</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="h6-pill-toolbox-wrapper">
+            <div class="h6-top-row">
+              <div class="pill-with-chevron">
+                1 search field · 2 filters
+                <span class="pill-chevron" id="h6-chevron">
+                  <svg viewBox="0 0 12 8"><polyline points="2 2, 6 6, 10 2"/></svg>
+                </span>
+              </div>
+              <button class="search-btn">
+                <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+              </button>
+            </div>
+            <div class="e-toolbox-demo" id="h6-toolbox">
+              <button class="toolbox-clear-btn">Clear all</button>
+              <div class="e-toolbox-section">
+                <div class="e-toolbox-heading">Search</div>
+                <div class="e-item">
+                  <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                    <button class="e-item-remove" title="Remove">
+                      <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="e-toolbox-section filters-section">
+                <div class="e-toolbox-heading">Filters</div>
+                <div class="e-filter-row">
+                  <div class="e-filter-pill">
+                    Print
+                    <span class="e-filter-pill-x">
+                      <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                    </span>
+                  </div>
+                  <div class="e-filter-pill">
+                    1500–1520
+                    <span class="e-filter-pill-x">
+                      <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Interactive demo:</strong> Chevron provides clear affordance for expand/collapse. Toolbox aligned with pill creates visual hierarchy. Search icon remains separate action.<br>
+    <strong>Try it:</strong> Click the chevron to toggle the toolbox visibility.
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────
+     OPTION H7 — H6 with toolbox right edge aligned with pill
+     ──────────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant option-h7-variant">
+  <div class="option-label">Option H7</div>
+  <div class="option-name">Interactive: Toolbox right edge aligned with pill right edge</div>
+  <div class="option-desc">
+    Same as H6, but the toolbox's right edge aligns with the pill's right edge.
+    Click the chevron to toggle the toolbox!
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- Interactive demo -->
+    <div class="state-col" style="flex: 1; border-right: none;">
+      <div class="state-label">Interactive — Click chevron to toggle</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="h7-top-row">
+            <div class="h7-pill-toolbox-wrapper">
+              <div class="pill-with-chevron">
+                1 search field · 2 filters
+                <span class="pill-chevron" id="h7-chevron">
+                  <svg viewBox="0 0 12 8"><polyline points="2 2, 6 6, 10 2"/></svg>
+                </span>
+              </div>
+              <div class="e-toolbox-demo" id="h7-toolbox">
+              <button class="toolbox-clear-btn">Clear all</button>
+              <div class="e-toolbox-section">
+                <div class="e-toolbox-heading">Search</div>
+                <div class="e-item">
+                  <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                    <button class="e-item-remove" title="Remove">
+                      <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="e-toolbox-section filters-section">
+                <div class="e-toolbox-heading">Filters</div>
+                <div class="e-filter-row">
+                  <div class="e-filter-pill">
+                    Print
+                    <span class="e-filter-pill-x">
+                      <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                    </span>
+                  </div>
+                  <div class="e-filter-pill">
+                    1500–1520
+                    <span class="e-filter-pill-x">
+                      <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+            <button class="search-btn">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Interactive demo:</strong> Toolbox right edge aligns with pill's right edge, creating a clean right-aligned visual stack.<br>
+    <strong>Try it:</strong> Click the chevron to toggle the toolbox visibility.
+  </div>
+</div>
+
+<script>
+// H6 Interactive chevron toggle
+const h6Chevron = document.getElementById('h6-chevron');
+const h6Toolbox = document.getElementById('h6-toolbox');
+
+if (h6Chevron && h6Toolbox) {
+  h6Chevron.addEventListener('click', () => {
+    const isOpen = h6Toolbox.classList.toggle('visible');
+    h6Chevron.classList.toggle('open', isOpen);
+  });
+}
+
+// H7 Interactive chevron toggle
+const h7Chevron = document.getElementById('h7-chevron');
+const h7Toolbox = document.getElementById('h7-toolbox');
+
+if (h7Chevron && h7Toolbox) {
+  h7Chevron.addEventListener('click', () => {
+    const isOpen = h7Toolbox.classList.toggle('visible');
+    h7Chevron.classList.toggle('open', isOpen);
+  });
+}
+</script>
 
 </body>
 </html>
