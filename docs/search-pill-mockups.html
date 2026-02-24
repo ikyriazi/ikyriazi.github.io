@@ -342,6 +342,21 @@
   .pill-e-x svg { width: 9px; height: 9px; stroke: #fff; fill: none;
     stroke-width: 2.5; stroke-linecap: round; }
 
+  /* Pill without x button */
+  .pill-e-no-x {
+    background: #2c2c2c;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    cursor: default;
+    position: relative;
+  }
+
   /* Toolbox — floats below the pill */
   .e-toolbox {
     position: absolute;
@@ -361,7 +376,7 @@
     padding: 2px 14px 3px;
   }
   .e-toolbox-section + .e-toolbox-section {
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid #e5e5e5;
     margin-top: 5px;
     padding-top: 7px;
   }
@@ -370,7 +385,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .07em;
-    color: #bbb;
+    color: #888;
     margin-bottom: 6px;
   }
 
@@ -405,11 +420,52 @@
   .e-item-remove svg { width: 9px; height: 9px; stroke: #555; fill: none;
     stroke-width: 2.5; stroke-linecap: round; }
 
-  /* Filter items get a blue tint */
-  .e-item.filter .e-item-label { color: #2a3a6a; }
-  .e-item.filter .e-item-remove { background: #edf0fa; }
-  .e-item.filter .e-item-remove:hover { background: #dce1f5; }
-  .e-item.filter .e-item-remove svg { stroke: #6676b0; }
+  /* Filter section displays pills in a row */
+  .e-toolbox-section.filters-section .e-item {
+    padding: 0;
+  }
+  .e-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Filter items display as pills with integrated x button */
+  .e-filter-pill {
+    background: #e8e8e8;
+    color: #555;
+    padding: 4px 6px 4px 11px;
+    border-radius: 14px;
+    font-size: 10.5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+  }
+  .e-filter-pill-x {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f2f2f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .e-filter-pill-x:hover {
+    background: #e0e0e0;
+  }
+  .e-filter-pill-x svg {
+    width: 9px;
+    height: 9px;
+    stroke: #555;
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
 
   /* Option E demo canvas — needs visible overflow so the toolbox isn't clipped */
   .demo-canvas-e {
@@ -438,6 +494,114 @@
     border-radius: 12px;
     box-shadow: 0 8px 28px rgba(0,0,0,.13), 0 2px 8px rgba(0,0,0,.07);
     padding: 10px 0 6px;
+  }
+
+  /* Option F — Option E variant with dark toolbox */
+  .option-e-dark .e-toolbox,
+  .option-e-dark .e-toolbox-demo {
+    background: #111;
+    border-color: #222;
+    box-shadow: 0 8px 28px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.2);
+  }
+  .option-e-dark .e-toolbox-section + .e-toolbox-section {
+    border-top-color: #2a2a2a;
+  }
+  .option-e-dark .e-toolbox-heading {
+    color: #9a9a9a;
+  }
+  .option-e-dark .e-item-label {
+    color: #f0f0f0;
+  }
+  .option-e-dark .e-item-sub {
+    color: #9a9a9a;
+  }
+  .option-e-dark .e-item-remove {
+    background: #2a2a2a;
+  }
+  .option-e-dark .e-item-remove:hover {
+    background: #3a3a3a;
+  }
+  .option-e-dark .e-item-remove svg {
+    stroke: #dcdcdc;
+  }
+  .option-e-dark .e-item.filter .e-item-remove,
+  .option-e-dark .e-item.filter .e-item-remove:hover {
+    background: #2a2a2a;
+  }
+  .option-e-dark .e-filter-pill {
+    background: #222;
+    color: #aaa;
+  }
+
+  /* Option G — unified pill colors for search and filters */
+  .option-g-variant .e-item-label {
+    color: #555;
+  }
+  .option-g-variant .e-item-value {
+    color: #aaa;
+  }
+  .option-g-variant .e-filter-pill {
+    background: #f0f0f0;
+  }
+  .option-g-variant.option-e-dark .e-item-label {
+    color: #f0f0f0;
+  }
+  .option-g-variant.option-e-dark .e-item-value {
+    color: #aaa;
+  }
+  .option-g-variant.option-e-dark .e-filter-pill {
+    background: #2a2a2a;
+    color: #aaa;
+  }
+  
+  /* Option H — inverted emphasis: values are white, labels/controls are grey */
+  .option-h-variant .e-item-label {
+    color: #555;
+  }
+  .option-h-variant .e-item-value {
+    color: #222;
+  }
+  .option-h-variant .e-filter-pill {
+    background: #f0f0f0;
+  }
+  .option-h-variant.option-e-dark .e-item-label {
+    color: #aaa;
+  }
+  .option-h-variant.option-e-dark .e-item-value {
+    color: #f0f0f0;
+  }
+  .option-h-variant.option-e-dark .e-filter-pill {
+    background: #2a2a2a;
+    color: #f0f0f0;
+  }
+  .option-h-variant.option-e-dark .e-item-remove svg {
+    stroke: #aaa;
+  }
+  .option-h-variant.option-e-dark .e-filter-pill-x svg {
+    stroke: #aaa;
+  }
+  /* Option H inline x button after value */
+  .option-h-variant .e-item {
+    justify-content: flex-start;
+  }
+  .option-h-variant .e-item-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  .option-h-variant .e-item-remove {
+    margin-left: 0;
+  }
+  
+  .option-e-dark .e-filter-pill-x {
+    background: #2a2a2a;
+  }
+  .option-e-dark .e-filter-pill-x:hover {
+    background: #3a3a3a;
+  }
+  .option-e-dark .e-filter-pill-x svg {
+    stroke: #dcdcdc;
   }
 
 </style>
@@ -821,19 +985,21 @@
                 </button>
               </div>
             </div>
-            <div class="e-toolbox-section">
+            <div class="e-toolbox-section filters-section">
               <div class="e-toolbox-heading">Filters</div>
-              <div class="e-item filter">
-                <div class="e-item-label">Print</div>
-                <button class="e-item-remove" title="Remove">
-                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
-                </button>
-              </div>
-              <div class="e-item filter">
-                <div class="e-item-label">1500–1520</div>
-                <button class="e-item-remove" title="Remove">
-                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
-                </button>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -850,6 +1016,347 @@
     <strong>Cons:</strong> Hover-only on desktop; would need a tap toggle on touch screens.
     The toolbox must stay open while the user moves to click an item (needs
     a small hover-delay / grace area in CSS or JS).
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION F — Pill A + hover toolbox (dark)
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark">
+  <div class="option-label">Option F</div>
+  <div class="option-name">Dark pill · hover toolbox with black background</div>
+  <div class="option-desc">
+    Same as Option E, but the toolbox uses a black background for stronger contrast.
+    Filter remove buttons match the search remove button color for a unified look.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e">
+              2 search fields
+              <span class="pill-e-x">
+                <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+              </span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title <span class="e-item-sub">· "ambraser"</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person <span class="e-item-sub">· "gerle"</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e">
+              1 search field · 2 filters
+              <span class="pill-e-x">
+                <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+              </span>
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title <span class="e-item-sub">· "ambraser"</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Dark toolbox feels denser and more editorial, while keeping the same interaction model.
+    Filters and search items share the same remove button color for visual consistency.<br>
+    <strong>Cons:</strong> Dark surfaces need careful contrast tuning and may feel heavier on the page.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION G — Pill without x + hover toolbox (dark)
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-g-variant">
+  <div class="option-label">Option G</div>
+  <div class="option-name">Dark pill without × · hover toolbox with black background</div>
+  <div class="option-desc">
+    Based on Option F, but the main pill has no × button — users can only clear items individually
+    through the hover toolbox. The pill acts as a summary indicator only.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e-no-x">
+              2 search fields
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e-no-x">
+              1 search field · 2 filters
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span></div>
+                <button class="e-item-remove" title="Remove">
+                  <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Cleaner pill without the × clutter. Forces deliberate item-by-item removal, 
+    preventing accidental clear-all actions. The toolbox provides all removal controls.<br>
+    <strong>Cons:</strong> No quick way to clear everything at once. Users must hover/click to access removal.
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────
+     OPTION H — Values emphasized in white
+     ───────────────────────────────────────────────────────── -->
+<div class="option-section option-e-dark option-h-variant">
+  <div class="option-label">Option H</div>
+  <div class="option-name">Dark pill · white values with muted labels and controls</div>
+  <div class="option-desc">
+    Based on Option G with inverted emphasis: field values and filter text are white (prominent),
+    while field labels and × buttons are muted grey.
+  </div>
+  <div class="demo-canvas demo-canvas-e" style="align-items:stretch;">
+
+    <!-- State 1 — idle -->
+    <div class="state-col">
+      <div class="state-label">Idle</div>
+      <div class="state-bg">
+        <div class="a-wrap">
+          <button class="search-btn">
+            <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 2 — 2 search fields, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">2 search fields · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e-no-x">
+              2 search fields
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser liederbuch</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="e-item">
+                <div class="e-item-label">Person: <span class="e-item-value">gerle</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- State 3 — 1 search field + 2 filters, toolbox open -->
+    <div class="state-col">
+      <div class="state-label">1 search field · 2 filters · hover</div>
+      <div class="state-bg" style="height:auto; align-items:flex-end; padding: 20px;">
+        <div class="e-demo-col">
+          <div class="e-pill-row">
+            <div class="pill-e-no-x">
+              1 search field · 2 filters
+            </div>
+            <button class="search-btn active">
+              <svg><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+            </button>
+          </div>
+          <div class="e-toolbox-demo">
+            <div class="e-toolbox-section">
+              <div class="e-toolbox-heading">Search</div>
+              <div class="e-item">
+                <div class="e-item-label">Title: <span class="e-item-value">ambraser</span>
+                  <button class="e-item-remove" title="Remove">
+                    <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="e-toolbox-section filters-section">
+              <div class="e-toolbox-heading">Filters</div>
+              <div class="e-filter-row">
+                <div class="e-filter-pill">
+                  Print
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+                <div class="e-filter-pill">
+                  1500–1520
+                  <span class="e-filter-pill-x">
+                    <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.demo-canvas -->
+  <div class="notes">
+    <strong>Pros:</strong> Values are the visual focus — immediately readable. Field labels and controls recede into the background, reducing visual noise.<br>
+    <strong>Cons:</strong> Muted × buttons may feel less interactive; users might overlook removal controls.
   </div>
 </div>
 
