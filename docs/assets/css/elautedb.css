@@ -1061,23 +1061,234 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
   gap: 8px;
 }
 
-#searchPill {
+/* H7 pill with chevron and toolbox structure */
+.h7-pill-toolbox-wrapper {
+  position: relative;
+}
+
+.pill-with-chevron {
   background: #2c2c2c;
   color: #fff;
   font-size: 10px;
   font-weight: 600;
-  padding: 5px 10px;
+  padding: 5px 8px 5px 12px;
   border-radius: 20px;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: default;
+  position: relative;
   opacity: 0;
   transform: translateX(6px);
   transition: opacity 0.22s ease, transform 0.22s ease;
   pointer-events: none;
 }
 
-#searchPill.visible {
+.pill-with-chevron.visible {
   opacity: 1;
   transform: translateX(0);
+  pointer-events: auto;
+}
+
+.pill-chevron {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s, transform .2s;
+}
+
+.pill-chevron:hover {
+  background: rgba(255,255,255,.35);
+}
+
+.pill-chevron.open {
+  transform: rotate(180deg);
+}
+
+.pill-chevron svg {
+  width: 10px;
+  height: 10px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Toolbox that appears below the pill */
+.e-toolbox-demo {
+  min-width: 330px;
+  padding-top: 14px;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s ease-out, opacity 0.25s ease-out;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.28), 0 2px 8px rgba(0,0,0,.2);
+  padding: 10px 0 6px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.e-toolbox-demo.visible {
+  max-height: 500px;
+  opacity: 1;
+}
+
+/* Toolbox clear button */
+.toolbox-clear-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 8.5px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  border: none;
+}
+
+.toolbox-clear-btn:hover {
+  background: #e0e0e0;
+}
+
+/* Toolbox sections */
+.e-toolbox-section {
+  padding: 2px 14px 3px;
+}
+
+.e-toolbox-section + .e-toolbox-section {
+  border-top: 1px solid #2a2a2a;
+  margin-top: 5px;
+  padding-top: 7px;
+}
+
+.e-toolbox-heading {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: #9a9a9a;
+  margin-bottom: 6px;
+}
+
+/* Toolbox items */
+.e-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.e-item-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  font-size: 11.5px;
+  color: #aaa;
+  line-height: 1.3;
+}
+
+.e-item-value {
+  color: #f0f0f0;
+}
+
+.e-item-remove {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s;
+  margin-left: 0;
+}
+
+.e-item-remove:hover {
+  background: #3a3a3a;
+}
+
+.e-item-remove svg {
+  width: 9px;
+  height: 9px;
+  stroke: #aaa;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+/* Filter section */
+.e-toolbox-section.filters-section .e-item {
+  padding: 0;
+}
+
+.e-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Filter pills */
+.e-filter-pill {
+  background: #2a2a2a;
+  color: #f0f0f0;
+  padding: 4px 6px 4px 11px;
+  border-radius: 14px;
+  font-size: 10.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: default;
+}
+
+.e-filter-pill-x {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+
+.e-filter-pill-x:hover {
+  background: #3a3a3a;
+}
+
+.e-filter-pill-x svg {
+  width: 9px;
+  height: 9px;
+  stroke: #aaa;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
 }
 
 #searchIconBtn {

@@ -906,27 +906,146 @@ window.addEventListener('load', function () {
      Active-state pill
      ───────────────────────────────────────────── */
   const pill = document.getElementById('searchPill');
-  const pillState = { fields: 0, filters: 0 };
+  const pillChevron = document.getElementById('pillChevron');
+  const searchToolbox = document.getElementById('searchToolbox');
+  const toolboxSearchItems = document.getElementById('toolboxSearchItems');
+  const toolboxFilterItems = document.getElementById('toolboxFilterItems');
+  const toolboxClearBtn = document.getElementById('toolboxClearBtn');
+  const toolboxSearch = document.getElementById('toolboxSearch');
+  const toolboxFiltersSection = document.getElementById('toolboxFiltersSection');
+  
+  const pillState = { fields: 0, filters: 0, searchData: [], filterData: [] };
 
   function updatePill() {
     const f = pillState.fields, fi = pillState.filters;
-    if (f === 0 && fi === 0) { pill.classList.remove('visible'); return; }
+    if (f === 0 && fi === 0) { 
+      pill.classList.remove('visible'); 
+      searchToolbox.classList.remove('visible');
+      pillChevron.classList.remove('open');
+      return; 
+    }
+    
     const parts = [];
     if (f  > 0) parts.push(f  === 1 ? '1 search field'  : `${f} search fields`);
     if (fi > 0) parts.push(fi === 1 ? '1 filter' : `${fi} filters`);
-    pill.textContent = parts.join(' · ');
+    
+    // Update pill text - insert before the chevron
+    const pillText = parts.join(' · ');
+    const chevronEl = pill.querySelector('.pill-chevron');
+    
+    // Clear pill but keep the chevron
+    pill.innerHTML = '';
+    pill.appendChild(document.createTextNode(pillText));
+    pill.appendChild(chevronEl);
+    
     pill.classList.add('visible');
+    
+    // Update toolbox contents
+    updateToolbox();
   }
+  
+  function updateToolbox() {
+    // Update search items
+    toolboxSearchItems.innerHTML = '';
+    pillState.searchData.forEach(item => {
+      const itemEl = document.createElement('div');
+      itemEl.className = 'e-item';
+      itemEl.innerHTML = `
+        <div class="e-item-label">${item.field}: <span class="e-item-value">${item.value}</span>
+          <button class="e-item-remove" title="Remove" data-row-id="${item.rowId}">
+            <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
+          </button>
+        </div>
+      `;
+      toolboxSearchItems.appendChild(itemEl);
+      
+      // Add click handler to remove button
+      itemEl.querySelector('.e-item-remove').addEventListener('click', () => {
+        const row = document.querySelector(`[data-row-id="${item.rowId}"]`);
+        if (row) {
+          const input = row.querySelector('.builder-input, .p2b-text');
+          if (input) input.value = '';
+          row.querySelector('.remove-row-btn')?.click();
+        }
+        builderRowsEl.dispatchEvent(new Event('input'));
+      });
+    });
+    
+    // Show/hide search section
+    toolboxSearch.style.display = pillState.searchData.length > 0 ? '' : 'none';
+    
+    // Update filter items
+    toolboxFilterItems.innerHTML = '';
+    pillState.filterData.forEach(item => {
+      const pillEl = document.createElement('div');
+      pillEl.className = 'e-filter-pill';
+      pillEl.innerHTML = `
+        ${item.label}
+        <span class="e-filter-pill-x" data-filter-key="${item.key}">
+          <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
+        </span>
+      `;
+      toolboxFilterItems.appendChild(pillEl);
+      
+      // Add click handler to remove filter
+      pillEl.querySelector('.e-filter-pill-x').addEventListener('click', () => {
+        if (item.clearFn) item.clearFn();
+      });
+    });
+    
+    // Show/hide filters section
+    toolboxFiltersSection.style.display = pillState.filterData.length > 0 ? '' : 'none';
+  }
+  
+  function toggleToolbox() {
+    const isOpen = searchToolbox.classList.toggle('visible');
+    pillChevron.classList.toggle('open', isOpen);
+  }
+  
+  // Chevron toggle
+  pillChevron.addEventListener('click', toggleToolbox);
+  
+  // Clear all button
+  toolboxClearBtn.addEventListener('click', () => {
+    // Clear all search fields
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const inp = row.querySelector('.builder-input, .p2b-text');
+      if (inp) inp.value = '';
+      row.querySelector('.remove-row-btn')?.click();
+    });
+    
+    // Clear all filters
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
+    if (clearFiltersBtn) clearFiltersBtn.click();
+    
+    // Close toolbox
+    searchToolbox.classList.remove('visible');
+    pillChevron.classList.remove('open');
+    
+    builderRowsEl.dispatchEvent(new Event('input'));
+  });
 
   const builderRowsEl = document.getElementById('builderRows1');
 
   builderRowsEl.addEventListener('input', () => {
     let count = 0;
+    const searchData = [];
+    
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
       const inp = row.querySelector('.builder-input, .p2b-text');
-      if (inp && inp.value.trim()) count++;
+      const fieldSelect = row.querySelector('.field-select');
+      if (inp && inp.value.trim()) {
+        count++;
+        searchData.push({
+          field: fieldSelect ? fieldSelect.options[fieldSelect.selectedIndex].text : 'Search',
+          value: inp.value.trim(),
+          rowId: row.dataset.rowId || row.getAttribute('data-row-id') || count
+        });
+      }
     });
+    
     pillState.fields = count;
+    pillState.searchData = searchData;
     updatePill();
   });
 
@@ -947,19 +1066,36 @@ window.addEventListener('load', function () {
     if (options.filterCount) {
       clearFiltersBtn = document.getElementById(`clearFiltersBtn${n}`);
       const activeFilters = new Set();
-      onFilterChange = (key, isActive) => {
-        if (isActive) activeFilters.add(key);
-        else activeFilters.delete(key);
+      const filterDetails = new Map(); // Store filter details for toolbox
+      
+      onFilterChange = (key, isActive, label, clearFn) => {
+        if (isActive) {
+          activeFilters.add(key);
+          if (label) filterDetails.set(key, { label, clearFn });
+        } else {
+          activeFilters.delete(key);
+          filterDetails.delete(key);
+        }
         const count = activeFilters.size;
         clearFiltersBtn.style.display = count > 0 ? '' : 'none';
-        pillState.filters = count; updatePill();
+        pillState.filters = count;
+        pillState.filterData = Array.from(filterDetails.values()).map((v, i) => ({
+          key: Array.from(filterDetails.keys())[i],
+          label: v.label,
+          clearFn: v.clearFn
+        }));
+        updatePill();
       };
     }
 
     const { setVal, resetSearch: rs } = setupSplitAccordion(n,
       val => {
         physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
-        if (onFilterChange) onFilterChange('phys', val !== 'Both');
+        if (onFilterChange) {
+          const isActive = val !== 'Both';
+          const label = isActive ? (val === 'Print' ? 'Print' : 'Manuscript') : null;
+          onFilterChange('phys', isActive, label, () => setVal('Both'));
+        }
       },
       {
         'Person': (rowId) => createModeDropdownWidget(rowId, PERSONS),
@@ -969,10 +1105,10 @@ window.addEventListener('load', function () {
     );
     resetSearch = rs;
     physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
-    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
-    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
-    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
-    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
+    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v, v ? 'Date range' : null, () => resetDate()) : null });
+    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v, v ? 'Shelfmark' : null, () => resetShelf()) : null });
+    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v, v ? 'Function' : null, () => resetFn()) : null });
+    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v, v ? 'Fundamenta' : null, () => resetFunda()) : null });
 
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener('click', () => {

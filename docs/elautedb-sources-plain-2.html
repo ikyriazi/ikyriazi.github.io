@@ -17,7 +17,24 @@ custom_js:
 
 <!-- Search icon wrapper: pill + button -->
 <div id="searchIconWrap">
-  <div id="searchPill"></div>
+  <div class="h7-pill-toolbox-wrapper">
+    <div class="pill-with-chevron" id="searchPill">
+      <span class="pill-chevron" id="pillChevron">
+        <svg viewBox="0 0 12 8"><polyline points="2 2, 6 6, 10 2"/></svg>
+      </span>
+    </div>
+    <div class="e-toolbox-demo" id="searchToolbox">
+      <button class="toolbox-clear-btn" id="toolboxClearBtn">Clear all</button>
+      <div class="e-toolbox-section" id="toolboxSearch">
+        <div class="e-toolbox-heading">Search</div>
+        <div id="toolboxSearchItems"></div>
+      </div>
+      <div class="e-toolbox-section filters-section" id="toolboxFiltersSection">
+        <div class="e-toolbox-heading">Filters</div>
+        <div class="e-filter-row" id="toolboxFilterItems"></div>
+      </div>
+    </div>
+  </div>
   <button id="searchIconBtn" aria-label="Search sources"></button>
 </div>
 
