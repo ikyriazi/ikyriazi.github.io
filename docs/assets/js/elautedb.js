@@ -430,9 +430,9 @@ window.addEventListener('load', function () {
       '</colgroup>' + rows + '</table></div>';
   }
 
-  function renderWithHighlight(data, type, removeBracket = false) {
+  function renderWithHighlight(data, type, removeBracket = false, term = undefined) {
     if (type === 'sort') return (removeBracket && data) ? data.replace(/^\[/, '') : (data || '');
-    return (type === 'display') ? highlightText(data, getActiveTitleTerm()) : (data || '');
+    return (type === 'display') ? highlightText(data, term !== undefined ? term : getActiveTitleTerm()) : (data || '');
   }
 
   function combineValues(row, primaryField, otherField) {
@@ -445,11 +445,11 @@ window.addEventListener('load', function () {
     return values.join('<br/>');
   }
 
-  function renderCombinedField(row, primaryField, otherField, type) {
+  function renderCombinedField(row, primaryField, otherField, type, term) {
     if (type !== 'display') return '';
     const values = [];
     if (row[primaryField] && row[primaryField].label) {
-      const h = highlightText(row[primaryField].label, getActiveTitleTerm());
+      const h = highlightText(row[primaryField].label, term);
       values.push(row[primaryField].url
         ? `<a href="${row[primaryField].url}" target="_blank" rel="noopener noreferrer">${h}</a>`
         : h);
@@ -458,7 +458,7 @@ window.addEventListener('load', function () {
       const items = Array.isArray(row[otherField]) ? row[otherField] : [row[otherField]];
       items.forEach(item => {
         if (item && item.label) {
-          const h = highlightText(item.label, getActiveTitleTerm());
+          const h = highlightText(item.label, term);
           values.push(item.url
             ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${h}</a>`
             : h);
@@ -1046,6 +1046,30 @@ window.addEventListener('load', function () {
     return term;
   }
 
+  // Returns a highlight term only when the given column type is actually being searched.
+  // Columns not covered by any active search field return ''.
+  function getTermForColumn(columnType) {
+    const fieldMap = {
+      'title':      ['Title', 'All fields'],
+      'shortTitle': [],
+      'shelfmark':  ['All fields'],
+      'date':       ['All fields'],
+      'author':     ['Person', 'All fields'],
+      'publisher':  ['All fields'],
+      'printPlace': ['Place', 'All fields'],
+      'rism':       ['RISM / VD16 / Brown ID', 'All fields'],
+    };
+    const allowed = fieldMap[columnType] || [];
+    let term = '';
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp   = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (value && allowed.includes(field)) term = value;
+    });
+    return term;
+  }
+
   function rowMatches(row, field, value) {
     switch (field) {
       case 'All fields':
@@ -1170,7 +1194,7 @@ window.addEventListener('load', function () {
             defaultContent: '',
             render: function(data, type, row) {
               if (type === 'display') {
-                const highlighted = highlightText(data, getActiveTitleTerm());
+                const highlighted = highlightText(data, getTermForColumn('shelfmark'));
                 if (row.shelfmark && row.shelfmark.url) {
                   return `<a href="${row.shelfmark.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`;
                 }
@@ -1183,13 +1207,13 @@ window.addEventListener('load', function () {
             data: 'title',
             title: 'Title',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, true)
+            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('title'))
           },
           {
             data: 'shortTitle',
             title: 'Short title',
             defaultContent: '',
-            render: renderWithHighlight
+            render: (data, type) => renderWithHighlight(data, type, false, getTermForColumn('shortTitle'))
           },
           {
             data: 'date.label',
@@ -1203,7 +1227,7 @@ window.addEventListener('load', function () {
                 }
                 return 0;
               }
-              if (type === 'display') return highlightText(data, getActiveTitleTerm());
+              if (type === 'display') return highlightText(data, getTermForColumn('date'));
               return data || '';
             }
           },
@@ -1211,30 +1235,30 @@ window.addEventListener('load', function () {
             data: 'author.label',
             title: 'Author / Editor',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, true)
+            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('author'))
           },
           {
             data: 'publisher.label',
             title: 'Publisher',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, true)
+            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('publisher'))
           },
           {
             data: 'printPlace.label',
             title: 'Printing place',
             defaultContent: '',
             width: '120px',
-            render: (data, type) => renderWithHighlight(data, type, true)
+            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('printPlace'))
           },
           {
             data: 'rism',
             title: 'RISM',
-            render: (data, type, row) => renderCombinedField(row, 'rism', 'otherRism', type)
+            render: (data, type, row) => renderCombinedField(row, 'rism', 'otherRism', type, getTermForColumn('rism'))
           },
           {
             data: 'vd16',
             title: 'VD16',
-            render: (data, type, row) => renderCombinedField(row, 'vd16', 'otherVD16', type)
+            render: (data, type, row) => renderCombinedField(row, 'vd16', 'otherVD16', type, getTermForColumn('rism'))
           }
         ],
         paging: true,
