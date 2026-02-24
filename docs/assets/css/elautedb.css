@@ -1129,6 +1129,7 @@ table.details-table tr.subgroup-spacer-small.subgroup-content ~ tr.subgroup-head
 
 #searchOverlay.show {
   opacity: 1;
+  pointer-events: auto;
 }
 
 
