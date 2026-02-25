@@ -1173,7 +1173,14 @@ window.addEventListener('load', function () {
       const field = (row.querySelector('.field-select') || {}).value || 'All fields';
       const inp   = row.querySelector('.builder-input, .p2b-text');
       const value = inp ? inp.value.trim() : '';
-      if (value) active.push({ field, value: (value || '').toLowerCase() });
+      // Capture the mode (free/list) for Person and Place fields
+      let mode = 'free';
+      const tabsEl = row.querySelector('.p2b-tabs');
+      if (tabsEl) {
+        const activeTab = tabsEl.querySelector('.p2b-tab.active');
+        if (activeTab) mode = activeTab.dataset.mode;
+      }
+      if (value) active.push({ field, value: (value || '').toLowerCase(), mode });
     });
     return active;
   }
@@ -1220,7 +1227,7 @@ window.addEventListener('load', function () {
       'shelfmark':  ['All fields'],
       'date':       ['All fields'],
       'author':     ['Person', 'All fields'],
-      'publisher':  ['All fields'],
+      'publisher':  ['Person', 'All fields'],
       'printPlace': ['Place', 'All fields'],
       'rism':       ['RISM / VD16 / Brown ID', 'All fields'],
     };
@@ -1245,7 +1252,7 @@ window.addEventListener('load', function () {
     return labels;
   }
 
-  function rowMatches(row, field, value) {
+  function rowMatches(row, field, value, mode = 'free') {
     const matchesAny = arr => arr.some(v => stripHtml(v || '').toLowerCase().includes(value));
     const toArrR = v => !v ? [] : Array.isArray(v) ? v : [v];
     const nestedDescText = arr => toArrR(arr).map(item =>
@@ -1287,7 +1294,14 @@ window.addEventListener('load', function () {
         return stripHtml(row.title || '').toLowerCase().includes(value) ||
                stripHtml(row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        return stripHtml(row.author?.label || '').toLowerCase().includes(value);
+        // If mode is 'free' (text in source), search in both author and publisher
+        // If mode is 'list' (from list), search only in author
+        if (mode === 'free') {
+          return stripHtml(row.author?.label || '').toLowerCase().includes(value) ||
+                 stripHtml(row.publisher?.label || '').toLowerCase().includes(value);
+        } else {
+          return stripHtml(row.author?.label || '').toLowerCase().includes(value);
+        }
       case 'Place':
         return stripHtml(row.printPlace?.label || '').toLowerCase().includes(value);
       case 'RISM / VD16 / Brown ID':
@@ -1318,7 +1332,7 @@ window.addEventListener('load', function () {
     if (active.length === 0) return true;
     const rowData = table.row(dataIndex).data();
     if (!rowData) return true;
-    return active.every(({ field, value }) => rowMatches(rowData, field, value));
+    return active.every(({ field, value, mode }) => rowMatches(rowData, field, value, mode));
   });
 
   /* ─────────────────────────────────────────────
