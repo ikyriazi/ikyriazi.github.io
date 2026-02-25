@@ -274,7 +274,36 @@ window.addEventListener('load', function () {
         const iconName = isActive ? 'minus-circle' : 'plus-circle';
         return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
-      const highlightedLabel = highlightText(item.label, getActiveTitleTerm());
+      
+      // For provenance, also check Place searches
+      let highlightedLabel = item.label;
+      if (idPrefix === 'prov') {
+        const placeSearches = getActivePlaceSearches();
+        let matchFound = false;
+        for (const search of placeSearches) {
+          if (search.mode === 'list') {
+            // Exact match on normalizedName
+            if ((item.normalizedName || '').toLowerCase() === search.value) {
+              highlightedLabel = highlightText(item.label, item.label);
+              matchFound = true;
+              break;
+            }
+          } else {
+            // Partial match on label
+            if (stripHtml(item.label || '').toLowerCase().includes(search.value)) {
+              highlightedLabel = highlightText(item.label, search.value);
+              matchFound = true;
+              break;
+            }
+          }
+        }
+        if (!matchFound && titleTerm) {
+          highlightedLabel = highlightText(item.label, titleTerm);
+        }
+      } else {
+        highlightedLabel = highlightText(item.label, titleTerm);
+      }
+      
       const rowClass = hasSearchMatch ? ' class="cd-expanded"' : '';
       rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
       parts.forEach(type => {
@@ -403,6 +432,58 @@ window.addEventListener('load', function () {
   function renderWithHighlight(data, type, removeBracket = false, term = undefined) {
     if (type === 'sort') return (removeBracket && data) ? data.replace(/^\[/, '') : (data || '');
     return (type === 'display') ? highlightText(data, term !== undefined ? term : getActiveTitleTerm()) : (data || '');
+  }
+
+  // Special render function for Place columns (printPlace) that handles list mode
+  function renderPlaceColumn(data, type, row, field) {
+    if (type === 'sort') return data ? data.replace(/^\[/, '') : '';
+    if (type !== 'display') return data || '';
+    
+    // Get active Place searches and their modes
+    const activePlaceSearches = [];
+    builderRowsEl.querySelectorAll('.builder-row').forEach(rowEl => {
+      const fieldSelect = rowEl.querySelector('.field-select');
+      if (!fieldSelect || fieldSelect.value !== 'Place') return;
+      const inp = rowEl.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (!value) return;
+      
+      // Get mode
+      let mode = 'free';
+      const tabsEl = rowEl.querySelector('.p2b-tabs');
+      if (tabsEl) {
+        const activeTab = tabsEl.querySelector('.p2b-tab.active');
+        if (activeTab) mode = activeTab.dataset.mode;
+      }
+      activePlaceSearches.push({ value: value.toLowerCase(), mode });
+    });
+    
+    if (activePlaceSearches.length === 0) return data || '';
+    
+    // Check if this row matches in list mode (exact normalizedName match)
+    const placeData = row[field]; // printPlace object
+    if (placeData) {
+      for (const search of activePlaceSearches) {
+        if (search.mode === 'list') {
+          if ((placeData.normalizedName || '').toLowerCase() === search.value) {
+            // Highlight the entire label
+            return highlightText(data, data);
+          }
+        }
+      }
+      
+      // No list mode match found, check free mode (partial label match)
+      for (const search of activePlaceSearches) {
+        if (search.mode === 'free') {
+          if (stripHtml(data || '').toLowerCase().includes(search.value)) {
+            return highlightText(data, search.value);
+          }
+        }
+      }
+    }
+    
+    // No match or no search term, return unhighlighted
+    return data || '';
   }
 
   // Special render function for Person columns (author/publisher) that handles list mode
@@ -1245,6 +1326,28 @@ window.addEventListener('load', function () {
     return term;
   }
 
+  // Returns active Place searches with their modes
+  function getActivePlaceSearches() {
+    const searches = [];
+    builderRowsEl.querySelectorAll('.builder-row').forEach(rowEl => {
+      const fieldSelect = rowEl.querySelector('.field-select');
+      if (!fieldSelect || (fieldSelect.value !== 'Place' && fieldSelect.value !== 'All fields')) return;
+      const inp = rowEl.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (!value) return;
+      
+      // Get mode
+      let mode = 'free';
+      const tabsEl = rowEl.querySelector('.p2b-tabs');
+      if (tabsEl) {
+        const activeTab = tabsEl.querySelector('.p2b-tab.active');
+        if (activeTab) mode = activeTab.dataset.mode;
+      }
+      searches.push({ value: value.toLowerCase(), mode });
+    });
+    return searches;
+  }
+
   // Returns a highlight term only when the given column type is actually being searched.
   // Columns not covered by any active search field return ''.
   function getTermForColumn(columnType) {
@@ -1331,7 +1434,19 @@ window.addEventListener('load', function () {
                  (row.publisher?.normalizedName || '').toLowerCase() === value;
         }
       case 'Place':
-        return stripHtml(row.printPlace?.label || '').toLowerCase().includes(value);
+        // If mode is 'free' (text in source), search in printPlace.label and provenance.label (partial match)
+        // If mode is 'list' (from list), search in printPlace.normalizedName and provenance.normalizedName (exact match)
+        if (mode === 'free') {
+          if (stripHtml(row.printPlace?.label || '').toLowerCase().includes(value)) return true;
+          // Check provenance array/object
+          const provenances = Array.isArray(row.provenance) ? row.provenance : (row.provenance ? [row.provenance] : []);
+          return provenances.some(prov => stripHtml(prov.label || '').toLowerCase().includes(value));
+        } else {
+          if ((row.printPlace?.normalizedName || '').toLowerCase() === value) return true;
+          // Check provenance array/object
+          const provenances = Array.isArray(row.provenance) ? row.provenance : (row.provenance ? [row.provenance] : []);
+          return provenances.some(prov => (prov.normalizedName || '').toLowerCase() === value);
+        }
       case 'RISM / VD16 / Brown ID':
         return matchesAny([
           ...extractLabels(row, 'rism', 'otherRism'),
@@ -1367,6 +1482,94 @@ window.addEventListener('load', function () {
      Post-draw highlighting
      ───────────────────────────────────────────── */
 
+  // Collapse rows that were expanded due to nested matches but no longer match the current search
+  function collapseNonMatchingRows() {
+    const active = getActiveRows();
+    if (active.length === 0) return;
+
+    const titleTerms = active.filter(r => r.field === 'Title' || r.field === 'All fields');
+    const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
+    const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
+    const bibTerms = active.filter(r => r.field === 'Bibliography' || r.field === 'All fields');
+    const placeSearches = getActivePlaceSearches();
+
+    table.rows({ page: 'current' }).every(function () {
+      if (!this.child.isShown()) return;
+      const rowData = this.data();
+      if (!rowData) return;
+
+      let shouldKeepExpanded = false;
+
+      // Check if row has alternativeTitle match
+      if (titleTerms.length > 0 && rowData.alternativeTitle) {
+        const hasAltMatch = titleTerms.some(({ value }) => 
+          stripHtml(rowData.alternativeTitle || '').toLowerCase().includes(value)
+        );
+        if (hasAltMatch) shouldKeepExpanded = true;
+      }
+
+      // Check if row has brown match
+      if (!shouldKeepExpanded && rismTerms.length > 0 && rowData.brown) {
+        const hasBrownMatch = rismTerms.some(({ value }) => 
+          stripHtml(rowData.brown || '').toLowerCase().includes(value)
+        );
+        if (hasBrownMatch) shouldKeepExpanded = true;
+      }
+
+      // Check if row has description/comment match in nested fields
+      if (!shouldKeepExpanded && descTerms.length > 0) {
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const checkItems = (arr, term) => toArr(arr).some(item =>
+          (stripHtml(item.description || '').toLowerCase().includes(term)) ||
+          (stripHtml(item.comment || '').toLowerCase().includes(term))
+        );
+        const hasDescMatch = descTerms.some(({ value }) =>
+          stripHtml(rowData.description || '').toLowerCase().includes(value) ||
+          stripHtml(rowData.comment || '').toLowerCase().includes(value) ||
+          checkItems(rowData.provenance, value) ||
+          checkItems(rowData.function, value) ||
+          checkItems(rowData.codicology, value)
+        );
+        if (hasDescMatch) shouldKeepExpanded = true;
+      }
+
+      // Check if row has bibliography match
+      if (!shouldKeepExpanded && bibTerms.length > 0) {
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const checkBibItems = (arr, term) => toArr(arr).some(item =>
+          stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(term) ||
+          stripHtml(item.referencePages || '').toLowerCase().includes(term) ||
+          stripHtml(item.label || '').toLowerCase().includes(term)
+        );
+        const hasBibMatch = bibTerms.some(({ value }) =>
+          checkBibItems(rowData.referencedBy, value) || checkBibItems(rowData.relatedResource, value)
+        );
+        if (hasBibMatch) shouldKeepExpanded = true;
+      }
+
+      // Check if row has place match in provenance
+      if (!shouldKeepExpanded && placeSearches.length > 0) {
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const hasPlaceMatch = toArr(rowData.provenance).some(item => {
+          for (const search of placeSearches) {
+            if (search.mode === 'list') {
+              if ((item.normalizedName || '').toLowerCase() === search.value) return true;
+            } else {
+              if (stripHtml(item.label || '').toLowerCase().includes(search.value)) return true;
+            }
+          }
+          return false;
+        });
+        if (hasPlaceMatch) shouldKeepExpanded = true;
+      }
+
+      // If no match found, collapse the row
+      if (!shouldKeepExpanded) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
 
   // Expand child rows whose match is only in alternativeTitle.
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
@@ -1444,6 +1647,35 @@ window.addEventListener('load', function () {
     });
   }
 
+  // Expand child rows that have a matching place in provenance.
+  function expandPlaceMatches() {
+    const placeSearches = getActivePlaceSearches();
+    if (placeSearches.length === 0) return;
+    table.rows({ page: 'current' }).every(function () {
+      const rowData = this.data();
+      if (!rowData) return;
+      if (this.child.isShown()) return;
+      // Check if provenance items match any place search
+      const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+      const hasPlaceMatch = toArr(rowData.provenance).some(item => {
+        for (const search of placeSearches) {
+          if (search.mode === 'list') {
+            // Exact match on normalizedName
+            if ((item.normalizedName || '').toLowerCase() === search.value) return true;
+          } else {
+            // Partial match on label
+            if (stripHtml(item.label || '').toLowerCase().includes(search.value)) return true;
+          }
+        }
+        return false;
+      });
+      if (hasPlaceMatch) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
+
   // Expand child rows whose match is only in brown (Further Identifiers subtable).
   function expandBrownMatches() {
     const active = getActiveRows();
@@ -1497,6 +1729,30 @@ window.addEventListener('load', function () {
           checkItems(rowData.codicology, value)
         );
         if (hasDescMatch) {
+          const $child = this.child();
+          if ($child && $child.length) {
+            $child.find('.subgroup-content[data-subgroup="contextual"]').show();
+          }
+        }
+      }
+      // If this row has a place match in provenance, expand the Contextual Metadata subgroup.
+      const placeSearches = getActivePlaceSearches();
+      if (placeSearches.length > 0) {
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const checkPlaceItems = (arr, searches) => toArr(arr).some(item => {
+          for (const search of searches) {
+            if (search.mode === 'list') {
+              // Exact match on normalizedName
+              if ((item.normalizedName || '').toLowerCase() === search.value) return true;
+            } else {
+              // Partial match on label
+              if (stripHtml(item.label || '').toLowerCase().includes(search.value)) return true;
+            }
+          }
+          return false;
+        });
+        const hasPlaceMatch = checkPlaceItems(rowData.provenance, placeSearches);
+        if (hasPlaceMatch) {
           const $child = this.child();
           if ($child && $child.length) {
             $child.find('.subgroup-content[data-subgroup="contextual"]').show();
@@ -1720,7 +1976,7 @@ window.addEventListener('load', function () {
             title: 'Printing place',
             defaultContent: '',
             width: '120px',
-            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('printPlace'))
+            render: (data, type, row) => renderPlaceColumn(data, type, row, 'printPlace')
           },
           {
             data: 'rism',
@@ -1877,12 +2133,14 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Expand alt-title, brown, description, and bibliography matches first, then refresh highlights
+        // Collapse non-matching rows first, then expand matching rows and refresh highlights
         setTimeout(function() {
+          collapseNonMatchingRows();
           expandAltTitleMatches();
           expandBrownMatches();
           expandDescriptionMatches();
           expandBibliographyMatches();
+          expandPlaceMatches();
           refreshOpenAltTitleHighlights();
           feather.replace();
         }, 0);
