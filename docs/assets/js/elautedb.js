@@ -8,50 +8,13 @@ window.addEventListener('load', function () {
     'Description / Comment', 'Bibliography'
   ];
 
-  const PERSONS = [
-    'Agricola, Martin', 'Aich, Arnt von', 'Apiarius, Mathias',
-    'Egenolff d.Ä., Christian', 'Formschneider, Hieronymus', 'Forster, Georg',
-    'Franck, Matthäus', 'Fuhrmann, Valentin', 'Furter, Michael',
-    'Gerle, Hans', 'Guldenmundt, Hans', 'Hergot, Kunigunde',
-    'Hochfelder, Kaspar', 'Huber, Wolfgang', 'Judenkünig, Hans',
-    'Meyerpeck, Wolfgang', 'Neuber, Valentin', 'Neusidler, Hans',
-    'Ott, Hans', 'Petreius, Johann', 'Rhau, Georg',
-    'Schlick, Arnold', 'Schöffer, Peter d.J.', 'Singriener, Johannes',
-    'Virdung, Sebastian', 'Öglin, Erhard'
-  ];
+  // Person and place lists will be dynamically populated from Q1.json
+  let PERSONS = [];
+  let PLACES = [];
 
-  const PLACES = [
-    'Argentorati (city)', 'Augsburg (city)', 'Basel', 'Frankfurt am Main',
-    'Heidelberg (city)', 'Köln (city)', 'Königstein / Taunus', 'Mainz (city)',
-    'München (city)', 'Nürnberg (city)', 'Wien (city)', 'Wien (region)',
-    'Wien (university)', 'Wittenberg (city)', 'Zwickau (city)'
-  ];
-
-  const SHELFMARKS = [
-    { heading: 'A — Austria', chips: ['A-Imf','A-Wgm','A-Wgm 676/137','A-Wkm KK_5410','A-Wn 396116-A','A-Wn Cod. 9704','A-Wn MS47356-8°','A-Wn Mus.Hs. 18688','A-Wn Mus.Hs. 18827','A-Wn Mus.Hs. 41950','A-Wn SA.78.C.29 19','A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1'] },
-    { heading: 'B — Belgium', chips: ['B-Br','B-Br Fétis 2.884 b 9899 48','B-Br Fétis 4.014 A (RP)','B-Br Fétis 6.197 A (RP)'] },
-    { heading: 'CH — Switzerland', chips: ['CH-A AKB Mb 465','CH-BEsu Hospinian 141','CH-BEsu MUE Hospinian 141','CH-Bu F IX 23','CH-Bu F IX 56','CH-Bu F IX 63','CH-Bu F IX 70','CH-Bu F X','CH-Bu F X 1','CH-Bu F X 10','CH-Bu F X 11','CH-Bu F X 17','CH-Bu F X 18','CH-Bu F X 19','CH-Bu F X 2','CH-Bu F X 20','CH-Bu F X 21','CH-Bu F X 22','CH-Bu F X 23','CH-Bu F X 24','CH-Bu F X 25','CH-Bu F X 3','CH-Bu F X 4','CH-Bu F X 5','CH-Bu F X 6','CH-Bu F X 7','CH-Bu F X 8','CH-Bu kk II 27','CH-E','CH-SAM Ms. FP/M 1','CH-SAM Ms. FP/M 2','CH-SGs Cod. Sang. 463','CH-ZO','CH-Zz Mus. 908'] },
-    { heading: 'CZ — Czech Republic', chips: ['CZ-Bm','CZ-Bu','CZ-Pu Hs. 223-20'] },
-    { heading: 'D — Germany', chips: ['D-As Tonk Schl 549','D-B','D-B 1 an: Yd 5008','D-B 2 an: Yd 5008','D-B Ms.germ.qu. 719','D-B Ms.germ.qu.718','D-B Mus. ant. theor. V. 30','D-B Mus.ant.pract. A 180','D-B Mus.ant.pract. G 435','D-B Mus.ant.pract. O 65','D-B Mus.ant.pract. O120','D-B Mus.ant.theor G 60','D-B Mus.ant.theor. A 15','D-B Mus.ms. 40026','D-B Mus.ms. 40588','D-B Yd 5006','D-B Yd 5008 R','D-B Yd5041','D-B Yd9496','D-B Yd9503','D-Cl Rara/BIII 1/9(Beil 1)','D-DS Gü 13788','D-FLs KdM1 a/b','D-Gms','D-Gs 8 MUS IV, 4600','D-HAu Pon IIe 290 (1)','D-HAu Pon IIe 290 (2)','D-HEu cpg 343','D-HTd','D-Ju 4 Mus. 12a(1)','D-Ju 4 Mus. 12a(2)','D-Ju 4 Mus. 12b(1)','D-Ju 4 Mus. 12c(1)','D-Ju 4 Mus. 12d(1)','D-Ju 4 Mus.12b(2)','D-Ju 4 Mus.12c(2)','D-Ju 4 Mus.12d(2)','D-KA Don Mus.Autogr. 1','D-Kl 2° Ms.Math. 31','D-LEm','D-LEm I. 8° 191','D-LEm I.8°191','D-LEm II. 6. 13 / D-Dl II. 6. 13','D-LEm II. 6. 7','D-Mbs 2 Mus.pr. 156.16/20#16','D-Mbs 4 Mus.pr.167','D-Mbs 4 Mus.th. 1616','D-Mbs 4 Mus.th. 729','D-Mbs 4 Mus.th. 729#Beibd.1','D-Mbs 4° Mus pr 439','D-Mbs Einbl. I,6','D-Mbs Mus.ms. 1501','D-Mbs Mus.ms. 1511c','D-Mbs Mus.ms. 1511d','D-Mbs Mus.ms. 1512','D-Mbs Mus.ms. 266','D-Mbs Mus.ms. 267','D-Mbs Mus.ms. 268','D-Mbs Mus.ms. 269','D-Mbs Mus.ms. 270','D-Mbs Mus.ms. 271','D-Mbs Mus.ms. 2987','D-Mbs Mus.pr. 316','D-Mbs Mus.pr. 35','D-Mbs Mus.pr. 39#Beibd.2','D-Mbs Mus.pr. 46#Beibd.1','D-Mbs Mus.th. 49','D-Mbs Rar. 27','D-Mbs Rar. 567','D-Mu 4° Cod.ms. 718','D-Mu 8° Cod. 328-331','D-Ngm','D-Ngm 8° Postinc. M. 261','D-ROu Th A 1','D-Rp Ms.Th. 98 4°','D-Us Smr.misc 131b','D-Us Smr.misc 131b_copy','D-Usch Misc.235c','D-W 2.14 Musica','D-W 3 Musica','D-W 43 Musica Helmst.','D-W Musica 4.1.1','D-W Musica Helmst. (3)','D-WRZ 14,6:60e(n.1.)','D-Wa cod. VII B Hs Nr. 264','D-Z 2.8.10(5)','D-Z 30.5.20(1)','D-Z Mus. 115.3','D-Z Mus. 15.1','D-Z Mus. 15.1 b (Mu 94)','D-Z Mus. 82.1 (Mu 477)','D-Z Mus. 82.2'] },
-    { heading: 'DK — Denmark', chips: ['DK-Kk'] },
-    { heading: 'E — Spain', chips: ['E-Mn R/22789'] },
-    { heading: 'F — France', chips: ['F-Pc','F-Pn RES VM7-663','F-Pn Rés. 658','F-Ssp M 01 (f.k. IIII)','F-Ssp M 1'] },
-    { heading: 'GB — Great Britain', chips: ['GB-Eu','GB-Lbl','GB-Lbl C.125.CC.9.','GB-Lbl Hirsch I 594','GB-Lbl Hirsch IV 1603','GB-Lbl Hirsch IV 1604','GB-Lbl K.1.b.11.','GB-Lbl K.8.c.9','GB-Ob Mus. 156 e.25Music'] },
-    { heading: 'H — Hungary', chips: ['H-Ba K 53/II'] },
-    { heading: 'NL — Netherlands', chips: ['NL-DHgm','NL-HAN'] },
-    { heading: 'PL — Poland', chips: ['PL-Kj Mus.ant.pract. L 1150','PL-Kj Mus.ant.pract. N 175a','PL-Kj Mus.ms. 40154','PL-LEtpn (Lost acc. to Brown)','PL-WRk 352'] },
-    { heading: 'RISM', chips: ['RISM B/8 1534/06'] },
-    { heading: 'S — Sweden', chips: ['S-Uu Lq.XI.3. n. 663'] },
-    { heading: 'UKR — Ukraine', chips: ['UKR-LVu 1400/1'] },
-    { heading: 'US — United States', chips: ['US-Bp','US-CA','US-NHub Osborn Music MS 31','US-R','US-Wc','US-Wc MT640 .J9','US-Wc MT640 .N3'] },
-    { heading: 'olim', chips: ['olim CZ-Pu 59r 469'] },
-  ];
-
-  const FUNCTIONS_DATA = [
-    'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
-    "primer, teacher's book", 'song book / Liederbuch', 'student handbook', 'tablature book',
-    { label: '[empty field]', cls: 'sm-chip--grey' }
-  ];
+  // Shelfmarks and functions will be dynamically populated from Q1.json
+  let SHELFMARKS = [];
+  let FUNCTIONS_DATA = [];
 
   const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
   const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
@@ -442,6 +405,58 @@ window.addEventListener('load', function () {
     return (type === 'display') ? highlightText(data, term !== undefined ? term : getActiveTitleTerm()) : (data || '');
   }
 
+  // Special render function for Person columns (author/publisher) that handles list mode
+  function renderPersonColumn(data, type, row, field) {
+    if (type === 'sort') return data ? data.replace(/^\[/, '') : '';
+    if (type !== 'display') return data || '';
+    
+    // Get active Person searches and their modes
+    const activePersonSearches = [];
+    builderRowsEl.querySelectorAll('.builder-row').forEach(rowEl => {
+      const fieldSelect = rowEl.querySelector('.field-select');
+      if (!fieldSelect || fieldSelect.value !== 'Person') return;
+      const inp = rowEl.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (!value) return;
+      
+      // Get mode
+      let mode = 'free';
+      const tabsEl = rowEl.querySelector('.p2b-tabs');
+      if (tabsEl) {
+        const activeTab = tabsEl.querySelector('.p2b-tab.active');
+        if (activeTab) mode = activeTab.dataset.mode;
+      }
+      activePersonSearches.push({ value: value.toLowerCase(), mode });
+    });
+    
+    if (activePersonSearches.length === 0) return data || '';
+    
+    // Check if this row matches in list mode (exact normalizedName match)
+    const personData = row[field]; // author or publisher object
+    if (personData) {
+      for (const search of activePersonSearches) {
+        if (search.mode === 'list') {
+          if ((personData.normalizedName || '').toLowerCase() === search.value) {
+            // Highlight the entire label
+            return highlightText(data, data);
+          }
+        }
+      }
+      
+      // No list mode match found, check free mode (partial label match)
+      for (const search of activePersonSearches) {
+        if (search.mode === 'free') {
+          if (stripHtml(data || '').toLowerCase().includes(search.value)) {
+            return highlightText(data, search.value);
+          }
+        }
+      }
+    }
+    
+    // No match or no search term, return unhighlighted
+    return data || '';
+  }
+
   function combineValues(row, primaryField, otherField) {
     const values = [];
     if (row[primaryField] && row[primaryField].label) values.push(row[primaryField].label);
@@ -553,8 +568,7 @@ window.addEventListener('load', function () {
 
   [1].forEach(n => {
     document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
-    renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
-    renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
+    // renderChipGrid calls moved to after data loading (inside fetch callback)
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
@@ -1294,13 +1308,14 @@ window.addEventListener('load', function () {
         return stripHtml(row.title || '').toLowerCase().includes(value) ||
                stripHtml(row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        // If mode is 'free' (text in source), search in both author and publisher
-        // If mode is 'list' (from list), search only in author
+        // If mode is 'free' (text in source), search in both author and publisher labels (partial match)
+        // If mode is 'list' (from list), search in both author and publisher normalizedNames (exact match)
         if (mode === 'free') {
           return stripHtml(row.author?.label || '').toLowerCase().includes(value) ||
                  stripHtml(row.publisher?.label || '').toLowerCase().includes(value);
         } else {
-          return stripHtml(row.author?.label || '').toLowerCase().includes(value);
+          return (row.author?.normalizedName || '').toLowerCase() === value ||
+                 (row.publisher?.normalizedName || '').toLowerCase() === value;
         }
       case 'Place':
         return stripHtml(row.printPlace?.label || '').toLowerCase().includes(value);
@@ -1529,6 +1544,97 @@ window.addEventListener('load', function () {
     .then(json => {
       const data = json['@graph'] || [];
 
+      // Extract unique person normalizedNames from author and publisher fields
+      const personNamesSet = new Set();
+      data.forEach(row => {
+        if (row.author?.normalizedName) personNamesSet.add(row.author.normalizedName);
+        if (row.publisher?.normalizedName) personNamesSet.add(row.publisher.normalizedName);
+      });
+      PERSONS = Array.from(personNamesSet).sort();
+
+      // Extract unique place normalizedNames from printPlace and provenance fields
+      const placeNamesSet = new Set();
+      data.forEach(row => {
+        if (row.printPlace?.normalizedName) placeNamesSet.add(row.printPlace.normalizedName);
+        if (row.provenance) {
+          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
+          provenances.forEach(prov => {
+            if (prov?.normalizedName) placeNamesSet.add(prov.normalizedName);
+          });
+        }
+      });
+      PLACES = Array.from(placeNamesSet).sort();
+
+      // Extract unique function labels
+      const functionLabelsSet = new Set();
+      data.forEach(row => {
+        if (row.function) {
+          const functions = Array.isArray(row.function) ? row.function : [row.function];
+          functions.forEach(func => {
+            if (func?.label) functionLabelsSet.add(func.label);
+          });
+        }
+      });
+      FUNCTIONS_DATA = Array.from(functionLabelsSet).sort();
+      // Add the special '[empty field]' option at the end
+      FUNCTIONS_DATA.push({ label: '[empty field]', cls: 'sm-chip--grey' });
+
+      // Extract and group shelfmark labels by country/siglum
+      const shelfmarksByGroup = new Map();
+      const countryNames = new Map(); // Map country code to country name
+      
+      data.forEach(row => {
+        // Process main shelfmark
+        if (row.shelfmark?.label && row.shelfmark?.holdingInstitution) {
+          const inst = row.shelfmark.holdingInstitution;
+          const groupKey = inst.countryCode || inst.siglum;
+          if (groupKey) {
+            if (!shelfmarksByGroup.has(groupKey)) {
+              shelfmarksByGroup.set(groupKey, new Set());
+            }
+            shelfmarksByGroup.get(groupKey).add(row.shelfmark.label);
+            // Store country name for heading
+            if (inst.country && inst.countryCode) {
+              countryNames.set(inst.countryCode, inst.country);
+            }
+          }
+        }
+        
+        // Process otherShelfmark (can be object or array)
+        if (row.otherShelfmark) {
+          const otherShelfmarks = Array.isArray(row.otherShelfmark) ? row.otherShelfmark : [row.otherShelfmark];
+          otherShelfmarks.forEach(other => {
+            if (other?.label && other?.holdingInstitution) {
+              const inst = other.holdingInstitution;
+              const groupKey = inst.countryCode || inst.siglum;
+              if (groupKey) {
+                if (!shelfmarksByGroup.has(groupKey)) {
+                  shelfmarksByGroup.set(groupKey, new Set());
+                }
+                shelfmarksByGroup.get(groupKey).add(other.label);
+                // Store country name for heading
+                if (inst.country && inst.countryCode) {
+                  countryNames.set(inst.countryCode, inst.country);
+                }
+              }
+            }
+          });
+        }
+      });
+
+      // Convert to array format with headings
+      SHELFMARKS = Array.from(shelfmarksByGroup.entries())
+        .map(([key, labelsSet]) => {
+          const chips = Array.from(labelsSet).sort();
+          let heading = key;
+          // Format heading with country name if available
+          if (countryNames.has(key)) {
+            heading = `${key} — ${countryNames.get(key)}`;
+          }
+          return { heading, chips };
+        })
+        .sort((a, b) => a.heading.localeCompare(b.heading));
+
       table = $('#sourcesTable').DataTable({
         data: data,
         columns: [
@@ -1588,13 +1694,13 @@ window.addEventListener('load', function () {
             data: 'author.label',
             title: 'Author / Editor',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('author'))
+            render: (data, type, row) => renderPersonColumn(data, type, row, 'author')
           },
           {
             data: 'publisher.label',
             title: 'Publisher',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('publisher'))
+            render: (data, type, row) => renderPersonColumn(data, type, row, 'publisher')
           },
           {
             data: 'printPlace.label',
@@ -1642,6 +1748,12 @@ window.addEventListener('load', function () {
           $('#sourcesTable').css('opacity', '1');
           feather.replace();
         }
+      });
+
+      // Now that data is loaded, render the chip grids with dynamic data
+      [1].forEach(n => {
+        renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
+        renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
       });
 
       /* ── Child row helpers ── */
