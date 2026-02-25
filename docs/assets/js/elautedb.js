@@ -299,12 +299,15 @@ window.addEventListener('load', function () {
       if (!item.label) return;
       const labelCell = getFirstLabel(index, labelText);
       const parts = ['description', 'comment'].filter(type => item[type]);
-      const searchTerm = (getActiveTitleTerm() || '').toLowerCase().trim();
-      const hasSearchMatch = searchTerm && parts.some(type =>
-        stripHtml(item[type]).toLowerCase().includes(searchTerm)
-      );
+      const titleTerm  = (getActiveTitleTerm()       || '').toLowerCase().trim();
+      const descTerm   = (getActiveDescriptionTerm() || '').toLowerCase().trim();
+      const hasSearchMatch = parts.some(type => {
+        const content = stripHtml(item[type]).toLowerCase();
+        return (descTerm && content.includes(descTerm)) || (titleTerm && content.includes(titleTerm));
+      });
       const badges = parts.map(type => {
-        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
+        const content = stripHtml(item[type]).toLowerCase();
+        const isActive = (descTerm && content.includes(descTerm)) || (titleTerm && content.includes(titleTerm));
         const iconName = isActive ? 'minus-circle' : 'plus-circle';
         return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
@@ -313,9 +316,11 @@ window.addEventListener('load', function () {
       rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
       parts.forEach(type => {
         const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
-        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
+        const content = stripHtml(item[type]).toLowerCase();
+        const isActive = (descTerm && content.includes(descTerm)) || (titleTerm && content.includes(titleTerm));
+        const highlightTerm = descTerm || titleTerm || undefined;
         const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : (isActive ? 'block' : 'none');
-        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], getActiveTitleTerm())}</div></div>`;
+        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], highlightTerm)}</div></div>`;
       });
       rows += '</td></tr>';
     });
@@ -1182,6 +1187,17 @@ window.addEventListener('load', function () {
     return term;
   }
 
+  function getActiveDescriptionTerm() {
+    let term = '';
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp   = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if ((field === 'Description / Comment' || field === 'All fields') && value) term = value;
+    });
+    return term;
+  }
+
   // Returns a highlight term only when the given column type is actually being searched.
   // Columns not covered by any active search field return ''.
   function getTermForColumn(columnType) {
@@ -1218,6 +1234,14 @@ window.addEventListener('load', function () {
 
   function rowMatches(row, field, value) {
     const matchesAny = arr => arr.some(v => (v || '').toLowerCase().includes(value));
+    const toArrR = v => !v ? [] : Array.isArray(v) ? v : [v];
+    const nestedDescText = arr => toArrR(arr).map(item =>
+      (stripHtml(item.description || '') + ' ' + stripHtml(item.comment || '')).trim()
+    ).filter(Boolean);
+    const checkDescItems = arr => toArrR(arr).some(item =>
+      stripHtml(item.description || '').toLowerCase().includes(value) ||
+      stripHtml(item.comment    || '').toLowerCase().includes(value)
+    );
     switch (field) {
       case 'All fields':
         return matchesAny([
@@ -1227,7 +1251,10 @@ window.addEventListener('load', function () {
           ...extractLabels(row, 'rism', 'otherRism'),
           ...extractLabels(row, 'vd16', 'otherVD16'),
           row.brown,
-          row.description, row.comment, row.bibliography
+          stripHtml(row.description || ''), stripHtml(row.comment || ''), row.bibliography,
+          ...nestedDescText(row.provenance),
+          ...nestedDescText(row.function),
+          ...nestedDescText(row.codicology)
         ]);
       case 'Title':
         return (row.title || '').toLowerCase().includes(value) ||
@@ -1243,8 +1270,11 @@ window.addEventListener('load', function () {
           row.brown
         ]);
       case 'Description / Comment':
-        return (row.description || '').toLowerCase().includes(value) ||
-               (row.comment || '').toLowerCase().includes(value);
+        return stripHtml(row.description || '').toLowerCase().includes(value) ||
+               stripHtml(row.comment     || '').toLowerCase().includes(value) ||
+               checkDescItems(row.provenance) ||
+               checkDescItems(row.function)   ||
+               checkDescItems(row.codicology);
       case 'Bibliography':
         return (row.bibliography || '').toLowerCase().includes(value);
       default:
@@ -1286,6 +1316,36 @@ window.addEventListener('load', function () {
     });
   }
 
+  // Expand child rows that have a matching description or comment.
+  function expandDescriptionMatches() {
+    const active = getActiveRows();
+    const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
+    if (descTerms.length === 0) return;
+    table.rows({ page: 'current' }).every(function () {
+      const rowData = this.data();
+      if (!rowData) return;
+      if (this.child.isShown()) return;
+      const hasDescMatch = descTerms.some(({ value }) => {
+        // Check top-level description/comment
+        if ((rowData.description || '').toLowerCase().includes(value)) return true;
+        if ((rowData.comment || '').toLowerCase().includes(value)) return true;
+        // Check nested items (provenance, function, codicology)
+        const checkItems = (arr) => (arr || []).some(item =>
+          (stripHtml(item.description || '').toLowerCase().includes(value)) ||
+          (stripHtml(item.comment || '').toLowerCase().includes(value))
+        );
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        return checkItems(toArr(rowData.provenance)) ||
+               checkItems(toArr(rowData.function)) ||
+               checkItems(toArr(rowData.codicology));
+      });
+      if (hasDescMatch) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
+
   // Expand child rows whose match is only in brown (Further Identifiers subtable).
   function expandBrownMatches() {
     const active = getActiveRows();
@@ -1306,6 +1366,7 @@ window.addEventListener('load', function () {
   function refreshOpenAltTitleHighlights() {
     const active = getActiveRows();
     const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
+    const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
     table.rows({ page: 'current' }).every(function () {
       if (!this.child.isShown()) return;
       // Fully re-render the child row content with the current search term,
@@ -1319,6 +1380,27 @@ window.addEventListener('load', function () {
           const $child = this.child();
           if ($child && $child.length) {
             $child.find('.subgroup-content[data-subgroup="identifiers"]').show();
+          }
+        }
+      }
+      // If this row has a description/comment match, expand the Contextual Metadata subgroup.
+      if (descTerms.length > 0) {
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const checkItems = (arr, term) => toArr(arr).some(item =>
+          (stripHtml(item.description || '').toLowerCase().includes(term)) ||
+          (stripHtml(item.comment || '').toLowerCase().includes(term))
+        );
+        const hasDescMatch = descTerms.some(({ value }) =>
+          (rowData.description || '').toLowerCase().includes(value) ||
+          (rowData.comment || '').toLowerCase().includes(value) ||
+          checkItems(rowData.provenance, value) ||
+          checkItems(rowData.function, value) ||
+          checkItems(rowData.codicology, value)
+        );
+        if (hasDescMatch) {
+          const $child = this.child();
+          if ($child && $child.length) {
+            $child.find('.subgroup-content[data-subgroup="contextual"]').show();
           }
         }
       }
@@ -1580,11 +1662,13 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Expand alt-title and brown matches first, then refresh highlights
+        // Expand alt-title, brown, and description matches first, then refresh highlights
         setTimeout(function() {
           expandAltTitleMatches();
           expandBrownMatches();
+          expandDescriptionMatches();
           refreshOpenAltTitleHighlights();
+          feather.replace();
         }, 0);
 
         const wasExpandAllActive = isExpandAllActive;
