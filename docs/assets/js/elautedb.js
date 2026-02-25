@@ -578,8 +578,19 @@ window.addEventListener('load', function () {
      ───────────────────────────────────────────── */
   function initModeDropdownEl(tabs, input, list, wrap, items) {
     let mode = 'free', highlighted = -1, listMemory = '';
-    function showSelected(name) { input.value = name; input.style.display = ''; input.style.fontWeight = '600'; }
-    function hideInput() { input.value = ''; input.style.display = 'none'; }
+    function showSelected(name) { 
+      input.value = name; 
+      input.style.display = ''; 
+      input.style.fontWeight = '600'; 
+      // Trigger input event to update search
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    function hideInput() { 
+      input.value = ''; 
+      input.style.display = 'none'; 
+      // Trigger input event to clear search
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
     function renderList() {
       list.innerHTML = ''; highlighted = -1;
       items.forEach(name => {
@@ -604,6 +615,8 @@ window.addEventListener('load', function () {
           list.classList.remove('open'); input.value = ''; input.style.fontWeight = '';
           input.style.display = ''; input.readOnly = false; input.style.caretColor = '';
           input.placeholder = 'Search...';
+          // Trigger input event to clear search when switching modes
+          input.dispatchEvent(new Event('input', { bubbles: true }));
         }
       });
     });
