@@ -336,11 +336,12 @@ window.addEventListener('load', function () {
                item.referenceSource.referencebookType !== 'Catalogue';
       return item.referenceSource.referencebookType === typeFilter;
     });
+    const bibTerm = getActiveBibliographyTerm() || getActiveTitleTerm();
     filtered.forEach((item, index) => {
       let valueText = item.referenceSource.bookShort || '';
       if (item.referencePages)
         valueText += ': <span class="reference-pages">' + item.referencePages + '</span>';
-      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText);
+      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText, false, bibTerm);
     });
     return rows;
   }
@@ -412,12 +413,13 @@ window.addEventListener('load', function () {
         bibliographyRows += generateBibliographyRows(refs, 'Other bibliography:', null);
       }
       if (row.relatedResource) {
+        const bibTerm = getActiveBibliographyTerm() || getActiveTitleTerm();
         toArray(row.relatedResource).forEach((item, index) => {
           if (item && item.label) {
             const value = item.url
               ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.label}</a>`
               : item.label;
-            bibliographyRows += generateSimpleRow(getFirstLabel(index, 'Related resources:'), value);
+            bibliographyRows += generateSimpleRow(getFirstLabel(index, 'Related resources:'), value, false, bibTerm);
           }
         });
       }
@@ -1198,6 +1200,17 @@ window.addEventListener('load', function () {
     return term;
   }
 
+  function getActiveBibliographyTerm() {
+    let term = '';
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp   = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if ((field === 'Bibliography' || field === 'All fields') && value) term = value;
+    });
+    return term;
+  }
+
   // Returns a highlight term only when the given column type is actually being searched.
   // Columns not covered by any active search field return ''.
   function getTermForColumn(columnType) {
@@ -1233,7 +1246,7 @@ window.addEventListener('load', function () {
   }
 
   function rowMatches(row, field, value) {
-    const matchesAny = arr => arr.some(v => (v || '').toLowerCase().includes(value));
+    const matchesAny = arr => arr.some(v => stripHtml(v || '').toLowerCase().includes(value));
     const toArrR = v => !v ? [] : Array.isArray(v) ? v : [v];
     const nestedDescText = arr => toArrR(arr).map(item =>
       (stripHtml(item.description || '') + ' ' + stripHtml(item.comment || '')).trim()
@@ -1241,6 +1254,18 @@ window.addEventListener('load', function () {
     const checkDescItems = arr => toArrR(arr).some(item =>
       stripHtml(item.description || '').toLowerCase().includes(value) ||
       stripHtml(item.comment    || '').toLowerCase().includes(value)
+    );
+    const nestedBibText = arr => toArrR(arr).map(item => {
+      const parts = [];
+      if (item.referenceSource?.bookShort) parts.push(stripHtml(item.referenceSource.bookShort));
+      if (item.referencePages) parts.push(stripHtml(item.referencePages));
+      if (item.label) parts.push(stripHtml(item.label));
+      return parts.join(' ');
+    }).filter(Boolean);
+    const checkBibItems = arr => toArrR(arr).some(item =>
+      stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(value) ||
+      stripHtml(item.referencePages || '').toLowerCase().includes(value) ||
+      stripHtml(item.label || '').toLowerCase().includes(value)
     );
     switch (field) {
       case 'All fields':
@@ -1254,15 +1279,17 @@ window.addEventListener('load', function () {
           stripHtml(row.description || ''), stripHtml(row.comment || ''), row.bibliography,
           ...nestedDescText(row.provenance),
           ...nestedDescText(row.function),
-          ...nestedDescText(row.codicology)
+          ...nestedDescText(row.codicology),
+          ...nestedBibText(row.referencedBy),
+          ...nestedBibText(row.relatedResource)
         ]);
       case 'Title':
-        return (row.title || '').toLowerCase().includes(value) ||
-               (row.alternativeTitle || '').toLowerCase().includes(value);
+        return stripHtml(row.title || '').toLowerCase().includes(value) ||
+               stripHtml(row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        return (row.author?.label || '').toLowerCase().includes(value);
+        return stripHtml(row.author?.label || '').toLowerCase().includes(value);
       case 'Place':
-        return (row.printPlace?.label || '').toLowerCase().includes(value);
+        return stripHtml(row.printPlace?.label || '').toLowerCase().includes(value);
       case 'RISM / VD16 / Brown ID':
         return matchesAny([
           ...extractLabels(row, 'rism', 'otherRism'),
@@ -1276,7 +1303,9 @@ window.addEventListener('load', function () {
                checkDescItems(row.function)   ||
                checkDescItems(row.codicology);
       case 'Bibliography':
-        return (row.bibliography || '').toLowerCase().includes(value);
+        return stripHtml(row.bibliography || '').toLowerCase().includes(value) ||
+               checkBibItems(row.referencedBy) ||
+               checkBibItems(row.relatedResource);
       default:
         return false;
     }
@@ -1308,7 +1337,7 @@ window.addEventListener('load', function () {
       const rowData = this.data();
       if (!rowData || !rowData.alternativeTitle) return;
       if (this.child.isShown()) return;
-      const hasAltMatch = titleTerms.some(({ value }) => (rowData.alternativeTitle || '').toLowerCase().includes(value));
+      const hasAltMatch = titleTerms.some(({ value }) => stripHtml(rowData.alternativeTitle || '').toLowerCase().includes(value));
       if (hasAltMatch) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
@@ -1327,8 +1356,8 @@ window.addEventListener('load', function () {
       if (this.child.isShown()) return;
       const hasDescMatch = descTerms.some(({ value }) => {
         // Check top-level description/comment
-        if ((rowData.description || '').toLowerCase().includes(value)) return true;
-        if ((rowData.comment || '').toLowerCase().includes(value)) return true;
+        if (stripHtml(rowData.description || '').toLowerCase().includes(value)) return true;
+        if (stripHtml(rowData.comment || '').toLowerCase().includes(value)) return true;
         // Check nested items (provenance, function, codicology)
         const checkItems = (arr) => (arr || []).some(item =>
           (stripHtml(item.description || '').toLowerCase().includes(value)) ||
@@ -1346,6 +1375,33 @@ window.addEventListener('load', function () {
     });
   }
 
+  // Expand child rows that have a matching bibliography or related resource.
+  function expandBibliographyMatches() {
+    const active = getActiveRows();
+    const bibTerms = active.filter(r => r.field === 'Bibliography' || r.field === 'All fields');
+    if (bibTerms.length === 0) return;
+    table.rows({ page: 'current' }).every(function () {
+      const rowData = this.data();
+      if (!rowData) return;
+      if (this.child.isShown()) return;
+      const hasBibMatch = bibTerms.some(({ value }) => {
+        const checkBibItems = arr => {
+          const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+          return toArr(arr).some(item =>
+            stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(value) ||
+            stripHtml(item.referencePages || '').toLowerCase().includes(value) ||
+            stripHtml(item.label || '').toLowerCase().includes(value)
+          );
+        };
+        return checkBibItems(rowData.referencedBy) || checkBibItems(rowData.relatedResource);
+      });
+      if (hasBibMatch) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
+
   // Expand child rows whose match is only in brown (Further Identifiers subtable).
   function expandBrownMatches() {
     const active = getActiveRows();
@@ -1355,7 +1411,7 @@ window.addEventListener('load', function () {
       const rowData = this.data();
       if (!rowData || !rowData.brown) return;
       if (this.child.isShown()) return;
-      const hasBrownMatch = rismTerms.some(({ value }) => (rowData.brown || '').toLowerCase().includes(value));
+      const hasBrownMatch = rismTerms.some(({ value }) => stripHtml(rowData.brown || '').toLowerCase().includes(value));
       if (hasBrownMatch) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
@@ -1367,6 +1423,7 @@ window.addEventListener('load', function () {
     const active = getActiveRows();
     const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
     const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
+    const bibTerms = active.filter(r => r.field === 'Bibliography' || r.field === 'All fields');
     table.rows({ page: 'current' }).every(function () {
       if (!this.child.isShown()) return;
       // Fully re-render the child row content with the current search term,
@@ -1375,7 +1432,7 @@ window.addEventListener('load', function () {
       // If this row has a brown match, expand the Further Identifiers subgroup.
       const rowData = this.data();
       if (rismTerms.length > 0 && rowData.brown) {
-        const hasBrownMatch = rismTerms.some(({ value }) => (rowData.brown || '').toLowerCase().includes(value));
+        const hasBrownMatch = rismTerms.some(({ value }) => stripHtml(rowData.brown || '').toLowerCase().includes(value));
         if (hasBrownMatch) {
           const $child = this.child();
           if ($child && $child.length) {
@@ -1391,8 +1448,8 @@ window.addEventListener('load', function () {
           (stripHtml(item.comment || '').toLowerCase().includes(term))
         );
         const hasDescMatch = descTerms.some(({ value }) =>
-          (rowData.description || '').toLowerCase().includes(value) ||
-          (rowData.comment || '').toLowerCase().includes(value) ||
+          stripHtml(rowData.description || '').toLowerCase().includes(value) ||
+          stripHtml(rowData.comment || '').toLowerCase().includes(value) ||
           checkItems(rowData.provenance, value) ||
           checkItems(rowData.function, value) ||
           checkItems(rowData.codicology, value)
@@ -1401,6 +1458,25 @@ window.addEventListener('load', function () {
           const $child = this.child();
           if ($child && $child.length) {
             $child.find('.subgroup-content[data-subgroup="contextual"]').show();
+          }
+        }
+      }
+      // If this row has a bibliography/related resource match, expand the Bibliography subgroup.
+      if (bibTerms.length > 0) {
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const checkBibItems = (arr, term) => toArr(arr).some(item =>
+          stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(term) ||
+          stripHtml(item.referencePages || '').toLowerCase().includes(term) ||
+          stripHtml(item.label || '').toLowerCase().includes(term)
+        );
+        const hasBibMatch = bibTerms.some(({ value }) =>
+          checkBibItems(rowData.referencedBy, value) ||
+          checkBibItems(rowData.relatedResource, value)
+        );
+        if (hasBibMatch) {
+          const $child = this.child();
+          if ($child && $child.length) {
+            $child.find('.subgroup-content[data-subgroup="bibliography"]').show();
           }
         }
       }
@@ -1662,11 +1738,12 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Expand alt-title, brown, and description matches first, then refresh highlights
+        // Expand alt-title, brown, description, and bibliography matches first, then refresh highlights
         setTimeout(function() {
           expandAltTitleMatches();
           expandBrownMatches();
           expandDescriptionMatches();
+          expandBibliographyMatches();
           refreshOpenAltTitleHighlights();
           feather.replace();
         }, 0);
