@@ -275,11 +275,13 @@ window.addEventListener('load', function () {
         return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
       
-      // For provenance, also check Place searches
+      // Check for Place searches (provenance), All fields, or Title matches for highlighting
       let highlightedLabel = item.label;
+      let matchFound = false;
+      
+      // For provenance, check Place searches
       if (idPrefix === 'prov') {
         const placeSearches = getActivePlaceSearches();
-        let matchFound = false;
         for (const search of placeSearches) {
           if (search.mode === 'list') {
             // Exact match on normalizedName
@@ -297,10 +299,19 @@ window.addEventListener('load', function () {
             }
           }
         }
-        if (!matchFound && titleTerm) {
-          highlightedLabel = highlightText(item.label, titleTerm);
+      }
+      
+      // For provenance, function, and codicology, check All fields search
+      if (!matchFound && (idPrefix === 'prov' || idPrefix === 'func' || idPrefix === 'codic')) {
+        const allFieldsTerm = getActiveAllFieldsTerm();
+        if (allFieldsTerm && stripHtml(item.label || '').toLowerCase().includes(allFieldsTerm.toLowerCase())) {
+          highlightedLabel = highlightText(item.label, allFieldsTerm);
+          matchFound = true;
         }
-      } else {
+      }
+      
+      // Fallback to Title search term
+      if (!matchFound && titleTerm) {
         highlightedLabel = highlightText(item.label, titleTerm);
       }
       
@@ -1326,6 +1337,17 @@ window.addEventListener('load', function () {
     return term;
   }
 
+  function getActiveAllFieldsTerm() {
+    let term = '';
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp   = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (field === 'All fields' && value) term = value;
+    });
+    return term;
+  }
+
   // Returns active Place searches with their modes
   function getActivePlaceSearches() {
     const searches = [];
@@ -1353,7 +1375,7 @@ window.addEventListener('load', function () {
   function getTermForColumn(columnType) {
     const fieldMap = {
       'title':      ['Title', 'All fields'],
-      'shortTitle': [],
+      'shortTitle': ['All fields'],
       'shelfmark':  ['All fields'],
       'date':       ['All fields'],
       'author':     ['Person', 'All fields'],
@@ -1385,9 +1407,7 @@ window.addEventListener('load', function () {
   function rowMatches(row, field, value, mode = 'free') {
     const matchesAny = arr => arr.some(v => stripHtml(v || '').toLowerCase().includes(value));
     const toArrR = v => !v ? [] : Array.isArray(v) ? v : [v];
-    const nestedDescText = arr => toArrR(arr).map(item =>
-      (stripHtml(item.description || '') + ' ' + stripHtml(item.comment || '')).trim()
-    ).filter(Boolean);
+    const nestedLabels = arr => toArrR(arr).map(item => item.label).filter(Boolean);
     const checkDescItems = arr => toArrR(arr).some(item =>
       stripHtml(item.description || '').toLowerCase().includes(value) ||
       stripHtml(item.comment    || '').toLowerCase().includes(value)
@@ -1407,16 +1427,15 @@ window.addEventListener('load', function () {
     switch (field) {
       case 'All fields':
         return matchesAny([
-          row.shelfmark?.label, row.title, row.alternativeTitle,
+          row.shelfmark?.label, row.title, row.shortTitle, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
           row.printPlace?.label,
           ...extractLabels(row, 'rism', 'otherRism'),
           ...extractLabels(row, 'vd16', 'otherVD16'),
-          row.brown,
-          stripHtml(row.description || ''), stripHtml(row.comment || ''), row.bibliography,
-          ...nestedDescText(row.provenance),
-          ...nestedDescText(row.function),
-          ...nestedDescText(row.codicology),
+          row.brown, row.bibliography,
+          ...nestedLabels(row.provenance),
+          ...nestedLabels(row.function),
+          ...nestedLabels(row.codicology),
           ...nestedBibText(row.referencedBy),
           ...nestedBibText(row.relatedResource)
         ]);
@@ -1563,6 +1582,20 @@ window.addEventListener('load', function () {
         if (hasPlaceMatch) shouldKeepExpanded = true;
       }
 
+      // Check if row has All fields match in nested labels (provenance, function, codicology)
+      if (!shouldKeepExpanded) {
+        const allFieldsTerm = getActiveAllFieldsTerm();
+        if (allFieldsTerm) {
+          const value = allFieldsTerm.toLowerCase();
+          const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+          const hasNestedMatch = 
+            toArr(rowData.provenance).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
+            toArr(rowData.function).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
+            toArr(rowData.codicology).some(item => stripHtml(item.label || '').toLowerCase().includes(value));
+          if (hasNestedMatch) shouldKeepExpanded = true;
+        }
+      }
+
       // If no match found, collapse the row
       if (!shouldKeepExpanded) {
         const chevron = this.node().cells[0];
@@ -1676,6 +1709,28 @@ window.addEventListener('load', function () {
     });
   }
 
+  // Expand child rows that have All fields matches in provenance, function, or codicology labels.
+  function expandAllFieldsMatches() {
+    const allFieldsTerm = getActiveAllFieldsTerm();
+    if (!allFieldsTerm) return;
+    const value = allFieldsTerm.toLowerCase();
+    table.rows({ page: 'current' }).every(function () {
+      const rowData = this.data();
+      if (!rowData) return;
+      if (this.child.isShown()) return;
+      // Check if provenance, function, or codicology labels match
+      const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+      const hasMatch = 
+        toArr(rowData.provenance).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
+        toArr(rowData.function).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
+        toArr(rowData.codicology).some(item => stripHtml(item.label || '').toLowerCase().includes(value));
+      if (hasMatch) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+    });
+  }
+
   // Expand child rows whose match is only in brown (Further Identifiers subtable).
   function expandBrownMatches() {
     const active = getActiveRows();
@@ -1753,6 +1808,22 @@ window.addEventListener('load', function () {
         });
         const hasPlaceMatch = checkPlaceItems(rowData.provenance, placeSearches);
         if (hasPlaceMatch) {
+          const $child = this.child();
+          if ($child && $child.length) {
+            $child.find('.subgroup-content[data-subgroup="contextual"]').show();
+          }
+        }
+      }
+      // If this row has All fields match in provenance/function/codicology labels, expand Contextual Metadata.
+      const allFieldsTerm = getActiveAllFieldsTerm();
+      if (allFieldsTerm) {
+        const value = allFieldsTerm.toLowerCase();
+        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
+        const hasNestedMatch = 
+          toArr(rowData.provenance).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
+          toArr(rowData.function).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
+          toArr(rowData.codicology).some(item => stripHtml(item.label || '').toLowerCase().includes(value));
+        if (hasNestedMatch) {
           const $child = this.child();
           if ($child && $child.length) {
             $child.find('.subgroup-content[data-subgroup="contextual"]').show();
@@ -2141,6 +2212,7 @@ window.addEventListener('load', function () {
           expandDescriptionMatches();
           expandBibliographyMatches();
           expandPlaceMatches();
+          expandAllFieldsMatches();
           refreshOpenAltTitleHighlights();
           feather.replace();
         }, 0);
