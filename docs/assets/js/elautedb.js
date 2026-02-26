@@ -914,8 +914,9 @@ window.addEventListener('load', function () {
       minInput.style.zIndex = lo >= hi ? 5 : 3;
       const isDefault = lo === minYear && hi === maxYear;
       tag.style.visibility = isDefault ? 'hidden' : 'visible';
-      if (!isDefault) tagText.textContent = `${lo}–${hi}`;
-      if (onFilterChange) onFilterChange(!isDefault);
+      const dateRangeStr = `${lo}–${hi}`;
+      if (!isDefault) tagText.textContent = dateRangeStr;
+      if (onFilterChange) onFilterChange(!isDefault, dateRangeStr);
     }
 
     minInput.addEventListener('input', () => { if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; update(); });
@@ -1232,7 +1233,7 @@ window.addEventListener('load', function () {
     );
     resetSearch = rs;
     physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
-    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v, v ? 'Date range' : null, () => resetDate()) : null });
+    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? (isActive, dateStr) => onFilterChange('date', isActive, isActive ? dateStr : null, () => resetDate()) : null });
     const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v, v ? 'Shelfmark' : null, () => resetShelf()) : null });
     const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v, v ? 'Function' : null, () => resetFn()) : null });
     const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v, v ? 'Fundamenta' : null, () => resetFunda()) : null });
