@@ -1087,13 +1087,14 @@ window.addEventListener('load', function () {
       
       // Add click handler to remove button
       itemEl.querySelector('.e-item-remove').addEventListener('click', () => {
-        const row = document.querySelector(`[data-row-id="${item.rowId}"]`);
+        const row = document.querySelector(`[data-id="${item.rowId}"]`);
         if (row) {
-          const input = row.querySelector('.builder-input, .p2b-text');
-          if (input) input.value = '';
-          row.querySelector('.remove-row-btn')?.click();
+          row.querySelector('.remove-btn')?.click();
+          // Trigger input event after row removal to update table
+          setTimeout(() => {
+            builderRowsEl.dispatchEvent(new Event('input', { bubbles: true }));
+          }, 0);
         }
-        builderRowsEl.dispatchEvent(new Event('input'));
       });
     });
     
@@ -1137,7 +1138,7 @@ window.addEventListener('load', function () {
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
       const inp = row.querySelector('.builder-input, .p2b-text');
       if (inp) inp.value = '';
-      row.querySelector('.remove-row-btn')?.click();
+      row.querySelector('.remove-btn')?.click();
     });
     
     // Clear all filters
@@ -1165,7 +1166,7 @@ window.addEventListener('load', function () {
         searchData.push({
           field: fieldSelect ? fieldSelect.options[fieldSelect.selectedIndex].text : 'Search',
           value: inp.value.trim(),
-          rowId: row.dataset.rowId || row.getAttribute('data-row-id') || count
+          rowId: row.dataset.id
         });
       }
     });
