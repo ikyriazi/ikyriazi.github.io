@@ -795,8 +795,16 @@ window.addEventListener('load', function () {
       if (onFilterChange) onFilterChange(!isDefault);
     }
 
-    minInput.addEventListener('input', () => { if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; update(); });
-    maxInput.addEventListener('input', () => { if (parseInt(maxInput.value) < parseInt(minInput.value)) maxInput.value = minInput.value; update(); });
+    minInput.addEventListener('input', () => { 
+      if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; 
+      update(); 
+      if (table) table.draw();
+    });
+    maxInput.addEventListener('input', () => { 
+      if (parseInt(maxInput.value) < parseInt(minInput.value)) maxInput.value = minInput.value; 
+      update(); 
+      if (table) table.draw();
+    });
     minLabel.addEventListener('focus', () => minLabel.select());
     maxLabel.addEventListener('focus', () => maxLabel.select());
 
@@ -809,11 +817,11 @@ window.addEventListener('load', function () {
       update();
     }
 
-    minLabel.addEventListener('change', () => applyLabel(minLabel, true));
-    minLabel.addEventListener('blur',   () => applyLabel(minLabel, true));
-    maxLabel.addEventListener('change', () => applyLabel(maxLabel, false));
-    maxLabel.addEventListener('blur',   () => applyLabel(maxLabel, false));
-    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); });
+    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); if (table) table.draw(); });
+    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); if (table) table.draw(); });
+    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); if (table) table.draw(); });
+    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); if (table) table.draw(); });
+    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); if (table) table.draw(); });
     update();
     return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
   }
@@ -974,6 +982,25 @@ window.addEventListener('load', function () {
         // Reset physical type to "Both"
         const bothRow = document.querySelector('#physRadioList1 .phys-radio-row[data-val="Both"]');
         if (bothRow) bothRow.click();
+      });
+      toolboxFilterItems.appendChild(item);
+    }
+    
+    // Date range filter
+    const dateRange = getActiveDateRange();
+    if (dateRange.min !== 1450 || dateRange.max !== 1620) {
+      filterCount++;
+      const item = document.createElement('div');
+      item.className = 'e-item';
+      item.innerHTML = `
+        <span class="e-item-label">Date: <span class="e-item-value">${dateRange.min}–${dateRange.max}</span></span>
+        <button class="e-item-remove" type="button">${SVG_X}</button>
+      `;
+      const removeBtn = item.querySelector('.e-item-remove');
+      removeBtn.addEventListener('click', () => {
+        // Reset date range to default
+        const dateTagX = document.getElementById('dateTagX1');
+        if (dateTagX) dateTagX.click();
       });
       toolboxFilterItems.appendChild(item);
     }
@@ -1190,6 +1217,16 @@ window.addEventListener('load', function () {
     return activeRow ? activeRow.dataset.val : 'Both';
   }
 
+  function getActiveDateRange() {
+    const minInput = document.getElementById('dateMin1');
+    const maxInput = document.getElementById('dateMax1');
+    if (!minInput || !maxInput) return { min: 1450, max: 1620 };
+    return {
+      min: parseInt(minInput.value) || 1450,
+      max: parseInt(maxInput.value) || 1620
+    };
+  }
+
   $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
     if (settings.nTable.id !== 'sourcesTable') return true;
     if (!table) return true;
@@ -1209,6 +1246,15 @@ window.addEventListener('load', function () {
       const rowPhysType = rowData.physicalType ? 
         rowData.physicalType.charAt(0).toUpperCase() + rowData.physicalType.slice(1) : '';
       if (physType !== rowPhysType) return false;
+    }
+    
+    // Apply date range filter (using ex15.js logic)
+    const dateRange = getActiveDateRange();
+    if (rowData.date && rowData.date.timespan && rowData.date.timespan.earliestDate && rowData.date.timespan.earliestDate.value) {
+      const earliestDate = parseInt(rowData.date.timespan.earliestDate.value);
+      if (earliestDate < dateRange.min || earliestDate > dateRange.max) {
+        return false;
+      }
     }
     
     return true;
