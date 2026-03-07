@@ -758,7 +758,10 @@ window.addEventListener('load', function () {
       updateSelectionUI(val);
     }
 
-    physTagX.addEventListener('click', () => setVal('Both'));
+    physTagX.addEventListener('click', () => { 
+      setVal('Both'); 
+      if (table) table.draw(); 
+    });
     return { setVal, resetSearch };
   }
 
@@ -907,6 +910,9 @@ window.addEventListener('load', function () {
      ───────────────────────────────────────────── */
   const pill = document.getElementById('searchPill');
   const pillState = { fields: 0, filters: 0 };
+  const toolboxSearchItems = document.getElementById('toolboxSearchItems');
+  const toolboxFilterItems = document.getElementById('toolboxFilterItems');
+  const toolboxFiltersSection = document.getElementById('toolboxFiltersSection');
 
   function updatePill() {
     const f = pillState.fields, fi = pillState.filters;
@@ -914,8 +920,66 @@ window.addEventListener('load', function () {
     const parts = [];
     if (f  > 0) parts.push(f  === 1 ? '1 search field'  : `${f} search fields`);
     if (fi > 0) parts.push(fi === 1 ? '1 filter' : `${fi} filters`);
-    pill.textContent = parts.join(' · ');
+    const text = parts.join(' · ');
+    pill.innerHTML = text + '<span class="pill-chevron" id="pillChevron"><svg viewBox="0 0 12 8"><polyline points="2 2, 6 6, 10 2"/></svg></span>';
     pill.classList.add('visible');
+    
+    // Update toolbox content
+    updateToolboxContent();
+  }
+  
+  function updateToolboxContent() {
+    // Update search items
+    toolboxSearchItems.innerHTML = '';
+    let searchCount = 0;
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+      const inp = row.querySelector('.builder-input, .p2b-text');
+      const value = inp ? inp.value.trim() : '';
+      if (value) {
+        searchCount++;
+        const item = document.createElement('div');
+        item.className = 'e-item';
+        item.innerHTML = `
+          <span class="e-item-label">${field}: <span class="e-item-value">${value}</span></span>
+          <button class="e-item-remove" type="button">${SVG_X}</button>
+        `;
+        const removeBtn = item.querySelector('.e-item-remove');
+        removeBtn.addEventListener('click', () => {
+          // Clear the input value
+          if (inp) inp.value = '';
+          // Trigger input event to update everything
+          inp.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        toolboxSearchItems.appendChild(item);
+      }
+    });
+    
+    // Update filter items
+    toolboxFilterItems.innerHTML = '';
+    let filterCount = 0;
+    
+    // Physical type filter
+    const physType = document.querySelector('#physRadioList1 .phys-radio-row.active');
+    if (physType && physType.dataset.val !== 'Both') {
+      filterCount++;
+      const item = document.createElement('div');
+      item.className = 'e-item';
+      item.innerHTML = `
+        <span class="e-item-label">Physical type: <span class="e-item-value">${physType.dataset.val}</span></span>
+        <button class="e-item-remove" type="button">${SVG_X}</button>
+      `;
+      const removeBtn = item.querySelector('.e-item-remove');
+      removeBtn.addEventListener('click', () => {
+        // Reset physical type to "Both"
+        const bothRow = document.querySelector('#physRadioList1 .phys-radio-row[data-val="Both"]');
+        if (bothRow) bothRow.click();
+      });
+      toolboxFilterItems.appendChild(item);
+    }
+    
+    // Show/hide sections based on content
+    toolboxFiltersSection.style.display = filterCount > 0 ? '' : 'none';
   }
 
   const builderRowsEl = document.getElementById('builderRows1');
@@ -968,7 +1032,10 @@ window.addEventListener('load', function () {
       options
     );
     resetSearch = rs;
-    physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
+    physRows.forEach(r => r.addEventListener('click', () => { 
+      setVal(r.dataset.val); 
+      if (table) table.draw(); 
+    }));
     const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
     const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
     const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
@@ -981,6 +1048,7 @@ window.addEventListener('load', function () {
         document.getElementById(`filterPanel${n}`)
           .querySelectorAll('.phys-accordion.expanded')
           .forEach(a => a.classList.remove('expanded'));
+        if (table) table.draw();
       });
     }
   });
@@ -997,6 +1065,46 @@ window.addEventListener('load', function () {
 
   icon.addEventListener('click', () => dropdown.classList.contains('open') ? closeDropdown() : openDropdown());
   overlay.addEventListener('click', closeDropdown);
+
+  /* ─────────────────────────────────────────────
+     Pill toolbox toggle
+     ───────────────────────────────────────────── */
+  const toolbox = document.getElementById('searchToolbox');
+  
+  // Toggle toolbox when pill is clicked
+  pill.addEventListener('click', function(e) {
+    const chevron = document.getElementById('pillChevron');
+    if (chevron) {
+      toolbox.classList.toggle('visible');
+      chevron.classList.toggle('open');
+    }
+  });
+  
+  // Close toolbox when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.h7-pill-toolbox-wrapper')) {
+      const chevron = document.getElementById('pillChevron');
+      toolbox.classList.remove('visible');
+      if (chevron) chevron.classList.remove('open');
+    }
+  });
+  
+  // Toolbox "Clear all" button
+  const toolboxClearBtn = document.getElementById('toolboxClearBtn');
+  if (toolboxClearBtn) {
+    toolboxClearBtn.addEventListener('click', function() {
+      // Clear all search fields
+      resetSearch();
+      pillState.fields = 0;
+      
+      // Clear all filters
+      const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
+      if (clearFiltersBtn) clearFiltersBtn.click();
+      
+      updatePill();
+      if (table) table.draw();
+    });
+  }
 
   /* ─────────────────────────────────────────────
      Clear search fields button
@@ -1077,14 +1185,33 @@ window.addEventListener('load', function () {
     }
   }
 
+  function getActivePhysicalType() {
+    const activeRow = document.querySelector('#physRadioList1 .phys-radio-row.active');
+    return activeRow ? activeRow.dataset.val : 'Both';
+  }
+
   $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
     if (settings.nTable.id !== 'sourcesTable') return true;
     if (!table) return true;
     const active = getActiveRows();
-    if (active.length === 0) return true;
     const rowData = table.row(dataIndex).data();
     if (!rowData) return true;
-    return active.every(({ field, value }) => rowMatches(rowData, field, value));
+    
+    // Apply search field filters (AND logic)
+    if (active.length > 0) {
+      const searchMatch = active.every(({ field, value }) => rowMatches(rowData, field, value));
+      if (!searchMatch) return false;
+    }
+    
+    // Apply physical type filter
+    const physType = getActivePhysicalType();
+    if (physType !== 'Both') {
+      const rowPhysType = rowData.physicalType ? 
+        rowData.physicalType.charAt(0).toUpperCase() + rowData.physicalType.slice(1) : '';
+      if (physType !== rowPhysType) return false;
+    }
+    
+    return true;
   });
 
   /* ─────────────────────────────────────────────
