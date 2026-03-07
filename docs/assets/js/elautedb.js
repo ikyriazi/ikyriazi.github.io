@@ -1,24 +1,15 @@
 window.addEventListener('load', function () {
 
   /* ─────────────────────────────────────────────
-     Data constants
+     Data
      ───────────────────────────────────────────── */
   const FIELDS = [
     'All fields', 'Title', 'Person', 'Place', 'RISM / VD16 / Brown ID',
     'Description / Comment', 'Bibliography'
   ];
 
-  const PERSONS = [
-    'Agricola, Martin', 'Aich, Arnt von', 'Apiarius, Mathias',
-    'Egenolff d.Ä., Christian', 'Formschneider, Hieronymus', 'Forster, Georg',
-    'Franck, Matthäus', 'Fuhrmann, Valentin', 'Furter, Michael',
-    'Gerle, Hans', 'Guldenmundt, Hans', 'Hergot, Kunigunde',
-    'Hochfelder, Kaspar', 'Huber, Wolfgang', 'Judenkünig, Hans',
-    'Meyerpeck, Wolfgang', 'Neuber, Valentin', 'Neusidler, Hans',
-    'Ott, Hans', 'Petreius, Johann', 'Rhau, Georg',
-    'Schlick, Arnold', 'Schöffer, Peter d.J.', 'Singriener, Johannes',
-    'Virdung, Sebastian', 'Öglin, Erhard'
-  ];
+  // Dynamic persons list - populated from data
+  let DYNAMIC_PERSONS = [];
 
   const PLACES = [
     'Argentorati (city)', 'Augsburg (city)', 'Basel', 'Frankfurt am Main',
@@ -1026,59 +1017,62 @@ window.addEventListener('load', function () {
      ───────────────────────────────────────────── */
   let resetSearch;
 
-  const CARD_CONFIGS = [
-    { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } }
-  ];
+  // Function to initialize search interface with dynamic data
+  function initializeSearchInterface() {
+    const CARD_CONFIGS = [
+      { n: 1, options: { showLogic: false, showChipValues: true, filterCount: true } }
+    ];
 
-  CARD_CONFIGS.forEach(({ n, options }) => {
-    const physRows = document.querySelectorAll(`#physRadioList${n} .phys-radio-row`);
+    CARD_CONFIGS.forEach(({ n, options }) => {
+      const physRows = document.querySelectorAll(`#physRadioList${n} .phys-radio-row`);
 
-    let onFilterChange = null;
-    let clearFiltersBtn = null;
-    if (options.filterCount) {
-      clearFiltersBtn = document.getElementById(`clearFiltersBtn${n}`);
-      const activeFilters = new Set();
-      onFilterChange = (key, isActive) => {
-        if (isActive) activeFilters.add(key);
-        else activeFilters.delete(key);
-        const count = activeFilters.size;
-        clearFiltersBtn.style.display = count > 0 ? '' : 'none';
-        pillState.filters = count; updatePill();
-      };
-    }
+      let onFilterChange = null;
+      let clearFiltersBtn = null;
+      if (options.filterCount) {
+        clearFiltersBtn = document.getElementById(`clearFiltersBtn${n}`);
+        const activeFilters = new Set();
+        onFilterChange = (key, isActive) => {
+          if (isActive) activeFilters.add(key);
+          else activeFilters.delete(key);
+          const count = activeFilters.size;
+          clearFiltersBtn.style.display = count > 0 ? '' : 'none';
+          pillState.filters = count; updatePill();
+        };
+      }
 
-    const { setVal, resetSearch: rs } = setupSplitAccordion(n,
-      val => {
-        physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
-        if (onFilterChange) onFilterChange('phys', val !== 'Both');
-      },
-      {
-        'Person': (rowId) => createModeDropdownWidget(rowId, PERSONS),
-        'Place':  (rowId) => createModeDropdownWidget(rowId, PLACES)
-      },
-      options
-    );
-    resetSearch = rs;
-    physRows.forEach(r => r.addEventListener('click', () => { 
-      setVal(r.dataset.val); 
-      if (table) table.draw(); 
-    }));
-    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
-    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
-    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
-    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
+      const { setVal, resetSearch: rs } = setupSplitAccordion(n,
+        val => {
+          physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
+          if (onFilterChange) onFilterChange('phys', val !== 'Both');
+        },
+        {
+          'Person': (rowId) => createModeDropdownWidget(rowId, DYNAMIC_PERSONS),
+          'Place':  (rowId) => createModeDropdownWidget(rowId, PLACES)
+        },
+        options
+      );
+      resetSearch = rs;
+      physRows.forEach(r => r.addEventListener('click', () => { 
+        setVal(r.dataset.val); 
+        if (table) table.draw(); 
+      }));
+      const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
+      const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
+      const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
+      const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
 
-    if (clearFiltersBtn) {
-      clearFiltersBtn.addEventListener('click', () => {
-        setVal('Both');
-        resetDate(); resetShelf(); resetFn(); resetFunda();
-        document.getElementById(`filterPanel${n}`)
-          .querySelectorAll('.phys-accordion.expanded')
-          .forEach(a => a.classList.remove('expanded'));
-        if (table) table.draw();
-      });
-    }
-  });
+      if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+          setVal('Both');
+          resetDate(); resetShelf(); resetFn(); resetFunda();
+          document.getElementById(`filterPanel${n}`)
+            .querySelectorAll('.phys-accordion.expanded')
+            .forEach(a => a.classList.remove('expanded'));
+          if (table) table.draw();
+        });
+      }
+    });
+  }
 
   /* ─────────────────────────────────────────────
      Drawer open / close
@@ -1194,7 +1188,8 @@ window.addEventListener('load', function () {
         return (row.title || '').toLowerCase().includes(value) ||
                (row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        return (row.author?.label || '').toLowerCase().includes(value);
+        return (row.author?.label || '').toLowerCase().includes(value) ||
+               (row.publisher?.label || '').toLowerCase().includes(value);
       case 'Place':
         return (row.printPlace?.label || '').toLowerCase().includes(value);
       case 'RISM / VD16 / Brown ID':
@@ -1321,6 +1316,21 @@ window.addEventListener('load', function () {
     .then(response => response.json())
     .then(json => {
       const data = json['@graph'] || [];
+
+      // Generate dynamic persons list from data
+      const personsSet = new Set();
+      data.forEach(row => {
+        if (row.author && row.author.normalizedName) {
+          personsSet.add(row.author.normalizedName);
+        }
+        if (row.publisher && row.publisher.normalizedName) {
+          personsSet.add(row.publisher.normalizedName);
+        }
+      });
+      DYNAMIC_PERSONS = Array.from(personsSet).sort((a, b) => a.localeCompare(b));
+
+      // Initialize search interface now that we have the persons list
+      initializeSearchInterface();
 
       table = $('#sourcesTable').DataTable({
         data: data,
