@@ -11,12 +11,8 @@ window.addEventListener('load', function () {
   // Dynamic persons list - populated from data
   let DYNAMIC_PERSONS = [];
 
-  const PLACES = [
-    'Argentorati (city)', 'Augsburg (city)', 'Basel', 'Frankfurt am Main',
-    'Heidelberg (city)', 'Köln (city)', 'Königstein / Taunus', 'Mainz (city)',
-    'München (city)', 'Nürnberg (city)', 'Wien (city)', 'Wien (region)',
-    'Wien (university)', 'Wittenberg (city)', 'Zwickau (city)'
-  ];
+  // Dynamic places list - populated from data
+  let DYNAMIC_PLACES = [];
 
   const SHELFMARKS = [
     { heading: 'A — Austria', chips: ['A-Imf','A-Wgm','A-Wgm 676/137','A-Wkm KK_5410','A-Wn 396116-A','A-Wn Cod. 9704','A-Wn MS47356-8°','A-Wn Mus.Hs. 18688','A-Wn Mus.Hs. 18827','A-Wn Mus.Hs. 41950','A-Wn SA.78.C.29 19','A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1'] },
@@ -1047,7 +1043,7 @@ window.addEventListener('load', function () {
         },
         {
           'Person': (rowId) => createModeDropdownWidget(rowId, DYNAMIC_PERSONS),
-          'Place':  (rowId) => createModeDropdownWidget(rowId, PLACES)
+          'Place':  (rowId) => createModeDropdownWidget(rowId, DYNAMIC_PLACES)
         },
         options
       );
@@ -1177,21 +1173,44 @@ window.addEventListener('load', function () {
 
   function rowMatches(row, field, value) {
     switch (field) {
-      case 'All fields':
-        return [
+      case 'All fields': {
+        // Simple fields
+        const simpleFields = [
           row.shelfmark?.label, row.title, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
           row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
           row.description, row.comment, row.bibliography
-        ].some(v => (v || '').toLowerCase().includes(value));
+        ];
+        if (simpleFields.some(v => (v || '').toLowerCase().includes(value))) {
+          return true;
+        }
+        // Check provenance (can be array)
+        if (row.provenance) {
+          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
+          if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) {
+            return true;
+          }
+        }
+        return false;
+      }
       case 'Title':
         return (row.title || '').toLowerCase().includes(value) ||
                (row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
         return (row.author?.label || '').toLowerCase().includes(value) ||
                (row.publisher?.label || '').toLowerCase().includes(value);
-      case 'Place':
-        return (row.printPlace?.label || '').toLowerCase().includes(value);
+      case 'Place': {
+        // Check printPlace
+        if ((row.printPlace?.label || '').toLowerCase().includes(value)) {
+          return true;
+        }
+        // Check provenance (can be array or single object)
+        if (row.provenance) {
+          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
+          return provenances.some(prov => (prov?.label || '').toLowerCase().includes(value));
+        }
+        return false;
+      }
       case 'RISM / VD16 / Brown ID':
         return (row.rism || '').toLowerCase().includes(value)      ||
                (row.otherRism || '').toLowerCase().includes(value) ||
@@ -1329,7 +1348,24 @@ window.addEventListener('load', function () {
       });
       DYNAMIC_PERSONS = Array.from(personsSet).sort((a, b) => a.localeCompare(b));
 
-      // Initialize search interface now that we have the persons list
+      // Generate dynamic places list from data
+      const placesSet = new Set();
+      data.forEach(row => {
+        if (row.printPlace && row.printPlace.normalizedName) {
+          placesSet.add(row.printPlace.normalizedName);
+        }
+        if (row.provenance) {
+          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
+          provenances.forEach(prov => {
+            if (prov && prov.normalizedName) {
+              placesSet.add(prov.normalizedName);
+            }
+          });
+        }
+      });
+      DYNAMIC_PLACES = Array.from(placesSet).sort((a, b) => a.localeCompare(b));
+
+      // Initialize search interface now that we have the persons and places lists
       initializeSearchInterface();
 
       table = $('#sourcesTable').DataTable({
