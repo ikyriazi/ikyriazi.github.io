@@ -8,13 +8,50 @@ window.addEventListener('load', function () {
     'Description / Comment', 'Bibliography'
   ];
 
-  // Person and place lists will be dynamically populated from Q1.json
-  let PERSONS = [];
-  let PLACES = [];
+  const PERSONS = [
+    'Agricola, Martin', 'Aich, Arnt von', 'Apiarius, Mathias',
+    'Egenolff d.Ä., Christian', 'Formschneider, Hieronymus', 'Forster, Georg',
+    'Franck, Matthäus', 'Fuhrmann, Valentin', 'Furter, Michael',
+    'Gerle, Hans', 'Guldenmundt, Hans', 'Hergot, Kunigunde',
+    'Hochfelder, Kaspar', 'Huber, Wolfgang', 'Judenkünig, Hans',
+    'Meyerpeck, Wolfgang', 'Neuber, Valentin', 'Neusidler, Hans',
+    'Ott, Hans', 'Petreius, Johann', 'Rhau, Georg',
+    'Schlick, Arnold', 'Schöffer, Peter d.J.', 'Singriener, Johannes',
+    'Virdung, Sebastian', 'Öglin, Erhard'
+  ];
 
-  // Shelfmarks and functions will be dynamically populated from Q1.json
-  let SHELFMARKS = [];
-  let FUNCTIONS_DATA = [];
+  const PLACES = [
+    'Argentorati (city)', 'Augsburg (city)', 'Basel', 'Frankfurt am Main',
+    'Heidelberg (city)', 'Köln (city)', 'Königstein / Taunus', 'Mainz (city)',
+    'München (city)', 'Nürnberg (city)', 'Wien (city)', 'Wien (region)',
+    'Wien (university)', 'Wittenberg (city)', 'Zwickau (city)'
+  ];
+
+  const SHELFMARKS = [
+    { heading: 'A — Austria', chips: ['A-Imf','A-Wgm','A-Wgm 676/137','A-Wkm KK_5410','A-Wn 396116-A','A-Wn Cod. 9704','A-Wn MS47356-8°','A-Wn Mus.Hs. 18688','A-Wn Mus.Hs. 18827','A-Wn Mus.Hs. 41950','A-Wn SA.78.C.29 19','A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1'] },
+    { heading: 'B — Belgium', chips: ['B-Br','B-Br Fétis 2.884 b 9899 48','B-Br Fétis 4.014 A (RP)','B-Br Fétis 6.197 A (RP)'] },
+    { heading: 'CH — Switzerland', chips: ['CH-A AKB Mb 465','CH-BEsu Hospinian 141','CH-BEsu MUE Hospinian 141','CH-Bu F IX 23','CH-Bu F IX 56','CH-Bu F IX 63','CH-Bu F IX 70','CH-Bu F X','CH-Bu F X 1','CH-Bu F X 10','CH-Bu F X 11','CH-Bu F X 17','CH-Bu F X 18','CH-Bu F X 19','CH-Bu F X 2','CH-Bu F X 20','CH-Bu F X 21','CH-Bu F X 22','CH-Bu F X 23','CH-Bu F X 24','CH-Bu F X 25','CH-Bu F X 3','CH-Bu F X 4','CH-Bu F X 5','CH-Bu F X 6','CH-Bu F X 7','CH-Bu F X 8','CH-Bu kk II 27','CH-E','CH-SAM Ms. FP/M 1','CH-SAM Ms. FP/M 2','CH-SGs Cod. Sang. 463','CH-ZO','CH-Zz Mus. 908'] },
+    { heading: 'CZ — Czech Republic', chips: ['CZ-Bm','CZ-Bu','CZ-Pu Hs. 223-20'] },
+    { heading: 'D — Germany', chips: ['D-As Tonk Schl 549','D-B','D-B 1 an: Yd 5008','D-B 2 an: Yd 5008','D-B Ms.germ.qu. 719','D-B Ms.germ.qu.718','D-B Mus. ant. theor. V. 30','D-B Mus.ant.pract. A 180','D-B Mus.ant.pract. G 435','D-B Mus.ant.pract. O 65','D-B Mus.ant.pract. O120','D-B Mus.ant.theor G 60','D-B Mus.ant.theor. A 15','D-B Mus.ms. 40026','D-B Mus.ms. 40588','D-B Yd 5006','D-B Yd 5008 R','D-B Yd5041','D-B Yd9496','D-B Yd9503','D-Cl Rara/BIII 1/9(Beil 1)','D-DS Gü 13788','D-FLs KdM1 a/b','D-Gms','D-Gs 8 MUS IV, 4600','D-HAu Pon IIe 290 (1)','D-HAu Pon IIe 290 (2)','D-HEu cpg 343','D-HTd','D-Ju 4 Mus. 12a(1)','D-Ju 4 Mus. 12a(2)','D-Ju 4 Mus. 12b(1)','D-Ju 4 Mus. 12c(1)','D-Ju 4 Mus. 12d(1)','D-Ju 4 Mus.12b(2)','D-Ju 4 Mus.12c(2)','D-Ju 4 Mus.12d(2)','D-KA Don Mus.Autogr. 1','D-Kl 2° Ms.Math. 31','D-LEm','D-LEm I. 8° 191','D-LEm I.8°191','D-LEm II. 6. 13 / D-Dl II. 6. 13','D-LEm II. 6. 7','D-Mbs 2 Mus.pr. 156.16/20#16','D-Mbs 4 Mus.pr.167','D-Mbs 4 Mus.th. 1616','D-Mbs 4 Mus.th. 729','D-Mbs 4 Mus.th. 729#Beibd.1','D-Mbs 4° Mus pr 439','D-Mbs Einbl. I,6','D-Mbs Mus.ms. 1501','D-Mbs Mus.ms. 1511c','D-Mbs Mus.ms. 1511d','D-Mbs Mus.ms. 1512','D-Mbs Mus.ms. 266','D-Mbs Mus.ms. 267','D-Mbs Mus.ms. 268','D-Mbs Mus.ms. 269','D-Mbs Mus.ms. 270','D-Mbs Mus.ms. 271','D-Mbs Mus.ms. 2987','D-Mbs Mus.pr. 316','D-Mbs Mus.pr. 35','D-Mbs Mus.pr. 39#Beibd.2','D-Mbs Mus.pr. 46#Beibd.1','D-Mbs Mus.th. 49','D-Mbs Rar. 27','D-Mbs Rar. 567','D-Mu 4° Cod.ms. 718','D-Mu 8° Cod. 328-331','D-Ngm','D-Ngm 8° Postinc. M. 261','D-ROu Th A 1','D-Rp Ms.Th. 98 4°','D-Us Smr.misc 131b','D-Us Smr.misc 131b_copy','D-Usch Misc.235c','D-W 2.14 Musica','D-W 3 Musica','D-W 43 Musica Helmst.','D-W Musica 4.1.1','D-W Musica Helmst. (3)','D-WRZ 14,6:60e(n.1.)','D-Wa cod. VII B Hs Nr. 264','D-Z 2.8.10(5)','D-Z 30.5.20(1)','D-Z Mus. 115.3','D-Z Mus. 15.1','D-Z Mus. 15.1 b (Mu 94)','D-Z Mus. 82.1 (Mu 477)','D-Z Mus. 82.2'] },
+    { heading: 'DK — Denmark', chips: ['DK-Kk'] },
+    { heading: 'E — Spain', chips: ['E-Mn R/22789'] },
+    { heading: 'F — France', chips: ['F-Pc','F-Pn RES VM7-663','F-Pn Rés. 658','F-Ssp M 01 (f.k. IIII)','F-Ssp M 1'] },
+    { heading: 'GB — Great Britain', chips: ['GB-Eu','GB-Lbl','GB-Lbl C.125.CC.9.','GB-Lbl Hirsch I 594','GB-Lbl Hirsch IV 1603','GB-Lbl Hirsch IV 1604','GB-Lbl K.1.b.11.','GB-Lbl K.8.c.9','GB-Ob Mus. 156 e.25Music'] },
+    { heading: 'H — Hungary', chips: ['H-Ba K 53/II'] },
+    { heading: 'NL — Netherlands', chips: ['NL-DHgm','NL-HAN'] },
+    { heading: 'PL — Poland', chips: ['PL-Kj Mus.ant.pract. L 1150','PL-Kj Mus.ant.pract. N 175a','PL-Kj Mus.ms. 40154','PL-LEtpn (Lost acc. to Brown)','PL-WRk 352'] },
+    { heading: 'RISM', chips: ['RISM B/8 1534/06'] },
+    { heading: 'S — Sweden', chips: ['S-Uu Lq.XI.3. n. 663'] },
+    { heading: 'UKR — Ukraine', chips: ['UKR-LVu 1400/1'] },
+    { heading: 'US — United States', chips: ['US-Bp','US-CA','US-NHub Osborn Music MS 31','US-R','US-Wc','US-Wc MT640 .J9','US-Wc MT640 .N3'] },
+    { heading: 'olim', chips: ['olim CZ-Pu 59r 469'] },
+  ];
+
+  const FUNCTIONS_DATA = [
+    'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
+    "primer, teacher's book", 'song book / Liederbuch', 'student handbook', 'tablature book',
+    { label: '[empty field]', cls: 'sm-chip--grey' }
+  ];
 
   const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
   const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
@@ -249,8 +286,8 @@ window.addEventListener('load', function () {
     }
   }
 
-  function generateSimpleRow(labelText, value, skipHighlight = false, term = undefined) {
-    const displayValue = skipHighlight ? value : highlightText(value, term !== undefined ? term : getActiveTitleTerm());
+  function generateSimpleRow(labelText, value, skipHighlight = false) {
+    const displayValue = skipHighlight ? value : highlightText(value, getActiveTitleTerm());
     return '<tr><td class="details-placeholder"></td><td class="details-label">' + labelText +
       '</td><td class="details-value">' + displayValue + '</td><td class="details-CD" colspan="7"></td></tr>';
   }
@@ -262,68 +299,23 @@ window.addEventListener('load', function () {
       if (!item.label) return;
       const labelCell = getFirstLabel(index, labelText);
       const parts = ['description', 'comment'].filter(type => item[type]);
-      const titleTerm  = (getActiveTitleTerm()       || '').toLowerCase().trim();
-      const descTerm   = (getActiveDescriptionTerm() || '').toLowerCase().trim();
-      const hasSearchMatch = parts.some(type => {
-        const content = stripHtml(item[type]).toLowerCase();
-        return (descTerm && content.includes(descTerm)) || (titleTerm && content.includes(titleTerm));
-      });
+      const searchTerm = (getActiveTitleTerm() || '').toLowerCase().trim();
+      const hasSearchMatch = searchTerm && parts.some(type =>
+        stripHtml(item[type]).toLowerCase().includes(searchTerm)
+      );
       const badges = parts.map(type => {
-        const content = stripHtml(item[type]).toLowerCase();
-        const isActive = (descTerm && content.includes(descTerm)) || (titleTerm && content.includes(titleTerm));
+        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
         const iconName = isActive ? 'minus-circle' : 'plus-circle';
         return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
-      
-      // Check for Place searches (provenance), All fields, or Title matches for highlighting
-      let highlightedLabel = item.label;
-      let matchFound = false;
-      
-      // For provenance, check Place searches
-      if (idPrefix === 'prov') {
-        const placeSearches = getActivePlaceSearches();
-        for (const search of placeSearches) {
-          if (search.mode === 'list') {
-            // Exact match on normalizedName
-            if ((item.normalizedName || '').toLowerCase() === search.value) {
-              highlightedLabel = highlightText(item.label, item.label);
-              matchFound = true;
-              break;
-            }
-          } else {
-            // Partial match on label
-            if (stripHtml(item.label || '').toLowerCase().includes(search.value)) {
-              highlightedLabel = highlightText(item.label, search.value);
-              matchFound = true;
-              break;
-            }
-          }
-        }
-      }
-      
-      // For provenance, function, and codicology, check All fields search
-      if (!matchFound && (idPrefix === 'prov' || idPrefix === 'func' || idPrefix === 'codic')) {
-        const allFieldsTerm = getActiveAllFieldsTerm();
-        if (allFieldsTerm && stripHtml(item.label || '').toLowerCase().includes(allFieldsTerm.toLowerCase())) {
-          highlightedLabel = highlightText(item.label, allFieldsTerm);
-          matchFound = true;
-        }
-      }
-      
-      // Fallback to Title search term
-      if (!matchFound && titleTerm) {
-        highlightedLabel = highlightText(item.label, titleTerm);
-      }
-      
+      const highlightedLabel = highlightText(item.label, getActiveTitleTerm());
       const rowClass = hasSearchMatch ? ' class="cd-expanded"' : '';
       rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
       parts.forEach(type => {
         const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
-        const content = stripHtml(item[type]).toLowerCase();
-        const isActive = (descTerm && content.includes(descTerm)) || (titleTerm && content.includes(titleTerm));
-        const highlightTerm = descTerm || titleTerm || undefined;
+        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
         const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : (isActive ? 'block' : 'none');
-        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], highlightTerm)}</div></div>`;
+        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], getActiveTitleTerm())}</div></div>`;
       });
       rows += '</td></tr>';
     });
@@ -339,12 +331,11 @@ window.addEventListener('load', function () {
                item.referenceSource.referencebookType !== 'Catalogue';
       return item.referenceSource.referencebookType === typeFilter;
     });
-    const bibTerm = getActiveBibliographyTerm() || getActiveTitleTerm();
     filtered.forEach((item, index) => {
       let valueText = item.referenceSource.bookShort || '';
       if (item.referencePages)
         valueText += ': <span class="reference-pages">' + item.referencePages + '</span>';
-      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText, false, bibTerm);
+      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText);
     });
     return rows;
   }
@@ -391,7 +382,7 @@ window.addEventListener('load', function () {
     if (row.brown || row.otherShelfmark) {
       rows += generateSubgroupHeading('Further Identifiers', 'identifiers');
       let identifiersRows = '';
-      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown, false, getTermForColumn('rism'));
+      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown);
       if (row.otherShelfmark) {
         toArray(row.otherShelfmark).forEach((item, index) => {
           if (item && item.label) {
@@ -416,13 +407,12 @@ window.addEventListener('load', function () {
         bibliographyRows += generateBibliographyRows(refs, 'Other bibliography:', null);
       }
       if (row.relatedResource) {
-        const bibTerm = getActiveBibliographyTerm() || getActiveTitleTerm();
         toArray(row.relatedResource).forEach((item, index) => {
           if (item && item.label) {
             const value = item.url
               ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.label}</a>`
               : item.label;
-            bibliographyRows += generateSimpleRow(getFirstLabel(index, 'Related resources:'), value, false, bibTerm);
+            bibliographyRows += generateSimpleRow(getFirstLabel(index, 'Related resources:'), value);
           }
         });
       }
@@ -440,113 +430,9 @@ window.addEventListener('load', function () {
       '</colgroup>' + rows + '</table></div>';
   }
 
-  function renderWithHighlight(data, type, removeBracket = false, term = undefined) {
+  function renderWithHighlight(data, type, removeBracket = false) {
     if (type === 'sort') return (removeBracket && data) ? data.replace(/^\[/, '') : (data || '');
-    return (type === 'display') ? highlightText(data, term !== undefined ? term : getActiveTitleTerm()) : (data || '');
-  }
-
-  // Special render function for Place columns (printPlace) that handles list mode
-  function renderPlaceColumn(data, type, row, field) {
-    if (type === 'sort') return data ? data.replace(/^\[/, '') : '';
-    if (type !== 'display') return data || '';
-    
-    // Get active Place searches and their modes
-    const activePlaceSearches = [];
-    builderRowsEl.querySelectorAll('.builder-row').forEach(rowEl => {
-      const fieldSelect = rowEl.querySelector('.field-select');
-      if (!fieldSelect || fieldSelect.value !== 'Place') return;
-      const inp = rowEl.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if (!value) return;
-      
-      // Get mode
-      let mode = 'free';
-      const tabsEl = rowEl.querySelector('.p2b-tabs');
-      if (tabsEl) {
-        const activeTab = tabsEl.querySelector('.p2b-tab.active');
-        if (activeTab) mode = activeTab.dataset.mode;
-      }
-      activePlaceSearches.push({ value: value.toLowerCase(), mode });
-    });
-    
-    if (activePlaceSearches.length === 0) return data || '';
-    
-    // Check if this row matches in list mode (exact normalizedName match)
-    const placeData = row[field]; // printPlace object
-    if (placeData) {
-      for (const search of activePlaceSearches) {
-        if (search.mode === 'list') {
-          if ((placeData.normalizedName || '').toLowerCase() === search.value) {
-            // Highlight the entire label
-            return highlightText(data, data);
-          }
-        }
-      }
-      
-      // No list mode match found, check free mode (partial label match)
-      for (const search of activePlaceSearches) {
-        if (search.mode === 'free') {
-          if (stripHtml(data || '').toLowerCase().includes(search.value)) {
-            return highlightText(data, search.value);
-          }
-        }
-      }
-    }
-    
-    // No match or no search term, return unhighlighted
-    return data || '';
-  }
-
-  // Special render function for Person columns (author/publisher) that handles list mode
-  function renderPersonColumn(data, type, row, field) {
-    if (type === 'sort') return data ? data.replace(/^\[/, '') : '';
-    if (type !== 'display') return data || '';
-    
-    // Get active Person searches and their modes
-    const activePersonSearches = [];
-    builderRowsEl.querySelectorAll('.builder-row').forEach(rowEl => {
-      const fieldSelect = rowEl.querySelector('.field-select');
-      if (!fieldSelect || fieldSelect.value !== 'Person') return;
-      const inp = rowEl.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if (!value) return;
-      
-      // Get mode
-      let mode = 'free';
-      const tabsEl = rowEl.querySelector('.p2b-tabs');
-      if (tabsEl) {
-        const activeTab = tabsEl.querySelector('.p2b-tab.active');
-        if (activeTab) mode = activeTab.dataset.mode;
-      }
-      activePersonSearches.push({ value: value.toLowerCase(), mode });
-    });
-    
-    if (activePersonSearches.length === 0) return data || '';
-    
-    // Check if this row matches in list mode (exact normalizedName match)
-    const personData = row[field]; // author or publisher object
-    if (personData) {
-      for (const search of activePersonSearches) {
-        if (search.mode === 'list') {
-          if ((personData.normalizedName || '').toLowerCase() === search.value) {
-            // Highlight the entire label
-            return highlightText(data, data);
-          }
-        }
-      }
-      
-      // No list mode match found, check free mode (partial label match)
-      for (const search of activePersonSearches) {
-        if (search.mode === 'free') {
-          if (stripHtml(data || '').toLowerCase().includes(search.value)) {
-            return highlightText(data, search.value);
-          }
-        }
-      }
-    }
-    
-    // No match or no search term, return unhighlighted
-    return data || '';
+    return (type === 'display') ? highlightText(data, getActiveTitleTerm()) : (data || '');
   }
 
   function combineValues(row, primaryField, otherField) {
@@ -559,11 +445,11 @@ window.addEventListener('load', function () {
     return values.join('<br/>');
   }
 
-  function renderCombinedField(row, primaryField, otherField, type, term) {
+  function renderCombinedField(row, primaryField, otherField, type) {
     if (type !== 'display') return '';
     const values = [];
     if (row[primaryField] && row[primaryField].label) {
-      const h = highlightText(row[primaryField].label, term);
+      const h = highlightText(row[primaryField].label, getActiveTitleTerm());
       values.push(row[primaryField].url
         ? `<a href="${row[primaryField].url}" target="_blank" rel="noopener noreferrer">${h}</a>`
         : h);
@@ -572,7 +458,7 @@ window.addEventListener('load', function () {
       const items = Array.isArray(row[otherField]) ? row[otherField] : [row[otherField]];
       items.forEach(item => {
         if (item && item.label) {
-          const h = highlightText(item.label, term);
+          const h = highlightText(item.label, getActiveTitleTerm());
           values.push(item.url
             ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${h}</a>`
             : h);
@@ -660,7 +546,8 @@ window.addEventListener('load', function () {
 
   [1].forEach(n => {
     document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
-    // renderChipGrid calls moved to after data loading (inside fetch callback)
+    renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
+    renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
@@ -670,19 +557,8 @@ window.addEventListener('load', function () {
      ───────────────────────────────────────────── */
   function initModeDropdownEl(tabs, input, list, wrap, items) {
     let mode = 'free', highlighted = -1, listMemory = '';
-    function showSelected(name) { 
-      input.value = name; 
-      input.style.display = ''; 
-      input.style.fontWeight = '600'; 
-      // Trigger input event to update search
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    function hideInput() { 
-      input.value = ''; 
-      input.style.display = 'none'; 
-      // Trigger input event to clear search
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    function showSelected(name) { input.value = name; input.style.display = ''; input.style.fontWeight = '600'; }
+    function hideInput() { input.value = ''; input.style.display = 'none'; }
     function renderList() {
       list.innerHTML = ''; highlighted = -1;
       items.forEach(name => {
@@ -707,8 +583,6 @@ window.addEventListener('load', function () {
           list.classList.remove('open'); input.value = ''; input.style.fontWeight = '';
           input.style.display = ''; input.readOnly = false; input.style.caretColor = '';
           input.placeholder = 'Search...';
-          // Trigger input event to clear search when switching modes
-          input.dispatchEvent(new Event('input', { bubbles: true }));
         }
       });
     });
@@ -914,9 +788,8 @@ window.addEventListener('load', function () {
       minInput.style.zIndex = lo >= hi ? 5 : 3;
       const isDefault = lo === minYear && hi === maxYear;
       tag.style.visibility = isDefault ? 'hidden' : 'visible';
-      const dateRangeStr = `${lo}–${hi}`;
-      if (!isDefault) tagText.textContent = dateRangeStr;
-      if (onFilterChange) onFilterChange(!isDefault, dateRangeStr);
+      if (!isDefault) tagText.textContent = `${lo}–${hi}`;
+      if (onFilterChange) onFilterChange(!isDefault);
     }
 
     minInput.addEventListener('input', () => { if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; update(); });
@@ -1033,147 +906,27 @@ window.addEventListener('load', function () {
      Active-state pill
      ───────────────────────────────────────────── */
   const pill = document.getElementById('searchPill');
-  const pillChevron = document.getElementById('pillChevron');
-  const searchToolbox = document.getElementById('searchToolbox');
-  const toolboxSearchItems = document.getElementById('toolboxSearchItems');
-  const toolboxFilterItems = document.getElementById('toolboxFilterItems');
-  const toolboxClearBtn = document.getElementById('toolboxClearBtn');
-  const toolboxSearch = document.getElementById('toolboxSearch');
-  const toolboxFiltersSection = document.getElementById('toolboxFiltersSection');
-  
-  const pillState = { fields: 0, filters: 0, searchData: [], filterData: [] };
+  const pillState = { fields: 0, filters: 0 };
 
   function updatePill() {
     const f = pillState.fields, fi = pillState.filters;
-    if (f === 0 && fi === 0) { 
-      pill.classList.remove('visible'); 
-      searchToolbox.classList.remove('visible');
-      pillChevron.classList.remove('open');
-      return; 
-    }
-    
+    if (f === 0 && fi === 0) { pill.classList.remove('visible'); return; }
     const parts = [];
     if (f  > 0) parts.push(f  === 1 ? '1 search field'  : `${f} search fields`);
     if (fi > 0) parts.push(fi === 1 ? '1 filter' : `${fi} filters`);
-    
-    // Update pill text - insert before the chevron
-    const pillText = parts.join(' · ');
-    const chevronEl = pill.querySelector('.pill-chevron');
-    
-    // Clear pill but keep the chevron
-    pill.innerHTML = '';
-    pill.appendChild(document.createTextNode(pillText));
-    pill.appendChild(chevronEl);
-    
+    pill.textContent = parts.join(' · ');
     pill.classList.add('visible');
-    
-    // Update toolbox contents
-    updateToolbox();
   }
-  
-  function updateToolbox() {
-    // Update search items
-    toolboxSearchItems.innerHTML = '';
-    pillState.searchData.forEach(item => {
-      const itemEl = document.createElement('div');
-      itemEl.className = 'e-item';
-      itemEl.innerHTML = `
-        <div class="e-item-label">${item.field}: <span class="e-item-value">${item.value}</span>
-          <button class="e-item-remove" title="Remove" data-row-id="${item.rowId}">
-            <svg viewBox="0 0 9 9"><line x1="1" y1="1" x2="8" y2="8"/><line x1="8" y1="1" x2="1" y2="8"/></svg>
-          </button>
-        </div>
-      `;
-      toolboxSearchItems.appendChild(itemEl);
-      
-      // Add click handler to remove button
-      itemEl.querySelector('.e-item-remove').addEventListener('click', () => {
-        const row = document.querySelector(`[data-id="${item.rowId}"]`);
-        if (row) {
-          row.querySelector('.remove-btn')?.click();
-          // Trigger input event after row removal to update table
-          setTimeout(() => {
-            builderRowsEl.dispatchEvent(new Event('input', { bubbles: true }));
-          }, 0);
-        }
-      });
-    });
-    
-    // Show/hide search section
-    toolboxSearch.style.display = pillState.searchData.length > 0 ? '' : 'none';
-    
-    // Update filter items
-    toolboxFilterItems.innerHTML = '';
-    pillState.filterData.forEach(item => {
-      const pillEl = document.createElement('div');
-      pillEl.className = 'e-filter-pill';
-      pillEl.innerHTML = `
-        ${item.label}
-        <span class="e-filter-pill-x" data-filter-key="${item.key}">
-          <svg viewBox="0 0 8 8"><line x1="1" y1="1" x2="7" y2="7"/><line x1="7" y1="1" x2="1" y2="7"/></svg>
-        </span>
-      `;
-      toolboxFilterItems.appendChild(pillEl);
-      
-      // Add click handler to remove filter
-      pillEl.querySelector('.e-filter-pill-x').addEventListener('click', () => {
-        if (item.clearFn) item.clearFn();
-      });
-    });
-    
-    // Show/hide filters section
-    toolboxFiltersSection.style.display = pillState.filterData.length > 0 ? '' : 'none';
-  }
-  
-  function toggleToolbox() {
-    const isOpen = searchToolbox.classList.toggle('visible');
-    pillChevron.classList.toggle('open', isOpen);
-  }
-  
-  // Chevron toggle
-  pillChevron.addEventListener('click', toggleToolbox);
-  
-  // Clear all button
-  toolboxClearBtn.addEventListener('click', () => {
-    // Clear all search fields
-    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const inp = row.querySelector('.builder-input, .p2b-text');
-      if (inp) inp.value = '';
-      row.querySelector('.remove-btn')?.click();
-    });
-    
-    // Clear all filters
-    const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
-    if (clearFiltersBtn) clearFiltersBtn.click();
-    
-    // Close toolbox
-    searchToolbox.classList.remove('visible');
-    pillChevron.classList.remove('open');
-    
-    builderRowsEl.dispatchEvent(new Event('input'));
-  });
 
   const builderRowsEl = document.getElementById('builderRows1');
 
   builderRowsEl.addEventListener('input', () => {
     let count = 0;
-    const searchData = [];
-    
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
       const inp = row.querySelector('.builder-input, .p2b-text');
-      const fieldSelect = row.querySelector('.field-select');
-      if (inp && inp.value.trim()) {
-        count++;
-        searchData.push({
-          field: fieldSelect ? fieldSelect.options[fieldSelect.selectedIndex].text : 'Search',
-          value: inp.value.trim(),
-          rowId: row.dataset.id
-        });
-      }
+      if (inp && inp.value.trim()) count++;
     });
-    
     pillState.fields = count;
-    pillState.searchData = searchData;
     updatePill();
   });
 
@@ -1194,36 +947,19 @@ window.addEventListener('load', function () {
     if (options.filterCount) {
       clearFiltersBtn = document.getElementById(`clearFiltersBtn${n}`);
       const activeFilters = new Set();
-      const filterDetails = new Map(); // Store filter details for toolbox
-      
-      onFilterChange = (key, isActive, label, clearFn) => {
-        if (isActive) {
-          activeFilters.add(key);
-          if (label) filterDetails.set(key, { label, clearFn });
-        } else {
-          activeFilters.delete(key);
-          filterDetails.delete(key);
-        }
+      onFilterChange = (key, isActive) => {
+        if (isActive) activeFilters.add(key);
+        else activeFilters.delete(key);
         const count = activeFilters.size;
         clearFiltersBtn.style.display = count > 0 ? '' : 'none';
-        pillState.filters = count;
-        pillState.filterData = Array.from(filterDetails.values()).map((v, i) => ({
-          key: Array.from(filterDetails.keys())[i],
-          label: v.label,
-          clearFn: v.clearFn
-        }));
-        updatePill();
+        pillState.filters = count; updatePill();
       };
     }
 
     const { setVal, resetSearch: rs } = setupSplitAccordion(n,
       val => {
         physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
-        if (onFilterChange) {
-          const isActive = val !== 'Both';
-          const label = isActive ? (val === 'Print' ? 'Print' : 'Manuscript') : null;
-          onFilterChange('phys', isActive, label, () => setVal('Both'));
-        }
+        if (onFilterChange) onFilterChange('phys', val !== 'Both');
       },
       {
         'Person': (rowId) => createModeDropdownWidget(rowId, PERSONS),
@@ -1233,10 +969,10 @@ window.addEventListener('load', function () {
     );
     resetSearch = rs;
     physRows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
-    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? (isActive, dateStr) => onFilterChange('date', isActive, isActive ? dateStr : null, () => resetDate()) : null });
-    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v, v ? 'Shelfmark' : null, () => resetShelf()) : null });
-    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v, v ? 'Function' : null, () => resetFn()) : null });
-    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v, v ? 'Fundamenta' : null, () => resetFunda()) : null });
+    const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
+    const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
+    const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
+    const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
 
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener('click', () => {
@@ -1281,7 +1017,7 @@ window.addEventListener('load', function () {
       resetSearch();
       pillState.fields = 0; updatePill();
       updateClearBtn();
-      if (table) { table.rows().invalidate('data'); table.draw(); }
+      if (table) table.draw();
     });
   })();
 
@@ -1294,14 +1030,7 @@ window.addEventListener('load', function () {
       const field = (row.querySelector('.field-select') || {}).value || 'All fields';
       const inp   = row.querySelector('.builder-input, .p2b-text');
       const value = inp ? inp.value.trim() : '';
-      // Capture the mode (free/list) for Person and Place fields
-      let mode = 'free';
-      const tabsEl = row.querySelector('.p2b-tabs');
-      if (tabsEl) {
-        const activeTab = tabsEl.querySelector('.p2b-tab.active');
-        if (activeTab) mode = activeTab.dataset.mode;
-      }
-      if (value) active.push({ field, value: (value || '').toLowerCase(), mode });
+      if (value) active.push({ field, value: (value || '').toLowerCase() });
     });
     return active;
   }
@@ -1317,173 +1046,32 @@ window.addEventListener('load', function () {
     return term;
   }
 
-  function getActiveDescriptionTerm() {
-    let term = '';
-    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp   = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if ((field === 'Description / Comment' || field === 'All fields') && value) term = value;
-    });
-    return term;
-  }
-
-  function getActiveBibliographyTerm() {
-    let term = '';
-    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp   = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if ((field === 'Bibliography' || field === 'All fields') && value) term = value;
-    });
-    return term;
-  }
-
-  function getActiveAllFieldsTerm() {
-    let term = '';
-    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp   = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if (field === 'All fields' && value) term = value;
-    });
-    return term;
-  }
-
-  // Returns active Place searches with their modes
-  function getActivePlaceSearches() {
-    const searches = [];
-    builderRowsEl.querySelectorAll('.builder-row').forEach(rowEl => {
-      const fieldSelect = rowEl.querySelector('.field-select');
-      if (!fieldSelect || (fieldSelect.value !== 'Place' && fieldSelect.value !== 'All fields')) return;
-      const inp = rowEl.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if (!value) return;
-      
-      // Get mode
-      let mode = 'free';
-      const tabsEl = rowEl.querySelector('.p2b-tabs');
-      if (tabsEl) {
-        const activeTab = tabsEl.querySelector('.p2b-tab.active');
-        if (activeTab) mode = activeTab.dataset.mode;
-      }
-      searches.push({ value: value.toLowerCase(), mode });
-    });
-    return searches;
-  }
-
-  // Returns a highlight term only when the given column type is actually being searched.
-  // Columns not covered by any active search field return ''.
-  function getTermForColumn(columnType) {
-    const fieldMap = {
-      'title':      ['Title', 'All fields'],
-      'shortTitle': ['All fields'],
-      'shelfmark':  ['All fields'],
-      'date':       ['All fields'],
-      'author':     ['Person', 'All fields'],
-      'publisher':  ['Person', 'All fields'],
-      'printPlace': ['Place', 'All fields'],
-      'rism':       ['RISM / VD16 / Brown ID', 'All fields'],
-    };
-    const allowed = fieldMap[columnType] || [];
-    let term = '';
-    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp   = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if (value && allowed.includes(field)) term = value;
-    });
-    return term;
-  }
-
-  // Extract all searchable text labels from a combined field (primary object + other array/object)
-  function extractLabels(row, primaryField, otherField) {
-    const labels = [];
-    if (row[primaryField]?.label) labels.push(row[primaryField].label);
-    if (row[otherField]) {
-      toArray(row[otherField]).forEach(item => { if (item?.label) labels.push(item.label); });
-    }
-    return labels;
-  }
-
-  function rowMatches(row, field, value, mode = 'free') {
-    const matchesAny = arr => arr.some(v => stripHtml(v || '').toLowerCase().includes(value));
-    const toArrR = v => !v ? [] : Array.isArray(v) ? v : [v];
-    const nestedLabels = arr => toArrR(arr).map(item => item.label).filter(Boolean);
-    const checkDescItems = arr => toArrR(arr).some(item =>
-      stripHtml(item.description || '').toLowerCase().includes(value) ||
-      stripHtml(item.comment    || '').toLowerCase().includes(value)
-    );
-    const nestedBibText = arr => toArrR(arr).map(item => {
-      const parts = [];
-      if (item.referenceSource?.bookShort) parts.push(stripHtml(item.referenceSource.bookShort));
-      if (item.referencePages) parts.push(stripHtml(item.referencePages));
-      if (item.label) parts.push(stripHtml(item.label));
-      return parts.join(' ');
-    }).filter(Boolean);
-    const checkBibItems = arr => toArrR(arr).some(item =>
-      stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(value) ||
-      stripHtml(item.referencePages || '').toLowerCase().includes(value) ||
-      stripHtml(item.label || '').toLowerCase().includes(value)
-    );
+  function rowMatches(row, field, value) {
     switch (field) {
       case 'All fields':
-        return matchesAny([
-          row.shelfmark?.label, row.title, row.shortTitle, row.alternativeTitle,
+        return [
+          row.shelfmark?.label, row.title, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
-          row.printPlace?.label,
-          ...extractLabels(row, 'rism', 'otherRism'),
-          ...extractLabels(row, 'vd16', 'otherVD16'),
-          row.brown, row.bibliography,
-          ...nestedLabels(row.provenance),
-          ...nestedLabels(row.function),
-          ...nestedLabels(row.codicology),
-          ...nestedBibText(row.referencedBy),
-          ...nestedBibText(row.relatedResource)
-        ]);
+          row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
+          row.description, row.comment, row.bibliography
+        ].some(v => (v || '').toLowerCase().includes(value));
       case 'Title':
-        return stripHtml(row.title || '').toLowerCase().includes(value) ||
-               stripHtml(row.alternativeTitle || '').toLowerCase().includes(value);
+        return (row.title || '').toLowerCase().includes(value) ||
+               (row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        // If mode is 'free' (text in source), search in both author and publisher labels (partial match)
-        // If mode is 'list' (from list), search in both author and publisher normalizedNames (exact match)
-        if (mode === 'free') {
-          return stripHtml(row.author?.label || '').toLowerCase().includes(value) ||
-                 stripHtml(row.publisher?.label || '').toLowerCase().includes(value);
-        } else {
-          return (row.author?.normalizedName || '').toLowerCase() === value ||
-                 (row.publisher?.normalizedName || '').toLowerCase() === value;
-        }
+        return (row.author?.label || '').toLowerCase().includes(value);
       case 'Place':
-        // If mode is 'free' (text in source), search in printPlace.label and provenance.label (partial match)
-        // If mode is 'list' (from list), search in printPlace.normalizedName and provenance.normalizedName (exact match)
-        if (mode === 'free') {
-          if (stripHtml(row.printPlace?.label || '').toLowerCase().includes(value)) return true;
-          // Check provenance array/object
-          const provenances = Array.isArray(row.provenance) ? row.provenance : (row.provenance ? [row.provenance] : []);
-          return provenances.some(prov => stripHtml(prov.label || '').toLowerCase().includes(value));
-        } else {
-          if ((row.printPlace?.normalizedName || '').toLowerCase() === value) return true;
-          // Check provenance array/object
-          const provenances = Array.isArray(row.provenance) ? row.provenance : (row.provenance ? [row.provenance] : []);
-          return provenances.some(prov => (prov.normalizedName || '').toLowerCase() === value);
-        }
+        return (row.printPlace?.label || '').toLowerCase().includes(value);
       case 'RISM / VD16 / Brown ID':
-        return matchesAny([
-          ...extractLabels(row, 'rism', 'otherRism'),
-          ...extractLabels(row, 'vd16', 'otherVD16'),
-          row.brown
-        ]);
+        return (row.rism || '').toLowerCase().includes(value)      ||
+               (row.otherRism || '').toLowerCase().includes(value) ||
+               (row.vd16 || '').toLowerCase().includes(value)      ||
+               (row.otherVD16 || '').toLowerCase().includes(value);
       case 'Description / Comment':
-        return stripHtml(row.description || '').toLowerCase().includes(value) ||
-               stripHtml(row.comment     || '').toLowerCase().includes(value) ||
-               checkDescItems(row.provenance) ||
-               checkDescItems(row.function)   ||
-               checkDescItems(row.codicology);
+        return (row.description || '').toLowerCase().includes(value) ||
+               (row.comment || '').toLowerCase().includes(value);
       case 'Bibliography':
-        return stripHtml(row.bibliography || '').toLowerCase().includes(value) ||
-               checkBibItems(row.referencedBy) ||
-               checkBibItems(row.relatedResource);
+        return (row.bibliography || '').toLowerCase().includes(value);
       default:
         return false;
     }
@@ -1496,115 +1084,13 @@ window.addEventListener('load', function () {
     if (active.length === 0) return true;
     const rowData = table.row(dataIndex).data();
     if (!rowData) return true;
-    return active.every(({ field, value, mode }) => rowMatches(rowData, field, value, mode));
+    return active.every(({ field, value }) => rowMatches(rowData, field, value));
   });
 
   /* ─────────────────────────────────────────────
      Post-draw highlighting
      ───────────────────────────────────────────── */
 
-  // Collapse rows that were expanded due to nested matches but no longer match the current search
-  function collapseNonMatchingRows() {
-    const active = getActiveRows();
-    if (active.length === 0) return;
-
-    const titleTerms = active.filter(r => r.field === 'Title' || r.field === 'All fields');
-    const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
-    const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
-    const bibTerms = active.filter(r => r.field === 'Bibliography' || r.field === 'All fields');
-    const placeSearches = getActivePlaceSearches();
-
-    table.rows({ page: 'current' }).every(function () {
-      if (!this.child.isShown()) return;
-      const rowData = this.data();
-      if (!rowData) return;
-
-      let shouldKeepExpanded = false;
-
-      // Check if row has alternativeTitle match
-      if (titleTerms.length > 0 && rowData.alternativeTitle) {
-        const hasAltMatch = titleTerms.some(({ value }) => 
-          stripHtml(rowData.alternativeTitle || '').toLowerCase().includes(value)
-        );
-        if (hasAltMatch) shouldKeepExpanded = true;
-      }
-
-      // Check if row has brown match
-      if (!shouldKeepExpanded && rismTerms.length > 0 && rowData.brown) {
-        const hasBrownMatch = rismTerms.some(({ value }) => 
-          stripHtml(rowData.brown || '').toLowerCase().includes(value)
-        );
-        if (hasBrownMatch) shouldKeepExpanded = true;
-      }
-
-      // Check if row has description/comment match in nested fields
-      if (!shouldKeepExpanded && descTerms.length > 0) {
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const checkItems = (arr, term) => toArr(arr).some(item =>
-          (stripHtml(item.description || '').toLowerCase().includes(term)) ||
-          (stripHtml(item.comment || '').toLowerCase().includes(term))
-        );
-        const hasDescMatch = descTerms.some(({ value }) =>
-          stripHtml(rowData.description || '').toLowerCase().includes(value) ||
-          stripHtml(rowData.comment || '').toLowerCase().includes(value) ||
-          checkItems(rowData.provenance, value) ||
-          checkItems(rowData.function, value) ||
-          checkItems(rowData.codicology, value)
-        );
-        if (hasDescMatch) shouldKeepExpanded = true;
-      }
-
-      // Check if row has bibliography match
-      if (!shouldKeepExpanded && bibTerms.length > 0) {
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const checkBibItems = (arr, term) => toArr(arr).some(item =>
-          stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(term) ||
-          stripHtml(item.referencePages || '').toLowerCase().includes(term) ||
-          stripHtml(item.label || '').toLowerCase().includes(term)
-        );
-        const hasBibMatch = bibTerms.some(({ value }) =>
-          checkBibItems(rowData.referencedBy, value) || checkBibItems(rowData.relatedResource, value)
-        );
-        if (hasBibMatch) shouldKeepExpanded = true;
-      }
-
-      // Check if row has place match in provenance
-      if (!shouldKeepExpanded && placeSearches.length > 0) {
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const hasPlaceMatch = toArr(rowData.provenance).some(item => {
-          for (const search of placeSearches) {
-            if (search.mode === 'list') {
-              if ((item.normalizedName || '').toLowerCase() === search.value) return true;
-            } else {
-              if (stripHtml(item.label || '').toLowerCase().includes(search.value)) return true;
-            }
-          }
-          return false;
-        });
-        if (hasPlaceMatch) shouldKeepExpanded = true;
-      }
-
-      // Check if row has All fields match in nested labels (provenance, function, codicology)
-      if (!shouldKeepExpanded) {
-        const allFieldsTerm = getActiveAllFieldsTerm();
-        if (allFieldsTerm) {
-          const value = allFieldsTerm.toLowerCase();
-          const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-          const hasNestedMatch = 
-            toArr(rowData.provenance).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
-            toArr(rowData.function).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
-            toArr(rowData.codicology).some(item => stripHtml(item.label || '').toLowerCase().includes(value));
-          if (hasNestedMatch) shouldKeepExpanded = true;
-        }
-      }
-
-      // If no match found, collapse the row
-      if (!shouldKeepExpanded) {
-        const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
-      }
-    });
-  }
 
   // Expand child rows whose match is only in alternativeTitle.
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
@@ -1617,7 +1103,7 @@ window.addEventListener('load', function () {
       const rowData = this.data();
       if (!rowData || !rowData.alternativeTitle) return;
       if (this.child.isShown()) return;
-      const hasAltMatch = titleTerms.some(({ value }) => stripHtml(rowData.alternativeTitle || '').toLowerCase().includes(value));
+      const hasAltMatch = titleTerms.some(({ value }) => (rowData.alternativeTitle || '').toLowerCase().includes(value));
       if (hasAltMatch) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
@@ -1625,245 +1111,23 @@ window.addEventListener('load', function () {
     });
   }
 
-  // Expand child rows that have a matching description or comment.
-  function expandDescriptionMatches() {
-    const active = getActiveRows();
-    const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
-    if (descTerms.length === 0) return;
-    table.rows({ page: 'current' }).every(function () {
-      const rowData = this.data();
-      if (!rowData) return;
-      if (this.child.isShown()) return;
-      const hasDescMatch = descTerms.some(({ value }) => {
-        // Check top-level description/comment
-        if (stripHtml(rowData.description || '').toLowerCase().includes(value)) return true;
-        if (stripHtml(rowData.comment || '').toLowerCase().includes(value)) return true;
-        // Check nested items (provenance, function, codicology)
-        const checkItems = (arr) => (arr || []).some(item =>
-          (stripHtml(item.description || '').toLowerCase().includes(value)) ||
-          (stripHtml(item.comment || '').toLowerCase().includes(value))
-        );
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        return checkItems(toArr(rowData.provenance)) ||
-               checkItems(toArr(rowData.function)) ||
-               checkItems(toArr(rowData.codicology));
-      });
-      if (hasDescMatch) {
-        const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
-      }
-    });
-  }
-
-  // Expand child rows that have a matching bibliography or related resource.
-  function expandBibliographyMatches() {
-    const active = getActiveRows();
-    const bibTerms = active.filter(r => r.field === 'Bibliography' || r.field === 'All fields');
-    if (bibTerms.length === 0) return;
-    table.rows({ page: 'current' }).every(function () {
-      const rowData = this.data();
-      if (!rowData) return;
-      if (this.child.isShown()) return;
-      const hasBibMatch = bibTerms.some(({ value }) => {
-        const checkBibItems = arr => {
-          const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-          return toArr(arr).some(item =>
-            stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(value) ||
-            stripHtml(item.referencePages || '').toLowerCase().includes(value) ||
-            stripHtml(item.label || '').toLowerCase().includes(value)
-          );
-        };
-        return checkBibItems(rowData.referencedBy) || checkBibItems(rowData.relatedResource);
-      });
-      if (hasBibMatch) {
-        const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
-      }
-    });
-  }
-
-  // Expand child rows that have a matching place in provenance.
-  function expandPlaceMatches() {
-    const placeSearches = getActivePlaceSearches();
-    if (placeSearches.length === 0) return;
-    table.rows({ page: 'current' }).every(function () {
-      const rowData = this.data();
-      if (!rowData) return;
-      if (this.child.isShown()) return;
-      // Check if provenance items match any place search
-      const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-      const hasPlaceMatch = toArr(rowData.provenance).some(item => {
-        for (const search of placeSearches) {
-          if (search.mode === 'list') {
-            // Exact match on normalizedName
-            if ((item.normalizedName || '').toLowerCase() === search.value) return true;
-          } else {
-            // Partial match on label
-            if (stripHtml(item.label || '').toLowerCase().includes(search.value)) return true;
-          }
-        }
-        return false;
-      });
-      if (hasPlaceMatch) {
-        const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
-      }
-    });
-  }
-
-  // Expand child rows that have All fields matches in provenance, function, or codicology labels.
-  function expandAllFieldsMatches() {
-    const allFieldsTerm = getActiveAllFieldsTerm();
-    if (!allFieldsTerm) return;
-    const value = allFieldsTerm.toLowerCase();
-    table.rows({ page: 'current' }).every(function () {
-      const rowData = this.data();
-      if (!rowData) return;
-      if (this.child.isShown()) return;
-      // Check if provenance, function, or codicology labels match
-      const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-      const hasMatch = 
-        toArr(rowData.provenance).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
-        toArr(rowData.function).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
-        toArr(rowData.codicology).some(item => stripHtml(item.label || '').toLowerCase().includes(value));
-      if (hasMatch) {
-        const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
-      }
-    });
-  }
-
-  // Expand child rows whose match is only in brown (Further Identifiers subtable).
-  function expandBrownMatches() {
-    const active = getActiveRows();
-    const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
-    if (rismTerms.length === 0) return;
-    table.rows({ page: 'current' }).every(function () {
-      const rowData = this.data();
-      if (!rowData || !rowData.brown) return;
-      if (this.child.isShown()) return;
-      const hasBrownMatch = rismTerms.some(({ value }) => stripHtml(rowData.brown || '').toLowerCase().includes(value));
-      if (hasBrownMatch) {
-        const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
-      }
-    });
-  }
-
   function refreshOpenAltTitleHighlights() {
-    const active = getActiveRows();
-    const rismTerms = active.filter(r => r.field === 'RISM / VD16 / Brown ID' || r.field === 'All fields');
-    const descTerms = active.filter(r => r.field === 'Description / Comment' || r.field === 'All fields');
-    const bibTerms = active.filter(r => r.field === 'Bibliography' || r.field === 'All fields');
     table.rows({ page: 'current' }).every(function () {
       if (!this.child.isShown()) return;
       // Fully re-render the child row content with the current search term,
       // so all highlights (not just the alt-title cell) are generated fresh.
       this.child(formatDetails(this.data())).show();
-      // If this row has a brown match, expand the Further Identifiers subgroup.
-      const rowData = this.data();
-      if (rismTerms.length > 0 && rowData.brown) {
-        const hasBrownMatch = rismTerms.some(({ value }) => stripHtml(rowData.brown || '').toLowerCase().includes(value));
-        if (hasBrownMatch) {
-          const $child = this.child();
-          if ($child && $child.length) {
-            $child.find('.subgroup-content[data-subgroup="identifiers"]').show();
-          }
-        }
-      }
-      // If this row has a description/comment match, expand the Contextual Metadata subgroup.
-      if (descTerms.length > 0) {
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const checkItems = (arr, term) => toArr(arr).some(item =>
-          (stripHtml(item.description || '').toLowerCase().includes(term)) ||
-          (stripHtml(item.comment || '').toLowerCase().includes(term))
-        );
-        const hasDescMatch = descTerms.some(({ value }) =>
-          stripHtml(rowData.description || '').toLowerCase().includes(value) ||
-          stripHtml(rowData.comment || '').toLowerCase().includes(value) ||
-          checkItems(rowData.provenance, value) ||
-          checkItems(rowData.function, value) ||
-          checkItems(rowData.codicology, value)
-        );
-        if (hasDescMatch) {
-          const $child = this.child();
-          if ($child && $child.length) {
-            $child.find('.subgroup-content[data-subgroup="contextual"]').show();
-          }
-        }
-      }
-      // If this row has a place match in provenance, expand the Contextual Metadata subgroup.
-      const placeSearches = getActivePlaceSearches();
-      if (placeSearches.length > 0) {
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const checkPlaceItems = (arr, searches) => toArr(arr).some(item => {
-          for (const search of searches) {
-            if (search.mode === 'list') {
-              // Exact match on normalizedName
-              if ((item.normalizedName || '').toLowerCase() === search.value) return true;
-            } else {
-              // Partial match on label
-              if (stripHtml(item.label || '').toLowerCase().includes(search.value)) return true;
-            }
-          }
-          return false;
-        });
-        const hasPlaceMatch = checkPlaceItems(rowData.provenance, placeSearches);
-        if (hasPlaceMatch) {
-          const $child = this.child();
-          if ($child && $child.length) {
-            $child.find('.subgroup-content[data-subgroup="contextual"]').show();
-          }
-        }
-      }
-      // If this row has All fields match in provenance/function/codicology labels, expand Contextual Metadata.
-      const allFieldsTerm = getActiveAllFieldsTerm();
-      if (allFieldsTerm) {
-        const value = allFieldsTerm.toLowerCase();
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const hasNestedMatch = 
-          toArr(rowData.provenance).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
-          toArr(rowData.function).some(item => stripHtml(item.label || '').toLowerCase().includes(value)) ||
-          toArr(rowData.codicology).some(item => stripHtml(item.label || '').toLowerCase().includes(value));
-        if (hasNestedMatch) {
-          const $child = this.child();
-          if ($child && $child.length) {
-            $child.find('.subgroup-content[data-subgroup="contextual"]').show();
-          }
-        }
-      }
-      // If this row has a bibliography/related resource match, expand the Bibliography subgroup.
-      if (bibTerms.length > 0) {
-        const toArr = v => !v ? [] : Array.isArray(v) ? v : [v];
-        const checkBibItems = (arr, term) => toArr(arr).some(item =>
-          stripHtml(item.referenceSource?.bookShort || '').toLowerCase().includes(term) ||
-          stripHtml(item.referencePages || '').toLowerCase().includes(term) ||
-          stripHtml(item.label || '').toLowerCase().includes(term)
-        );
-        const hasBibMatch = bibTerms.some(({ value }) =>
-          checkBibItems(rowData.referencedBy, value) ||
-          checkBibItems(rowData.relatedResource, value)
-        );
-        if (hasBibMatch) {
-          const $child = this.child();
-          if ($child && $child.length) {
-            $child.find('.subgroup-content[data-subgroup="bibliography"]').show();
-          }
-        }
-      }
     });
   }
 
   // Wire search builder inputs to DataTable draws
   builderRowsEl.addEventListener('input',  () => { 
     if (table) {
-      table.rows().invalidate('data');
       table.draw();
     }
   });
   builderRowsEl.addEventListener('change', () => { 
     if (table) {
-      table.rows().invalidate('data');
       table.draw();
     }
   });
@@ -1871,7 +1135,6 @@ window.addEventListener('load', function () {
     if (e.target.closest('.remove-btn')) {
       setTimeout(() => {
         if (table) {
-          table.rows().invalidate('data');
           table.draw();
         }
       }, 0);
@@ -1885,97 +1148,6 @@ window.addEventListener('load', function () {
     .then(response => response.json())
     .then(json => {
       const data = json['@graph'] || [];
-
-      // Extract unique person normalizedNames from author and publisher fields
-      const personNamesSet = new Set();
-      data.forEach(row => {
-        if (row.author?.normalizedName) personNamesSet.add(row.author.normalizedName);
-        if (row.publisher?.normalizedName) personNamesSet.add(row.publisher.normalizedName);
-      });
-      PERSONS = Array.from(personNamesSet).sort();
-
-      // Extract unique place normalizedNames from printPlace and provenance fields
-      const placeNamesSet = new Set();
-      data.forEach(row => {
-        if (row.printPlace?.normalizedName) placeNamesSet.add(row.printPlace.normalizedName);
-        if (row.provenance) {
-          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
-          provenances.forEach(prov => {
-            if (prov?.normalizedName) placeNamesSet.add(prov.normalizedName);
-          });
-        }
-      });
-      PLACES = Array.from(placeNamesSet).sort();
-
-      // Extract unique function labels
-      const functionLabelsSet = new Set();
-      data.forEach(row => {
-        if (row.function) {
-          const functions = Array.isArray(row.function) ? row.function : [row.function];
-          functions.forEach(func => {
-            if (func?.label) functionLabelsSet.add(func.label);
-          });
-        }
-      });
-      FUNCTIONS_DATA = Array.from(functionLabelsSet).sort();
-      // Add the special '[empty field]' option at the end
-      FUNCTIONS_DATA.push({ label: '[empty field]', cls: 'sm-chip--grey' });
-
-      // Extract and group shelfmark labels by country/siglum
-      const shelfmarksByGroup = new Map();
-      const countryNames = new Map(); // Map country code to country name
-      
-      data.forEach(row => {
-        // Process main shelfmark
-        if (row.shelfmark?.label && row.shelfmark?.holdingInstitution) {
-          const inst = row.shelfmark.holdingInstitution;
-          const groupKey = inst.countryCode || inst.siglum;
-          if (groupKey) {
-            if (!shelfmarksByGroup.has(groupKey)) {
-              shelfmarksByGroup.set(groupKey, new Set());
-            }
-            shelfmarksByGroup.get(groupKey).add(row.shelfmark.label);
-            // Store country name for heading
-            if (inst.country && inst.countryCode) {
-              countryNames.set(inst.countryCode, inst.country);
-            }
-          }
-        }
-        
-        // Process otherShelfmark (can be object or array)
-        if (row.otherShelfmark) {
-          const otherShelfmarks = Array.isArray(row.otherShelfmark) ? row.otherShelfmark : [row.otherShelfmark];
-          otherShelfmarks.forEach(other => {
-            if (other?.label && other?.holdingInstitution) {
-              const inst = other.holdingInstitution;
-              const groupKey = inst.countryCode || inst.siglum;
-              if (groupKey) {
-                if (!shelfmarksByGroup.has(groupKey)) {
-                  shelfmarksByGroup.set(groupKey, new Set());
-                }
-                shelfmarksByGroup.get(groupKey).add(other.label);
-                // Store country name for heading
-                if (inst.country && inst.countryCode) {
-                  countryNames.set(inst.countryCode, inst.country);
-                }
-              }
-            }
-          });
-        }
-      });
-
-      // Convert to array format with headings
-      SHELFMARKS = Array.from(shelfmarksByGroup.entries())
-        .map(([key, labelsSet]) => {
-          const chips = Array.from(labelsSet).sort();
-          let heading = key;
-          // Format heading with country name if available
-          if (countryNames.has(key)) {
-            heading = `${key} — ${countryNames.get(key)}`;
-          }
-          return { heading, chips };
-        })
-        .sort((a, b) => a.heading.localeCompare(b.heading));
 
       table = $('#sourcesTable').DataTable({
         data: data,
@@ -1995,7 +1167,7 @@ window.addEventListener('load', function () {
             defaultContent: '',
             render: function(data, type, row) {
               if (type === 'display') {
-                const highlighted = highlightText(data, getTermForColumn('shelfmark'));
+                const highlighted = highlightText(data, getActiveTitleTerm());
                 if (row.shelfmark && row.shelfmark.url) {
                   return `<a href="${row.shelfmark.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`;
                 }
@@ -2008,13 +1180,13 @@ window.addEventListener('load', function () {
             data: 'title',
             title: 'Title',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, true, getTermForColumn('title'))
+            render: (data, type) => renderWithHighlight(data, type, true)
           },
           {
             data: 'shortTitle',
             title: 'Short title',
             defaultContent: '',
-            render: (data, type) => renderWithHighlight(data, type, false, getTermForColumn('shortTitle'))
+            render: renderWithHighlight
           },
           {
             data: 'date.label',
@@ -2028,7 +1200,7 @@ window.addEventListener('load', function () {
                 }
                 return 0;
               }
-              if (type === 'display') return highlightText(data, getTermForColumn('date'));
+              if (type === 'display') return highlightText(data, getActiveTitleTerm());
               return data || '';
             }
           },
@@ -2036,30 +1208,30 @@ window.addEventListener('load', function () {
             data: 'author.label',
             title: 'Author / Editor',
             defaultContent: '',
-            render: (data, type, row) => renderPersonColumn(data, type, row, 'author')
+            render: (data, type) => renderWithHighlight(data, type, true)
           },
           {
             data: 'publisher.label',
             title: 'Publisher',
             defaultContent: '',
-            render: (data, type, row) => renderPersonColumn(data, type, row, 'publisher')
+            render: (data, type) => renderWithHighlight(data, type, true)
           },
           {
             data: 'printPlace.label',
             title: 'Printing place',
             defaultContent: '',
             width: '120px',
-            render: (data, type, row) => renderPlaceColumn(data, type, row, 'printPlace')
+            render: (data, type) => renderWithHighlight(data, type, true)
           },
           {
             data: 'rism',
             title: 'RISM',
-            render: (data, type, row) => renderCombinedField(row, 'rism', 'otherRism', type, getTermForColumn('rism'))
+            render: (data, type, row) => renderCombinedField(row, 'rism', 'otherRism', type)
           },
           {
             data: 'vd16',
             title: 'VD16',
-            render: (data, type, row) => renderCombinedField(row, 'vd16', 'otherVD16', type, getTermForColumn('rism'))
+            render: (data, type, row) => renderCombinedField(row, 'vd16', 'otherVD16', type)
           }
         ],
         paging: true,
@@ -2090,12 +1262,6 @@ window.addEventListener('load', function () {
           $('#sourcesTable').css('opacity', '1');
           feather.replace();
         }
-      });
-
-      // Now that data is loaded, render the chip grids with dynamic data
-      [1].forEach(n => {
-        renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
-        renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
       });
 
       /* ── Child row helpers ── */
@@ -2206,17 +1372,10 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Collapse non-matching rows first, then expand matching rows and refresh highlights
+        // Expand alt-title matches first, then refresh highlights
         setTimeout(function() {
-          collapseNonMatchingRows();
           expandAltTitleMatches();
-          expandBrownMatches();
-          expandDescriptionMatches();
-          expandBibliographyMatches();
-          expandPlaceMatches();
-          expandAllFieldsMatches();
           refreshOpenAltTitleHighlights();
-          feather.replace();
         }, 0);
 
         const wasExpandAllActive = isExpandAllActive;
