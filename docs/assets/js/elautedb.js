@@ -1330,47 +1330,68 @@ window.addEventListener('load', function () {
     table.rows({ page: 'current' }).every(function () {
       const rowData = this.data();
       if (!rowData) return;
-      if (this.child.isShown()) return;
       
       // Check if any search term matches fields only visible in detail view
       const hasDetailMatch = active.some(({ field, value, mode }) => {
         // Skip Person field - person data is only in main table
         if (field === 'Person') return false;
         
-        // For "Place" field, check provenance (shown in detail contextual section)
+        // For "Place" field, expand if there's a match in provenance (detail section)
         if (field === 'Place' && rowData.provenance) {
-          const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
-          // In list mode, check normalizedName; in free mode, check label
           const fieldToCheck = mode === 'list' ? 'normalizedName' : 'label';
+          const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
           if (provenances.some(prov => (prov?.[fieldToCheck] || '').toLowerCase().includes(value))) return true;
         }
         
-        // For "All fields" or "Title", check alternativeTitle
-        if ((field === 'Title' || field === 'All fields') && rowData.alternativeTitle) {
+        // For "Title" field, expand if there's a match in alternativeTitle (detail section)
+        if (field === 'Title' && rowData.alternativeTitle) {
           if ((rowData.alternativeTitle || '').toLowerCase().includes(value)) return true;
         }
         
-        // For "All fields" or "Description / Comment", check these fields
-        if ((field === 'Description / Comment' || field === 'All fields')) {
+        // For "All fields", check all detail sections
+        if (field === 'All fields') {
+          // Check alternativeTitle
+          if (rowData.alternativeTitle && (rowData.alternativeTitle || '').toLowerCase().includes(value)) return true;
+          
+          // Check description/comment
+          if ((rowData.description || '').toLowerCase().includes(value)) return true;
+          if ((rowData.comment || '').toLowerCase().includes(value)) return true;
+          
+          // Check bibliography
+          if (rowData.bibliography && (rowData.bibliography || '').toLowerCase().includes(value)) return true;
+          
+          // Check provenance
+          if (rowData.provenance) {
+            const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
+            if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) return true;
+          }
+        }
+        
+        // For "Description / Comment", expand if there's a match (always in detail)
+        if (field === 'Description / Comment') {
           if ((rowData.description || '').toLowerCase().includes(value)) return true;
           if ((rowData.comment || '').toLowerCase().includes(value)) return true;
         }
         
-        // For "All fields" or "Bibliography", check bibliography
-        if ((field === 'Bibliography' || field === 'All fields') && rowData.bibliography) {
+        // For "Bibliography", expand if there's a match (always in detail)
+        if (field === 'Bibliography' && rowData.bibliography) {
           if ((rowData.bibliography || '').toLowerCase().includes(value)) return true;
-        }
-        
-        // For "All fields", check provenance (shown in detail contextual section)
-        if (field === 'All fields' && rowData.provenance) {
-          const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
-          if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) return true;
         }
         
         return false;
       });
       
-      if (hasDetailMatch) {
+      const isShown = this.child.isShown();
+      
+      // Dynamically expand/collapse rows based on whether detail sections contain matches
+      // This applies to all fields: Title, Place, Description/Comment, Bibliography, All fields
+      // Expand if has detail match and not already shown
+      if (hasDetailMatch && !isShown) {
+        const chevron = this.node().cells[0];
+        if (chevron) chevron.click();
+      }
+      // Collapse if no detail match but currently shown (search term changed and no longer matches detail)
+      else if (!hasDetailMatch && isShown) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
       }
