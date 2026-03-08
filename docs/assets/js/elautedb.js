@@ -777,7 +777,7 @@ window.addEventListener('load', function () {
           pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
           pill.textContent = chip.textContent;
           const x = document.createElement('span'); x.className = 'pill-chip-x'; x.textContent = '×';
-          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); redrawTable(); });
+          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); updatePill(); redrawTable(); });
           pill.appendChild(x); pillRow.appendChild(pill);
         });
       } else {
