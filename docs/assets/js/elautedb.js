@@ -1169,17 +1169,17 @@ window.addEventListener('load', function () {
         return (row.title || '').toLowerCase().includes(value) ||
                (row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        return (row.author?.label || '').toLowerCase().includes(value) ||
-               (row.publisher?.label || '').toLowerCase().includes(value);
+        return (row.author?.normalizedName || '').toLowerCase().includes(value) ||
+               (row.publisher?.normalizedName || '').toLowerCase().includes(value);
       case 'Place': {
         // Check printPlace
-        if ((row.printPlace?.label || '').toLowerCase().includes(value)) {
+        if ((row.printPlace?.normalizedName || '').toLowerCase().includes(value)) {
           return true;
         }
         // Check provenance (can be array or single object)
         if (row.provenance) {
           const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
-          return provenances.some(prov => (prov?.label || '').toLowerCase().includes(value));
+          return provenances.some(prov => (prov?.normalizedName || '').toLowerCase().includes(value));
         }
         return false;
       }
