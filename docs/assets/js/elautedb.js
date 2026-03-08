@@ -17,11 +17,8 @@ window.addEventListener('load', function () {
   // Dynamic shelfmarks list - populated from data
   let DYNAMIC_SHELFMARKS = [];
 
-  const FUNCTIONS_DATA = [
-    'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
-    "primer, teacher's book", 'song book / Liederbuch', 'student handbook', 'tablature book',
-    { label: '[empty field]', cls: 'sm-chip--grey' }
-  ];
+  // Dynamic functions list - populated from data
+  let FUNCTIONS_DATA = [];
 
   const PHYS_RADIO_VALUES  = ['Both', 'Print', 'Manuscript'];
   const FUNDA_RADIO_VALUES = ['Both', 'Yes', 'No'];
@@ -428,8 +425,7 @@ window.addEventListener('load', function () {
 
   [1].forEach(n => {
     document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
-    // Shelfmarks will be rendered after data is loaded
-    renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
+    // Shelfmarks and Functions will be rendered after data is loaded
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
   });
@@ -1818,6 +1814,22 @@ window.addEventListener('load', function () {
       });
       DYNAMIC_PLACES = Array.from(placesSet).sort((a, b) => a.localeCompare(b));
 
+      // Generate dynamic functions list from data
+      const functionsSet = new Set();
+      data.forEach(row => {
+        if (row.function) {
+          const functions = Array.isArray(row.function) ? row.function : [row.function];
+          functions.forEach(func => {
+            if (func && func.label) {
+              functionsSet.add(func.label);
+            }
+          });
+        }
+      });
+      FUNCTIONS_DATA = Array.from(functionsSet).sort((a, b) => a.localeCompare(b));
+      // Add [empty field] chip at the end
+      FUNCTIONS_DATA.push({ label: '[empty field]', cls: 'sm-chip--grey' });
+
       // Generate dynamic shelfmarks list from data
       // Helper function to process a single shelfmark
       const processShelfmark = (shelf, shelfmarksMap) => {
@@ -1872,10 +1884,11 @@ window.addEventListener('load', function () {
           return a.heading.localeCompare(b.heading);
         });
       
-      // Render shelfmarks after generation
+      // Render shelfmarks and functions after generation
       renderChipGrid(document.getElementById('shelfList1'), DYNAMIC_SHELFMARKS);
+      renderChipGrid(document.getElementById('fnList1'), FUNCTIONS_DATA);
 
-      // Initialize search interface now that we have the persons, places, and shelfmarks lists
+      // Initialize search interface now that we have the persons, places, shelfmarks, and functions lists
       initializeSearchInterface();
 
       table = $('#sourcesTable').DataTable({
