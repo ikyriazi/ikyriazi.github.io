@@ -730,6 +730,7 @@ window.addEventListener('load', function () {
 
     physTagX.addEventListener('click', () => { 
       setVal('Both'); 
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
       if (table) table.draw(); 
     });
     return { setVal, resetSearch };
@@ -768,11 +769,13 @@ window.addEventListener('load', function () {
     minInput.addEventListener('input', () => { 
       if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; 
       update(); 
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
       if (table) table.draw();
     });
     maxInput.addEventListener('input', () => { 
       if (parseInt(maxInput.value) < parseInt(minInput.value)) maxInput.value = minInput.value; 
       update(); 
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
       if (table) table.draw();
     });
     minLabel.addEventListener('focus', () => minLabel.select());
@@ -787,11 +790,11 @@ window.addEventListener('load', function () {
       update();
     }
 
-    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); if (table) table.draw(); });
-    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); if (table) table.draw(); });
-    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); if (table) table.draw(); });
-    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); if (table) table.draw(); });
-    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); if (table) table.draw(); });
+    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
+    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
+    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
+    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
+    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
     update();
     return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
   }
@@ -830,7 +833,7 @@ window.addEventListener('load', function () {
           pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
           pill.textContent = chip.textContent;
           const x = document.createElement('span'); x.className = 'pill-chip-x'; x.textContent = '×';
-          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); if (table) table.draw(); });
+          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
           pill.appendChild(x); pillRow.appendChild(pill);
         });
       } else {
@@ -839,7 +842,14 @@ window.addEventListener('load', function () {
       }
     }
 
-    list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); if (table) table.draw(); });
+    list.addEventListener('click', e => { 
+      const chip = e.target.closest('.sm-chip'); 
+      if (!chip) return; 
+      chip.classList.toggle('selected'); 
+      updateTag(); 
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
+      if (table) table.draw(); 
+    });
     
     const resetChips = () => { 
       list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); 
@@ -849,6 +859,7 @@ window.addEventListener('load', function () {
     if (!showValues) {
       tagX.addEventListener('click', () => { 
         resetChips(); 
+        if (typeof isManualToggle !== 'undefined') isManualToggle = true;
         if (table) table.draw(); 
       });
     }
@@ -891,10 +902,12 @@ window.addEventListener('load', function () {
 
     rows.forEach(r => r.addEventListener('click', () => { 
       setVal(r.dataset.val); 
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
       if (table) table.draw(); 
     }));
     tagX.addEventListener('click', () => { 
       setVal('Both'); 
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
       if (table) table.draw(); 
     });
     return () => setVal('Both');
@@ -1042,6 +1055,10 @@ window.addEventListener('load', function () {
     });
     pillState.fields = count;
     updatePill();
+    
+    // Reset expand-all state when search changes to prevent unwanted auto-expansion
+    if (typeof isManualToggle !== 'undefined') isManualToggle = true;
+    
     if (table) table.draw();
   });
 
@@ -1087,6 +1104,7 @@ window.addEventListener('load', function () {
       resetSearch = rs;
       physRows.forEach(r => r.addEventListener('click', () => { 
         setVal(r.dataset.val); 
+        if (typeof isManualToggle !== 'undefined') isManualToggle = true;
         if (table) table.draw(); 
       }));
       const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
@@ -1101,6 +1119,7 @@ window.addEventListener('load', function () {
           document.getElementById(`filterPanel${n}`)
             .querySelectorAll('.phys-accordion.expanded')
             .forEach(a => a.classList.remove('expanded'));
+          if (typeof isManualToggle !== 'undefined') isManualToggle = true;
           if (table) table.draw();
         });
       }
@@ -1182,6 +1201,7 @@ window.addEventListener('load', function () {
       resetSearch();
       pillState.fields = 0; updatePill();
       updateClearBtn();
+      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
       if (table) table.draw();
     });
   })();
@@ -1341,19 +1361,46 @@ window.addEventListener('load', function () {
      ───────────────────────────────────────────── */
 
 
-  // Expand child rows whose match is only in alternativeTitle.
+  // Expand child rows whose match is only in detail fields (not shown in main table).
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
   // a real browser event that bubbles and reliably triggers the delegated click handler.
   function expandAltTitleMatches() {
     const active = getActiveRows();
-    const titleTerms = active.filter(r => r.field === 'Title' || r.field === 'All fields');
-    if (titleTerms.length === 0) return;
+    if (active.length === 0) return;
+    
     table.rows({ page: 'current' }).every(function () {
       const rowData = this.data();
-      if (!rowData || !rowData.alternativeTitle) return;
+      if (!rowData) return;
       if (this.child.isShown()) return;
-      const hasAltMatch = titleTerms.some(({ value }) => (rowData.alternativeTitle || '').toLowerCase().includes(value));
-      if (hasAltMatch) {
+      
+      // Check if any search term matches fields only visible in detail view
+      const hasDetailMatch = active.some(({ field, value }) => {
+        // For "All fields" or "Title", check alternativeTitle
+        if ((field === 'Title' || field === 'All fields') && rowData.alternativeTitle) {
+          if ((rowData.alternativeTitle || '').toLowerCase().includes(value)) return true;
+        }
+        
+        // For "All fields" or "Description / Comment", check these fields
+        if ((field === 'Description / Comment' || field === 'All fields')) {
+          if ((rowData.description || '').toLowerCase().includes(value)) return true;
+          if ((rowData.comment || '').toLowerCase().includes(value)) return true;
+        }
+        
+        // For "All fields" or "Bibliography", check bibliography
+        if ((field === 'Bibliography' || field === 'All fields') && rowData.bibliography) {
+          if ((rowData.bibliography || '').toLowerCase().includes(value)) return true;
+        }
+        
+        // For "All fields", check provenance (shown in detail contextual section)
+        if (field === 'All fields' && rowData.provenance) {
+          const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
+          if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) return true;
+        }
+        
+        return false;
+      });
+      
+      if (hasDetailMatch) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
       }
@@ -1368,27 +1415,6 @@ window.addEventListener('load', function () {
       this.child(formatDetails(this.data())).show();
     });
   }
-
-  // Wire search builder inputs to DataTable draws
-  builderRowsEl.addEventListener('input',  () => { 
-    if (table) {
-      table.draw();
-    }
-  });
-  builderRowsEl.addEventListener('change', () => { 
-    if (table) {
-      table.draw();
-    }
-  });
-  builderRowsEl.addEventListener('click',  e => {
-    if (e.target.closest('.remove-btn')) {
-      setTimeout(() => {
-        if (table) {
-          table.draw();
-        }
-      }, 0);
-    }
-  });
 
   /* ─────────────────────────────────────────────
      DataTable initialization
@@ -1710,19 +1736,50 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
-        // Expand alt-title matches first, then refresh highlights
+        // Check if there are any active search terms
+        const hasActiveSearch = getActiveRows().length > 0;
+        
+        // If search was cleared, collapse all rows
+        if (!hasActiveSearch && isManualToggle) {
+          table.rows({ page: 'current' }).every(function() {
+            if (this.child.isShown()) {
+              const tr = $(this.node());
+              this.child.hide();
+              tr.removeClass('shown');
+              updateChevron(tr.find('td.dt-control .chev'), false);
+            }
+          });
+        }
+        
+        // Expand detail-match rows first, then refresh highlights
         setTimeout(function() {
-          expandAltTitleMatches();
+          if (hasActiveSearch) {
+            expandAltTitleMatches();
+          }
           refreshOpenAltTitleHighlights();
         }, 0);
 
         const wasExpandAllActive = isExpandAllActive;
         updateExpandCollapseButton();
 
-        if (wasExpandAllActive && !isManualToggle) {
+        // Only maintain expand-all state if there are active searches AND user didn't just make a manual change
+        // Check both at the time of scheduling AND at the time of execution
+        if (wasExpandAllActive && hasActiveSearch) {
           setTimeout(function() {
-            requestAnimationFrame(function() { expandAllCurrentPageRows(); });
+            // Re-check the flag at execution time in case multiple draws were queued
+            if (!isManualToggle) {
+              requestAnimationFrame(function() { 
+                expandAllCurrentPageRows();
+              });
+            }
+            // Reset the flag after the decision is made
+            if (typeof isManualToggle !== 'undefined') isManualToggle = false;
           }, 100);
+        } else {
+          // Reset the manual toggle flag with a small delay to handle rapid successive draws
+          setTimeout(function() {
+            if (typeof isManualToggle !== 'undefined') isManualToggle = false;
+          }, 150);
         }
 
         setTimeout(updateToggleDescCommentsBtn, 100);
