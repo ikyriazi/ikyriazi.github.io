@@ -2119,6 +2119,13 @@ window.addEventListener('load', function () {
       table.on('draw', function() {
         feather.replace();
 
+        // Synchronize chevron state with actual child row state for all visible rows
+        table.rows({ page: 'current' }).every(function() {
+          const tr = $(this.node());
+          const isChildShown = this.child.isShown();
+          updateChevron(tr.find('td.dt-control .chev'), isChildShown);
+        });
+
         // Check if there are any active search terms
         const hasActiveSearch = getActiveRows().length > 0;
         
