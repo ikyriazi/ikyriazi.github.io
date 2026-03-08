@@ -1183,50 +1183,29 @@ window.addEventListener('load', function () {
           return true;
         }
         // Check provenance (can be array)
-        if (row.provenance) {
-          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
-          if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) {
-            return true;
-          }
+        if (provenanceMatches(row.provenance, value)) {
+          return true;
         }
         return false;
       }
       case 'Title':
         return (row.title || '').toLowerCase().includes(value) ||
                (row.alternativeTitle || '').toLowerCase().includes(value);
-      case 'Person':
+      case 'Person': {
         // List mode: search in normalizedName, Free-text mode: search in label
-        if (mode === 'list') {
-          return (row.author?.normalizedName || '').toLowerCase().includes(value) ||
-                 (row.publisher?.normalizedName || '').toLowerCase().includes(value);
-        } else {
-          return (row.author?.label || '').toLowerCase().includes(value) ||
-                 (row.publisher?.label || '').toLowerCase().includes(value);
-        }
+        const fieldToCheck = mode === 'list' ? 'normalizedName' : 'label';
+        return (row.author?.[fieldToCheck] || '').toLowerCase().includes(value) ||
+               (row.publisher?.[fieldToCheck] || '').toLowerCase().includes(value);
+      }
       case 'Place': {
         // List mode: search in normalizedName, Free-text mode: search in label
-        if (mode === 'list') {
-          // Check printPlace
-          if ((row.printPlace?.normalizedName || '').toLowerCase().includes(value)) {
-            return true;
-          }
-          // Check provenance (can be array or single object)
-          if (row.provenance) {
-            const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
-            return provenances.some(prov => (prov?.normalizedName || '').toLowerCase().includes(value));
-          }
-        } else {
-          // Check printPlace
-          if ((row.printPlace?.label || '').toLowerCase().includes(value)) {
-            return true;
-          }
-          // Check provenance (can be array or single object)
-          if (row.provenance) {
-            const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
-            return provenances.some(prov => (prov?.label || '').toLowerCase().includes(value));
-          }
+        const fieldToCheck = mode === 'list' ? 'normalizedName' : 'label';
+        // Check printPlace
+        if ((row.printPlace?.[fieldToCheck] || '').toLowerCase().includes(value)) {
+          return true;
         }
-        return false;
+        // Check provenance (can be array or single object)
+        return provenanceMatches(row.provenance, value, fieldToCheck);
       }
       case 'RISM / VD16 / Brown ID':
         return (row.rism || '').toLowerCase().includes(value)      ||
@@ -1333,6 +1312,13 @@ window.addEventListener('load', function () {
     }
   }
 
+  // Helper function to check if provenance data matches a search value
+  function provenanceMatches(provenance, value, fieldName = 'label') {
+    if (!provenance) return false;
+    const provenances = Array.isArray(provenance) ? provenance : [provenance];
+    return provenances.some(prov => (prov?.[fieldName] || '').toLowerCase().includes(value));
+  }
+
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
   // a real browser event that bubbles and reliably triggers the delegated click handler.
   function expandAltTitleMatches() {
@@ -1354,8 +1340,7 @@ window.addEventListener('load', function () {
         // For "Place" field, check provenance (detail section, contextual subgroup)
         if (field === 'Place' && rowData.provenance) {
           const fieldToCheck = mode === 'list' ? 'normalizedName' : 'label';
-          const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
-          if (provenances.some(prov => (prov?.[fieldToCheck] || '').toLowerCase().includes(value))) {
+          if (provenanceMatches(rowData.provenance, value, fieldToCheck)) {
             hasDetailMatch = true;
             matchedSubgroups.add('contextual');
           }
@@ -1386,12 +1371,9 @@ window.addEventListener('load', function () {
           }
           
           // Check provenance (contextual subgroup)
-          if (rowData.provenance) {
-            const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
-            if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) {
-              hasDetailMatch = true;
-              matchedSubgroups.add('contextual');
-            }
+          if (provenanceMatches(rowData.provenance, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
           }
         }
         
