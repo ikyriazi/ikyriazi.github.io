@@ -1172,32 +1172,38 @@ window.addEventListener('load', function () {
   function rowMatches(row, field, value, mode = 'free') {
     switch (field) {
       case 'All fields': {
-        // Simple fields
-        const simpleFields = [
-          row.shelfmark?.label, row.title, row.shortTitle, row.alternativeTitle,
-          row.date?.label, row.author?.label, row.publisher?.label,
-          row.printPlace?.label, row.rism?.label, row.vd16?.label, row.brown
-        ];
-        if (simpleFields.some(v => (v || '').toLowerCase().includes(value))) {
-          return true;
-        }
-        // Check otherRism and otherVD16 (arrays of objects with .label)
-        if (labelArrayMatches(row.otherRism, value) || labelArrayMatches(row.otherVD16, value)) {
-          return true;
-        }
-        // Check bibliography fields (including referencedBy and relatedResource)
-        if (checkBibliographyFields(row, value)) {
-          return true;
-        }
-        // Check provenance (can be array)
-        if (provenanceMatches(row.provenance, value)) {
-          return true;
-        }
-        // Check function and codicology (arrays of objects with .label)
-        if (labelArrayMatches(row.function, value) || labelArrayMatches(row.codicology, value)) {
-          return true;
-        }
-        return false;
+        // Split search value into individual words for independent matching
+        const words = value.split(/\s+/).filter(w => w.length > 0);
+        
+        // Check if each word appears somewhere in the row's fields
+        return words.every(word => {
+          // Simple fields
+          const simpleFields = [
+            row.shelfmark?.label, row.title, row.shortTitle, row.alternativeTitle,
+            row.date?.label, row.author?.label, row.publisher?.label,
+            row.printPlace?.label, row.rism?.label, row.vd16?.label, row.brown
+          ];
+          if (simpleFields.some(v => (v || '').toLowerCase().includes(word))) {
+            return true;
+          }
+          // Check otherRism and otherVD16 (arrays of objects with .label)
+          if (labelArrayMatches(row.otherRism, word) || labelArrayMatches(row.otherVD16, word)) {
+            return true;
+          }
+          // Check bibliography fields (including referencedBy and relatedResource)
+          if (checkBibliographyFields(row, word)) {
+            return true;
+          }
+          // Check provenance (can be array)
+          if (provenanceMatches(row.provenance, word)) {
+            return true;
+          }
+          // Check function and codicology (arrays of objects with .label)
+          if (labelArrayMatches(row.function, word) || labelArrayMatches(row.codicology, word)) {
+            return true;
+          }
+          return false;
+        });
       }
       case 'Title':
         return (row.title || '').toLowerCase().includes(value) ||
@@ -1498,35 +1504,41 @@ window.addEventListener('load', function () {
           }
         }
         
-        // For "All fields", check all detail sections
+        // For "All fields", check all detail sections (word-by-word matching)
         if (field === 'All fields') {
-          // Check alternativeTitle (no subgroup)
-          if (checkSimpleField(rowData, 'alternativeTitle', value, matchedSubgroups)) {
-            hasDetailMatch = true;
-          }
+          // Split value into individual words
+          const words = value.split(/\s+/).filter(w => w.length > 0);
           
-          // Check bibliography and related resources (bibliography subgroup)
-          if (checkBibliographyFields(rowData, value)) {
-            hasDetailMatch = true;
-            matchedSubgroups.add('bibliography');
-          }
-          
-          // Check provenance (contextual subgroup)
-          if (provenanceMatches(rowData.provenance, value)) {
-            hasDetailMatch = true;
-            matchedSubgroups.add('contextual');
-          }
-          
-          // Check function and codicology labels (contextual subgroup)
-          if (labelArrayMatches(rowData.function, value) || labelArrayMatches(rowData.codicology, value)) {
-            hasDetailMatch = true;
-            matchedSubgroups.add('contextual');
-          }
-          
-          // Check Brown (identifiers subgroup)
-          if (checkSimpleField(rowData, 'brown', value, matchedSubgroups, 'identifiers')) {
-            hasDetailMatch = true;
-          }
+          // Check if any word matches in detail sections
+          words.forEach(word => {
+            // Check alternativeTitle (no subgroup)
+            if (checkSimpleField(rowData, 'alternativeTitle', word, matchedSubgroups)) {
+              hasDetailMatch = true;
+            }
+            
+            // Check bibliography and related resources (bibliography subgroup)
+            if (checkBibliographyFields(rowData, word)) {
+              hasDetailMatch = true;
+              matchedSubgroups.add('bibliography');
+            }
+            
+            // Check provenance (contextual subgroup)
+            if (provenanceMatches(rowData.provenance, word)) {
+              hasDetailMatch = true;
+              matchedSubgroups.add('contextual');
+            }
+            
+            // Check function and codicology labels (contextual subgroup)
+            if (labelArrayMatches(rowData.function, word) || labelArrayMatches(rowData.codicology, word)) {
+              hasDetailMatch = true;
+              matchedSubgroups.add('contextual');
+            }
+            
+            // Check Brown (identifiers subgroup)
+            if (checkSimpleField(rowData, 'brown', word, matchedSubgroups, 'identifiers')) {
+              hasDetailMatch = true;
+            }
+          });
         }
         
         // For "Description / Comment", check nested descriptions/comments in detail sections
