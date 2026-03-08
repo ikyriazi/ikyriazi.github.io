@@ -1176,11 +1176,25 @@ window.addEventListener('load', function () {
         const simpleFields = [
           row.shelfmark?.label, row.title, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
-          row.printPlace?.label, row.rism, row.otherRism, row.vd16, row.otherVD16,
+          row.printPlace?.label, row.rism?.label, row.vd16?.label, row.brown,
           row.description, row.comment, row.bibliography
         ];
         if (simpleFields.some(v => (v || '').toLowerCase().includes(value))) {
           return true;
+        }
+        // Check otherRism (array or single object with .label)
+        if (row.otherRism) {
+          const otherRisms = Array.isArray(row.otherRism) ? row.otherRism : [row.otherRism];
+          if (otherRisms.some(item => (item?.label || '').toLowerCase().includes(value))) {
+            return true;
+          }
+        }
+        // Check otherVD16 (array or single object with .label)
+        if (row.otherVD16) {
+          const otherVD16s = Array.isArray(row.otherVD16) ? row.otherVD16 : [row.otherVD16];
+          if (otherVD16s.some(item => (item?.label || '').toLowerCase().includes(value))) {
+            return true;
+          }
         }
         // Check provenance (can be array)
         if (provenanceMatches(row.provenance, value)) {
@@ -1207,11 +1221,35 @@ window.addEventListener('load', function () {
         // Check provenance (can be array or single object)
         return provenanceMatches(row.provenance, value, fieldToCheck);
       }
-      case 'RISM / VD16 / Brown ID':
-        return (row.rism || '').toLowerCase().includes(value)      ||
-               (row.otherRism || '').toLowerCase().includes(value) ||
-               (row.vd16 || '').toLowerCase().includes(value)      ||
-               (row.otherVD16 || '').toLowerCase().includes(value);
+      case 'RISM / VD16 / Brown ID': {
+        // Check rism.label
+        if ((row.rism?.label || '').toLowerCase().includes(value)) {
+          return true;
+        }
+        // Check otherRism (array or single object with .label)
+        if (row.otherRism) {
+          const otherRisms = Array.isArray(row.otherRism) ? row.otherRism : [row.otherRism];
+          if (otherRisms.some(item => (item?.label || '').toLowerCase().includes(value))) {
+            return true;
+          }
+        }
+        // Check vd16.label
+        if ((row.vd16?.label || '').toLowerCase().includes(value)) {
+          return true;
+        }
+        // Check otherVD16 (array or single object with .label)
+        if (row.otherVD16) {
+          const otherVD16s = Array.isArray(row.otherVD16) ? row.otherVD16 : [row.otherVD16];
+          if (otherVD16s.some(item => (item?.label || '').toLowerCase().includes(value))) {
+            return true;
+          }
+        }
+        // Check brown (plain string)
+        if ((row.brown || '').toLowerCase().includes(value)) {
+          return true;
+        }
+        return false;
+      }
       case 'Description / Comment':
         return (row.description || '').toLowerCase().includes(value) ||
                (row.comment || '').toLowerCase().includes(value);
@@ -1353,6 +1391,14 @@ window.addEventListener('load', function () {
           }
         }
         
+        // For "RISM / VD16 / Brown ID" field, check Brown (detail section, identifiers subgroup)
+        if (field === 'RISM / VD16 / Brown ID' && rowData.brown) {
+          if ((rowData.brown || '').toLowerCase().includes(value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('identifiers');
+          }
+        }
+        
         // For "All fields", check all detail sections
         if (field === 'All fields') {
           // Check alternativeTitle (no subgroup)
@@ -1374,6 +1420,12 @@ window.addEventListener('load', function () {
           if (provenanceMatches(rowData.provenance, value)) {
             hasDetailMatch = true;
             matchedSubgroups.add('contextual');
+          }
+          
+          // Check Brown (identifiers subgroup)
+          if (rowData.brown && (rowData.brown || '').toLowerCase().includes(value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('identifiers');
           }
         }
         
