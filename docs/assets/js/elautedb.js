@@ -1391,6 +1391,18 @@ window.addEventListener('load', function () {
     return Array.from(selected).map(chip => chip.textContent.toLowerCase());
   }
 
+  function getActiveFunctions() {
+    const list = document.getElementById('fnList1');
+    if (!list) return [];
+    const selected = list.querySelectorAll('.sm-chip.selected');
+    return Array.from(selected).map(chip => chip.textContent.toLowerCase());
+  }
+
+  function getActiveFundamenta() {
+    const activeRow = document.querySelector('#fundaRadioList1 .phys-radio-row.active');
+    return activeRow ? activeRow.dataset.val : 'Both';
+  }
+
   $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
     if (settings.nTable.id !== 'sourcesTable') return true;
     if (!table) return true;
@@ -1438,6 +1450,40 @@ window.addEventListener('load', function () {
         rowShelfmarks.some(rowShelf => rowShelf === activeShelf)
       );
       if (!hasMatch) return false;
+    }
+    
+    // Apply functions filter (OR logic - match if any selected function matches)
+    const activeFunctions = getActiveFunctions();
+    if (activeFunctions.length > 0) {
+      const rowFunctions = [];
+      if (rowData.function) {
+        const functions = Array.isArray(rowData.function) ? rowData.function : [rowData.function];
+        functions.forEach(func => {
+          if (func && func.label) rowFunctions.push(func.label.toLowerCase());
+        });
+      }
+      
+      // Check if '[empty field]' is selected
+      const emptyFieldSelected = activeFunctions.includes('[empty field]');
+      const hasEmptyFunction = rowFunctions.length === 0;
+      
+      // If '[empty field]' is selected and row has no functions, match
+      if (emptyFieldSelected && hasEmptyFunction) {
+        return true;
+      }
+      
+      // Otherwise check if any active function matches row functions
+      const hasMatch = activeFunctions.some(activeFunc => 
+        rowFunctions.some(rowFunc => rowFunc === activeFunc)
+      );
+      if (!hasMatch) return false;
+    }
+    
+    // Apply fundamenta filter
+    const fundamenta = getActiveFundamenta();
+    if (fundamenta !== 'Both') {
+      const rowFundamenta = rowData.fundamenta == 1 ? 'Yes' : 'No';
+      if (fundamenta !== rowFundamenta) return false;
     }
     
     return true;
