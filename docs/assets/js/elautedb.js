@@ -76,6 +76,22 @@ window.addEventListener('load', function () {
     if (table) table.draw();
   }
 
+  // Apply search highlighting to an HTML string – wraps matched terms in <mark class="search-highlight">
+  function applyHighlight(html, terms) {
+    if (!terms || terms.length === 0 || !html) return html;
+    // Split on HTML tags so we never modify tag attributes
+    const parts = html.split(/(<[^>]*>)/);
+    return parts.map((part, i) => {
+      if (i % 2 === 1) return part; // inside an HTML tag – leave untouched
+      if (!part) return part;
+      return terms.reduce((text, term) => {
+        if (!term || term.length < 1) return text;
+        const regex = new RegExp('(' + escapeRegex(term) + ')', 'gi');
+        return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+      }, part);
+    }).join('');
+  }
+
   // Escape HTML entities
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -168,40 +184,37 @@ window.addEventListener('load', function () {
      DataTable rendering helpers
      ───────────────────────────────────────────── */
 
-  function generateSimpleRow(labelText, value, skipHighlight = false) {
-    const displayValue = value;
+  function generateSimpleRow(labelText, value, skipHighlight = false, terms = []) {
+    const displayValue = skipHighlight ? value : applyHighlight(value || '', terms);
     return '<tr><td class="details-placeholder"></td><td class="details-label">' + labelText +
       '</td><td class="details-value">' + displayValue + '</td><td class="details-CD" colspan="7"></td></tr>';
   }
 
-  function generateSubtableRows(data, labelText, idPrefix, recordId = '') {
+  function generateSubtableRows(data, labelText, idPrefix, recordId = '', terms = []) {
     let rows = '';
     if (!data) return rows;
     toArray(data).forEach((item, index) => {
       if (!item.label) return;
       const labelCell = getFirstLabel(index, labelText);
       const parts = ['description', 'comment'].filter(type => item[type]);
-      const hasSearchMatch = false;
       const badges = parts.map(type => {
-        const isActive = false;
         const iconName = 'plus-circle';
         return `<span class="cd-badge" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
-      const highlightedLabel = item.label;
+      const highlightedLabel = applyHighlight(item.label, terms);
       const rowClass = '';
       rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
       parts.forEach(type => {
         const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
-        const isActive = false;
         const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : 'none';
-        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${item[type]}</div></div>`;
+        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${applyHighlight(item[type], terms)}</div></div>`;
       });
       rows += '</td></tr>';
     });
     return rows;
   }
 
-  function generateBibliographyRows(items, labelText, typeFilter) {
+  function generateBibliographyRows(items, labelText, typeFilter, terms = []) {
     let rows = '';
     const filtered = items.filter(item => {
       if (!item.referenceSource) return false;
@@ -211,10 +224,10 @@ window.addEventListener('load', function () {
       return item.referenceSource.referencebookType === typeFilter;
     });
     filtered.forEach((item, index) => {
-      let valueText = item.referenceSource.bookShort || '';
+      let valueText = applyHighlight(item.referenceSource.bookShort || '', terms);
       if (item.referencePages)
-        valueText += ': <span class="reference-pages">' + item.referencePages + '</span>';
-      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText);
+        valueText += ': <span class="reference-pages">' + applyHighlight(item.referencePages, terms) + '</span>';
+      rows += generateSimpleRow(getFirstLabel(index, labelText), valueText, false, terms);
     });
     return rows;
   }
@@ -241,19 +254,20 @@ window.addEventListener('load', function () {
     const recordId = row.id ? row.id.split('/').pop() : Math.random().toString(36).substr(2, 9);
     const typeValue = row.physicalType ?
       row.physicalType.charAt(0).toUpperCase() + row.physicalType.slice(1) : '';
+    const terms = getHighlightTerms();
     let rows = '';
 
-    if (row.alternativeTitle) rows += generateSimpleRow('Alternative title:', row.alternativeTitle);
+    if (row.alternativeTitle) rows += generateSimpleRow('Alternative title:', row.alternativeTitle, false, terms);
     rows += generateSimpleRow('Type:', typeValue, true);
     rows += generateSpacerRow(null, true);
 
     if (row.provenance || row.function || row.fundamenta !== undefined || row.codicology) {
       rows += generateSubgroupHeading('Contextual Metadata', 'contextual');
       let contextualRows = '';
-      contextualRows += generateSubtableRows(row.provenance, 'Provenance:', 'prov', recordId);
-      contextualRows += generateSubtableRows(row.function, 'Function:', 'func', recordId);
+      contextualRows += generateSubtableRows(row.provenance, 'Provenance:', 'prov', recordId, terms);
+      contextualRows += generateSubtableRows(row.function, 'Function:', 'func', recordId, terms);
       contextualRows += generateSimpleRow('Fundamenta:', row.fundamenta == 1 ? 'Yes' : 'No', true);
-      contextualRows += generateSubtableRows(row.codicology, 'Codicology:', 'codic', recordId);
+      contextualRows += generateSubtableRows(row.codicology, 'Codicology:', 'codic', recordId, terms);
       rows += wrapInSubgroup(contextualRows, 'contextual', true);
       rows += generateSpacerRow('contextual');
     }
@@ -261,13 +275,14 @@ window.addEventListener('load', function () {
     if (row.brown || row.otherShelfmark) {
       rows += generateSubgroupHeading('Further Identifiers', 'identifiers');
       let identifiersRows = '';
-      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown);
+      if (row.brown) identifiersRows += generateSimpleRow('Brown:', row.brown, false, terms);
       if (row.otherShelfmark) {
         toArray(row.otherShelfmark).forEach((item, index) => {
           if (item && item.label) {
+            const highlighted = applyHighlight(item.label, terms);
             const value = item.url
-              ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.label}</a>`
-              : item.label;
+              ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`
+              : highlighted;
             identifiersRows += generateSimpleRow(getFirstLabel(index, 'Other shelfmarks:'), value);
           }
         });
@@ -281,16 +296,17 @@ window.addEventListener('load', function () {
       let bibliographyRows = '';
       if (row.referencedBy) {
         const refs = toArray(row.referencedBy);
-        bibliographyRows += generateBibliographyRows(refs, 'Editions:', 'Edition');
-        bibliographyRows += generateBibliographyRows(refs, 'Catalogues:', 'Catalogue');
-        bibliographyRows += generateBibliographyRows(refs, 'Other bibliography:', null);
+        bibliographyRows += generateBibliographyRows(refs, 'Editions:', 'Edition', terms);
+        bibliographyRows += generateBibliographyRows(refs, 'Catalogues:', 'Catalogue', terms);
+        bibliographyRows += generateBibliographyRows(refs, 'Other bibliography:', null, terms);
       }
       if (row.relatedResource) {
         toArray(row.relatedResource).forEach((item, index) => {
           if (item && item.label) {
+            const highlighted = applyHighlight(item.label, terms);
             const value = item.url
-              ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.label}</a>`
-              : item.label;
+              ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`
+              : highlighted;
             bibliographyRows += generateSimpleRow(getFirstLabel(index, 'Related resources:'), value);
           }
         });
@@ -1287,6 +1303,21 @@ window.addEventListener('load', function () {
     return active;
   }
 
+  // Collect all terms that should be visually highlighted (free-text rows only, not list-mode)
+  function getHighlightTerms() {
+    const terms = [];
+    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
+      const { field, value, mode } = getBuilderRowData(row);
+      if (!value || mode === 'list') return;
+      if (field === 'All fields') {
+        value.split(/\s+/).filter(w => w.length > 0).forEach(w => terms.push(w));
+      } else {
+        terms.push(value);
+      }
+    });
+    return [...new Set(terms)];
+  }
+
   function getActiveTitleTerm() {
     let term = '';
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
@@ -2166,6 +2197,24 @@ window.addEventListener('load', function () {
         isExpandAllActive = allExpanded;
       }
 
+      /* ── Main-table cell highlighting (post-draw DOM pass) ── */
+      function stripTableHighlights() {
+        $('#sourcesTable tbody tr:not(.child) td:not(.dt-control)').each(function() {
+          if (this.querySelector('mark.search-highlight')) {
+            this.innerHTML = this.innerHTML.replace(/<mark class="search-highlight">([^<]*)<\/mark>/g, '$1');
+          }
+        });
+      }
+
+      function highlightTableCells() {
+        const terms = getHighlightTerms();
+        stripTableHighlights();
+        if (!terms.length) return;
+        $('#sourcesTable tbody tr:not(.child) td:not(.dt-control)').each(function() {
+          this.innerHTML = applyHighlight(this.innerHTML, terms);
+        });
+      }
+
       /* ── Draw handler (combined) ── */
       table.on('draw', function() {
         feather.replace();
@@ -2176,6 +2225,9 @@ window.addEventListener('load', function () {
           const isChildShown = this.child.isShown();
           updateChevron(tr.find('td.dt-control .chev'), isChildShown);
         });
+
+        // Apply / remove highlights on main table cells
+        highlightTableCells();
 
         // Check if there are any active search terms
         const hasActiveSearch = getActiveRows().length > 0;
