@@ -1323,6 +1323,16 @@ window.addEventListener('load', function () {
 
 
   // Expand child rows whose match is only in detail fields (not shown in main table).
+  // Helper function to show specific subgroups in a DataTables child row
+  function showSubgroupsInChildRow(row, subgroups) {
+    const childRow = $(row.child());
+    if (childRow.length) {
+      subgroups.forEach(subgroup => {
+        childRow.find(`.subgroup-content[data-subgroup="${subgroup}"]`).show();
+      });
+    }
+  }
+
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
   // a real browser event that bubbles and reliably triggers the delegated click handler.
   function expandAltTitleMatches() {
@@ -1414,14 +1424,7 @@ window.addEventListener('load', function () {
           // After expanding, show the matched subgroups
           if (matchedSubgroups.size > 0) {
             setTimeout(() => {
-              // Use DataTables API to get child row
-              const childRow = $(row.child());
-              if (childRow.length) {
-                matchedSubgroups.forEach(subgroup => {
-                  const subgroupElements = childRow.find(`.subgroup-content[data-subgroup="${subgroup}"]`);
-                  subgroupElements.show();
-                });
-              }
+              showSubgroupsInChildRow(row, matchedSubgroups);
             }, 150);
           }
         }
@@ -1433,13 +1436,7 @@ window.addEventListener('load', function () {
       }
       // Already shown - ensure matched subgroups are visible
       else if (hasDetailMatch && isShown && matchedSubgroups.size > 0) {
-        const childRow = $(row.child());
-        if (childRow.length) {
-          matchedSubgroups.forEach(subgroup => {
-            const subgroupElements = childRow.find(`.subgroup-content[data-subgroup="${subgroup}"]`);
-            subgroupElements.show();
-          });
-        }
+        showSubgroupsInChildRow(row, matchedSubgroups);
       }
     });
   }
