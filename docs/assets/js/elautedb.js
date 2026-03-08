@@ -874,6 +874,9 @@ window.addEventListener('load', function () {
   }
 
   function updatePill() {
+    // Update toolbox content first to recalculate pillState values
+    updateToolboxContent();
+    
     const f = pillState.fields, fi = pillState.filters;
     if (f === 0 && fi === 0) { 
       pill.classList.remove('visible'); 
@@ -890,17 +893,22 @@ window.addEventListener('load', function () {
     const text = parts.join(' · ');
     pill.innerHTML = text + '<span class="pill-chevron" id="pillChevron"><svg viewBox="0 0 12 8"><polyline points="2 2, 6 6, 10 2"/></svg></span>';
     pill.classList.add('visible');
-    
-    // Update toolbox content
-    updateToolboxContent();
   }
   
-  function createToolboxItem(label, value, onRemove) {
+  function createToolboxItem(label, value, onRemove, showLabel = true) {
     const item = document.createElement('div');
     item.className = 'e-item';
-    item.innerHTML = `
-      <span class="e-item-label">${label}: <span class="e-item-value">${value}</span><button class="e-item-remove" type="button">${SVG_X}</button></span>
-    `;
+    item.style.display = 'inline-flex';
+    item.style.alignItems = 'center';
+    if (showLabel && label) {
+      item.innerHTML = `
+        <span class="e-item-label">${label}: <span class="e-item-value">${value}</span><button class="e-item-remove" type="button">${SVG_X}</button></span>
+      `;
+    } else {
+      item.innerHTML = `
+        <span class="e-item-label"><span class="e-item-value">${value}</span><button class="e-item-remove" type="button">${SVG_X}</button></span>
+      `;
+    }
     const removeBtn = item.querySelector('.e-item-remove');
     removeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -912,21 +920,33 @@ window.addEventListener('load', function () {
   function updateToolboxContent() {
     // Update search items
     toolboxSearchItems.innerHTML = '';
+    toolboxSearchItems.style.display = 'flex';
+    toolboxSearchItems.style.flexWrap = 'wrap';
+    toolboxSearchItems.style.gap = '8px';
     let searchCount = 0;
+    const seenSearchLabels = new Set();
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
       const { field, inp, value } = getBuilderRowData(row);
       if (value) {
         searchCount++;
+        const showLabel = !seenSearchLabels.has(field);
+        seenSearchLabels.add(field);
         const item = createToolboxItem(field, value, () => {
           if (inp) inp.value = '';
           inp.dispatchEvent(new Event('input', { bubbles: true }));
-        });
+        }, showLabel);
         toolboxSearchItems.appendChild(item);
       }
     });
     
+    // Update the pill state with the recalculated search field count
+    pillState.fields = searchCount;
+    
     // Update filter items
     toolboxFilterItems.innerHTML = '';
+    toolboxFilterItems.style.display = 'flex';
+    toolboxFilterItems.style.flexWrap = 'wrap';
+    toolboxFilterItems.style.gap = '8px';
     let filterCount = 0;
     
     // Physical type filter
@@ -934,8 +954,18 @@ window.addEventListener('load', function () {
     if (physType && physType.dataset.val !== 'Both') {
       filterCount++;
       const item = createToolboxItem('Physical type', physType.dataset.val, () => {
+        // Directly update the radio selection without triggering click events
+        const allRows = document.querySelectorAll('#physRadioList1 .phys-radio-row');
+        allRows.forEach(r => r.classList.remove('active'));
         const bothRow = document.querySelector('#physRadioList1 .phys-radio-row[data-val="Both"]');
-        if (bothRow) bothRow.click();
+        if (bothRow) bothRow.classList.add('active');
+        
+        // Update the tag visibility
+        const physTag = document.getElementById('physTag1');
+        if (physTag) physTag.style.visibility = 'hidden';
+        
+        updatePill();
+        redrawTable();
       });
       toolboxFilterItems.appendChild(item);
     }
@@ -945,8 +975,26 @@ window.addEventListener('load', function () {
     if (dateRange.min !== 1450 || dateRange.max !== 1620) {
       filterCount++;
       const item = createToolboxItem('Date', `${dateRange.min}–${dateRange.max}`, () => {
-        const dateTagX = document.getElementById('dateTagX1');
-        if (dateTagX) dateTagX.click();
+        // Directly reset the date range without triggering click events
+        const minInput = document.getElementById('dateMin1');
+        const maxInput = document.getElementById('dateMax1');
+        const dateTag = document.getElementById('dateTag1');
+        const dateFill = document.getElementById('dateFill1');
+        const minLabel = document.getElementById('dateMinLabel1');
+        const maxLabel = document.getElementById('dateMaxLabel1');
+        
+        if (minInput) minInput.value = 1450;
+        if (maxInput) maxInput.value = 1620;
+        if (minLabel) minLabel.value = 1450;
+        if (maxLabel) maxLabel.value = 1620;
+        if (dateTag) dateTag.style.visibility = 'hidden';
+        if (dateFill) {
+          dateFill.style.left = '0%';
+          dateFill.style.width = '100%';
+        }
+        
+        updatePill();
+        redrawTable();
       });
       toolboxFilterItems.appendChild(item);
     }
@@ -958,34 +1006,132 @@ window.addEventListener('load', function () {
       const shelfList = document.getElementById('shelfList1');
       const selectedChips = shelfList ? shelfList.querySelectorAll('.sm-chip.selected') : [];
       
+      let isFirstShelfmark = true;
       selectedChips.forEach(chip => {
         const item = createToolboxItem('Shelfmark', chip.textContent, () => {
-          // Find and click the corresponding pill chip X in the accordion header
-          // This will properly trigger updateTag() and onFilterChange callback
+          // Directly deselect the chip without triggering click events
+          // This prevents the "click outside toolbox" handler from closing the toolbox
+          chip.classList.remove('selected');
+          
+          // Get the updated list of selected chips
+          const shelfList = document.getElementById('shelfList1');
+          const selected = shelfList.querySelectorAll('.sm-chip.selected');
+          const count = selected.length;
+          
+          // Update the pill tags row in the accordion header
           const pillTagsRow = document.querySelector('#shelfAccordion1 .pill-tags-row');
           if (pillTagsRow) {
-            const pillChips = pillTagsRow.querySelectorAll('.pill-chip');
-            for (let pillChip of pillChips) {
-              if (pillChip.textContent.replace('×', '').trim() === chip.textContent.trim()) {
-                const xButton = pillChip.querySelector('.pill-chip-x');
-                if (xButton) {
-                  xButton.click();
-                  return; // Exit early, the pill chip X handler will update everything
-                }
+            pillTagsRow.innerHTML = '';
+            Array.from(selected).forEach((selectedChip, i) => {
+              if (i > 0) {
+                const sep = document.createElement('span');
+                sep.className = 'pill-or';
+                sep.textContent = 'or';
+                pillTagsRow.appendChild(sep);
               }
-            }
+              const pill = document.createElement('span');
+              pill.className = 'pill-chip' + (selectedChip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
+              pill.textContent = selectedChip.textContent;
+              const x = document.createElement('span');
+              x.className = 'pill-chip-x';
+              x.textContent = '×';
+              x.addEventListener('click', () => {
+                selectedChip.classList.remove('selected');
+                updatePill();
+                redrawTable();
+              });
+              pill.appendChild(x);
+              pillTagsRow.appendChild(pill);
+            });
           }
           
-          // Fallback: if we couldn't find the pill chip, click the chip itself to deselect it
-          // This will trigger updateTag() and table.draw() via the list click handler
-          chip.click();
-        });
+          updatePill();
+          redrawTable();
+        }, isFirstShelfmark);
+        isFirstShelfmark = false;
         toolboxFilterItems.appendChild(item);
       });
     }
     
+    // Functions filter
+    const fnList = document.getElementById('fnList1');
+    if (fnList) {
+      const selectedFunctions = fnList.querySelectorAll('.sm-chip.selected');
+      if (selectedFunctions.length > 0) {
+        filterCount++;
+        let isFirstFunction = true;
+        selectedFunctions.forEach(chip => {
+          const item = createToolboxItem('Function', chip.textContent, () => {
+            chip.classList.remove('selected');
+            
+            const fnList = document.getElementById('fnList1');
+            const selected = fnList.querySelectorAll('.sm-chip.selected');
+            
+            const pillTagsRow = document.querySelector('#fnAccordion1 .pill-tags-row');
+            if (pillTagsRow) {
+              pillTagsRow.innerHTML = '';
+              Array.from(selected).forEach((selectedChip, i) => {
+                if (i > 0) {
+                  const sep = document.createElement('span');
+                  sep.className = 'pill-or';
+                  sep.textContent = 'or';
+                  pillTagsRow.appendChild(sep);
+                }
+                const pill = document.createElement('span');
+                pill.className = 'pill-chip' + (selectedChip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
+                pill.textContent = selectedChip.textContent;
+                const x = document.createElement('span');
+                x.className = 'pill-chip-x';
+                x.textContent = '×';
+                x.addEventListener('click', () => {
+                  selectedChip.classList.remove('selected');
+                  updatePill();
+                  redrawTable();
+                });
+                pill.appendChild(x);
+                pillTagsRow.appendChild(pill);
+              });
+            }
+            
+            updatePill();
+            redrawTable();
+          }, isFirstFunction);
+          isFirstFunction = false;
+          toolboxFilterItems.appendChild(item);
+        });
+      }
+    }
+    
+    // Fundamenta filter
+    const fundaActive = document.querySelector('#fundaRadioList1 .phys-radio-row.active');
+    if (fundaActive && fundaActive.dataset.val !== 'Both') {
+      filterCount++;
+      const item = createToolboxItem('Fundamenta', fundaActive.dataset.val, () => {
+        const allRows = document.querySelectorAll('#fundaRadioList1 .phys-radio-row');
+        allRows.forEach(r => r.classList.remove('active'));
+        const bothRow = document.querySelector('#fundaRadioList1 .phys-radio-row[data-val="Both"]');
+        if (bothRow) bothRow.classList.add('active');
+        
+        const fundaTag = document.getElementById('fundaTag1');
+        if (fundaTag) fundaTag.style.visibility = 'hidden';
+        
+        updatePill();
+        redrawTable();
+      });
+      toolboxFilterItems.appendChild(item);
+    }
+    
     // Show/hide sections based on content
     toolboxFiltersSection.style.display = filterCount > 0 ? '' : 'none';
+    
+    // Update the pill state with the recalculated filter count
+    pillState.filters = filterCount;
+    
+    // Update "Clear all filters" button visibility based on actual filter count
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
+    if (clearFiltersBtn) {
+      clearFiltersBtn.style.display = filterCount > 0 ? '' : 'none';
+    }
   }
 
   const builderRowsEl = document.getElementById('builderRows1');
