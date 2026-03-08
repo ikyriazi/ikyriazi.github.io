@@ -1234,7 +1234,7 @@ window.addEventListener('load', function () {
         return checkAllDescriptionComment(row, value);
       }
       case 'Bibliography':
-        return (row.bibliography || '').toLowerCase().includes(value);
+        return checkBibliographyFields(row, value);
       default:
         return false;
     }
@@ -1406,6 +1406,32 @@ window.addEventListener('load', function () {
     return false;
   }
 
+  // Helper to check bibliography and related resources fields
+  function checkBibliographyFields(rowData, value) {
+    // Check referencedBy array (contains referenceSource.bookShort and referencePages)
+    if (rowData.referencedBy) {
+      const refs = Array.isArray(rowData.referencedBy) ? rowData.referencedBy : [rowData.referencedBy];
+      for (const item of refs) {
+        if (item.referenceSource?.bookShort && item.referenceSource.bookShort.toLowerCase().includes(value)) {
+          return true;
+        }
+        if (item.referencePages && item.referencePages.toLowerCase().includes(value)) {
+          return true;
+        }
+      }
+    }
+    // Check relatedResource array (contains label)
+    if (rowData.relatedResource) {
+      const resources = Array.isArray(rowData.relatedResource) ? rowData.relatedResource : [rowData.relatedResource];
+      for (const item of resources) {
+        if (item.label && item.label.toLowerCase().includes(value)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   // Helper function to check all nested contextual fields and collect badge activations
   function checkNestedContextualFields(rowData, value, recordId, matchedSubgroups, badgesToActivate) {
     const fields = [
@@ -1488,9 +1514,10 @@ window.addEventListener('load', function () {
             hasDetailMatch = true;
           }
           
-          // Check bibliography (bibliography subgroup)
-          if (checkSimpleField(rowData, 'bibliography', value, matchedSubgroups, 'bibliography')) {
+          // Check bibliography and related resources (bibliography subgroup)
+          if (checkBibliographyFields(rowData, value)) {
             hasDetailMatch = true;
+            matchedSubgroups.add('bibliography');
           }
           
           // Check provenance (contextual subgroup)
@@ -1520,8 +1547,9 @@ window.addEventListener('load', function () {
         
         // For "Bibliography", check (detail section, bibliography subgroup)
         if (field === 'Bibliography') {
-          if (checkSimpleField(rowData, 'bibliography', value, matchedSubgroups, 'bibliography')) {
+          if (checkBibliographyFields(rowData, value)) {
             hasDetailMatch = true;
+            matchedSubgroups.add('bibliography');
           }
         }
       });
