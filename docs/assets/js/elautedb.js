@@ -68,6 +68,17 @@ window.addEventListener('load', function () {
     return Array.isArray(val) ? val : [val];
   }
 
+  // Mark that a manual change occurred to prevent unwanted expand-all behavior
+  function markManualChange() {
+    isManualToggle = true;
+  }
+
+  // Mark manual change and redraw table
+  function redrawTable() {
+    markManualChange();
+    if (table) table.draw();
+  }
+
   // Escape HTML entities
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -730,8 +741,7 @@ window.addEventListener('load', function () {
 
     physTagX.addEventListener('click', () => { 
       setVal('Both'); 
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw(); 
+      redrawTable();
     });
     return { setVal, resetSearch };
   }
@@ -769,14 +779,12 @@ window.addEventListener('load', function () {
     minInput.addEventListener('input', () => { 
       if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; 
       update(); 
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw();
+      redrawTable();
     });
     maxInput.addEventListener('input', () => { 
       if (parseInt(maxInput.value) < parseInt(minInput.value)) maxInput.value = minInput.value; 
       update(); 
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw();
+      redrawTable();
     });
     minLabel.addEventListener('focus', () => minLabel.select());
     maxLabel.addEventListener('focus', () => maxLabel.select());
@@ -790,11 +798,11 @@ window.addEventListener('load', function () {
       update();
     }
 
-    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
-    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
-    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
-    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
-    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
+    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); redrawTable(); });
+    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); redrawTable(); });
+    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); redrawTable(); });
+    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); redrawTable(); });
+    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); redrawTable(); });
     update();
     return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
   }
@@ -833,7 +841,7 @@ window.addEventListener('load', function () {
           pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
           pill.textContent = chip.textContent;
           const x = document.createElement('span'); x.className = 'pill-chip-x'; x.textContent = '×';
-          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); if (typeof isManualToggle !== 'undefined') isManualToggle = true; if (table) table.draw(); });
+          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); redrawTable(); });
           pill.appendChild(x); pillRow.appendChild(pill);
         });
       } else {
@@ -847,8 +855,7 @@ window.addEventListener('load', function () {
       if (!chip) return; 
       chip.classList.toggle('selected'); 
       updateTag(); 
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw(); 
+      redrawTable();
     });
     
     const resetChips = () => { 
@@ -859,8 +866,7 @@ window.addEventListener('load', function () {
     if (!showValues) {
       tagX.addEventListener('click', () => { 
         resetChips(); 
-        if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-        if (table) table.draw(); 
+        redrawTable();
       });
     }
     
@@ -902,13 +908,11 @@ window.addEventListener('load', function () {
 
     rows.forEach(r => r.addEventListener('click', () => { 
       setVal(r.dataset.val); 
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw(); 
+      redrawTable();
     }));
     tagX.addEventListener('click', () => { 
       setVal('Both'); 
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw(); 
+      redrawTable();
     });
     return () => setVal('Both');
   }
@@ -1057,9 +1061,7 @@ window.addEventListener('load', function () {
     updatePill();
     
     // Reset expand-all state when search changes to prevent unwanted auto-expansion
-    if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-    
-    if (table) table.draw();
+    redrawTable();
   });
 
   /* ─────────────────────────────────────────────
@@ -1104,8 +1106,7 @@ window.addEventListener('load', function () {
       resetSearch = rs;
       physRows.forEach(r => r.addEventListener('click', () => { 
         setVal(r.dataset.val); 
-        if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-        if (table) table.draw(); 
+        redrawTable();
       }));
       const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
       const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
@@ -1119,8 +1120,7 @@ window.addEventListener('load', function () {
           document.getElementById(`filterPanel${n}`)
             .querySelectorAll('.phys-accordion.expanded')
             .forEach(a => a.classList.remove('expanded'));
-          if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-          if (table) table.draw();
+          redrawTable();
         });
       }
     });
@@ -1201,8 +1201,7 @@ window.addEventListener('load', function () {
       resetSearch();
       pillState.fields = 0; updatePill();
       updateClearBtn();
-      if (typeof isManualToggle !== 'undefined') isManualToggle = true;
-      if (table) table.draw();
+      redrawTable();
     });
   })();
 
@@ -1773,12 +1772,12 @@ window.addEventListener('load', function () {
               });
             }
             // Reset the flag after the decision is made
-            if (typeof isManualToggle !== 'undefined') isManualToggle = false;
+            isManualToggle = false;
           }, 100);
         } else {
           // Reset the manual toggle flag with a small delay to handle rapid successive draws
           setTimeout(function() {
-            if (typeof isManualToggle !== 'undefined') isManualToggle = false;
+            isManualToggle = false;
           }, 150);
         }
 
