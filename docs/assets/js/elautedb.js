@@ -1190,6 +1190,12 @@ window.addEventListener('load', function () {
         if (provenanceMatches(row.provenance, value)) {
           return true;
         }
+        // Check nested description/comment in provenance, function, codicology
+        if (nestedDescriptionMatches(row.provenance, value) ||
+            nestedDescriptionMatches(row.function, value) ||
+            nestedDescriptionMatches(row.codicology, value)) {
+          return true;
+        }
         return false;
       }
       case 'Title':
@@ -1224,9 +1230,20 @@ window.addEventListener('load', function () {
         }
         return false;
       }
-      case 'Description / Comment':
-        return (row.description || '').toLowerCase().includes(value) ||
-               (row.comment || '').toLowerCase().includes(value);
+      case 'Description / Comment': {
+        // Check main description/comment
+        if ((row.description || '').toLowerCase().includes(value) ||
+            (row.comment || '').toLowerCase().includes(value)) {
+          return true;
+        }
+        // Check nested description/comment in provenance, function, codicology
+        if (nestedDescriptionMatches(row.provenance, value) ||
+            nestedDescriptionMatches(row.function, value) ||
+            nestedDescriptionMatches(row.codicology, value)) {
+          return true;
+        }
+        return false;
+      }
       case 'Bibliography':
         return (row.bibliography || '').toLowerCase().includes(value);
       default:
@@ -1338,6 +1355,39 @@ window.addEventListener('load', function () {
     return items.some(item => (item?.label || '').toLowerCase().includes(value));
   }
 
+  // Helper function to check if nested description/comment fields match a search value
+  function nestedDescriptionMatches(data, value) {
+    if (!data) return false;
+    const items = Array.isArray(data) ? data : [data];
+    return items.some(item => 
+      (item?.description || '').toLowerCase().includes(value) ||
+      (item?.comment || '').toLowerCase().includes(value)
+    );
+  }
+
+  // Helper function to get contentIds for nested description/comment matches
+  // Returns array of {contentId, type} objects for items that match
+  function getMatchedNestedContentIds(data, value, recordId, idPrefix) {
+    if (!data) return [];
+    const items = Array.isArray(data) ? data : [data];
+    const matches = [];
+    items.forEach((item, index) => {
+      if ((item?.description || '').toLowerCase().includes(value)) {
+        matches.push({
+          contentId: `${recordId}-${idPrefix}-desc-${index}`,
+          type: 'description'
+        });
+      }
+      if ((item?.comment || '').toLowerCase().includes(value)) {
+        matches.push({
+          contentId: `${recordId}-${idPrefix}-comm-${index}`,
+          type: 'comment'
+        });
+      }
+    });
+    return matches;
+  }
+
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
   // a real browser event that bubbles and reliably triggers the delegated click handler.
   function expandAltTitleMatches() {
@@ -1348,9 +1398,13 @@ window.addEventListener('load', function () {
       const rowData = this.data();
       if (!rowData) return;
       
+      // Get recordId for this row
+      const recordId = rowData.id ? rowData.id.split('/').pop() : Math.random().toString(36).substr(2, 9);
+      
       // Track which subgroups contain matches and whether there are any detail matches
       let hasDetailMatch = false;
       const matchedSubgroups = new Set();
+      const badgesToActivate = [];
       
       active.forEach(({ field, value, mode }) => {
         // Skip Person field - person data is only in main table
@@ -1387,9 +1441,26 @@ window.addEventListener('load', function () {
             hasDetailMatch = true;
           }
           
-          // Check description/comment (no subgroup)
+          // Check main description/comment (no subgroup)
           if ((rowData.description || '').toLowerCase().includes(value)) hasDetailMatch = true;
           if ((rowData.comment || '').toLowerCase().includes(value)) hasDetailMatch = true;
+          
+          // Check nested description/comment in provenance, function, codicology (contextual subgroup)
+          if (nestedDescriptionMatches(rowData.provenance, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+            badgesToActivate.push(...getMatchedNestedContentIds(rowData.provenance, value, recordId, 'prov'));
+          }
+          if (nestedDescriptionMatches(rowData.function, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+            badgesToActivate.push(...getMatchedNestedContentIds(rowData.function, value, recordId, 'func'));
+          }
+          if (nestedDescriptionMatches(rowData.codicology, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+            badgesToActivate.push(...getMatchedNestedContentIds(rowData.codicology, value, recordId, 'codic'));
+          }
           
           // Check bibliography (bibliography subgroup)
           if (rowData.bibliography && (rowData.bibliography || '').toLowerCase().includes(value)) {
@@ -1410,10 +1481,28 @@ window.addEventListener('load', function () {
           }
         }
         
-        // For "Description / Comment", check (detail section, no subgroup)
+        // For "Description / Comment", check nested descriptions/comments in detail sections
         if (field === 'Description / Comment') {
+          // Check main description/comment (no subgroup - already in main table)
           if ((rowData.description || '').toLowerCase().includes(value)) hasDetailMatch = true;
           if ((rowData.comment || '').toLowerCase().includes(value)) hasDetailMatch = true;
+          
+          // Check nested description/comment in provenance, function, codicology (contextual subgroup)
+          if (nestedDescriptionMatches(rowData.provenance, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+            badgesToActivate.push(...getMatchedNestedContentIds(rowData.provenance, value, recordId, 'prov'));
+          }
+          if (nestedDescriptionMatches(rowData.function, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+            badgesToActivate.push(...getMatchedNestedContentIds(rowData.function, value, recordId, 'func'));
+          }
+          if (nestedDescriptionMatches(rowData.codicology, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+            badgesToActivate.push(...getMatchedNestedContentIds(rowData.codicology, value, recordId, 'codic'));
+          }
         }
         
         // For "Bibliography", check (detail section, bibliography subgroup)
@@ -1436,10 +1525,14 @@ window.addEventListener('load', function () {
         const chevron = this.node().cells[0];
         if (chevron) {
           chevron.click();
-          // After expanding, show the matched subgroups
+          // After expanding, show the matched subgroups and activate badges
           if (matchedSubgroups.size > 0) {
             setTimeout(() => {
               showSubgroupsInChildRow(row, matchedSubgroups);
+              // Activate badges for matched content
+              if (badgesToActivate.length > 0) {
+                activateMatchedBadges(badgesToActivate);
+              }
             }, 150);
           }
         }
@@ -1449,9 +1542,38 @@ window.addEventListener('load', function () {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
       }
-      // Already shown - ensure matched subgroups are visible
+      // Already shown - ensure matched subgroups are visible and badges activated
       else if (hasDetailMatch && isShown && matchedSubgroups.size > 0) {
         showSubgroupsInChildRow(row, matchedSubgroups);
+        // Activate badges for matched content
+        if (badgesToActivate.length > 0) {
+          activateMatchedBadges(badgesToActivate);
+        }
+      }
+    });
+  }
+
+  // Helper function to activate badges for matched content
+  function activateMatchedBadges(badgesToActivate) {
+    badgesToActivate.forEach(({ contentId }) => {
+      const $targetContent = $('#' + contentId);
+      if ($targetContent.length && !$targetContent.is(':visible')) {
+        const $badge = $(`.cd-badge[data-target="${contentId}"]`);
+        if ($badge.length) {
+          // Show the content
+          $targetContent.show();
+          // Add active class to badge
+          $badge.addClass('active');
+          // Change icon from plus to minus
+          $badge.find('svg').replaceWith(feather.icons['minus-circle'].toSvg({ 
+            width: 12, height: 12, 
+            style: 'vertical-align: -2px; margin-right: 4px;' 
+          }));
+          // Add cd-expanded class to the row
+          $badge.closest('tr').addClass('cd-expanded');
+          // Remove from manually hidden content
+          manuallyHiddenContent.delete(contentId);
+        }
       }
     });
   }
