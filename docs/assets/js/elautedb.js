@@ -1176,14 +1176,17 @@ window.addEventListener('load', function () {
         const simpleFields = [
           row.shelfmark?.label, row.title, row.shortTitle, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
-          row.printPlace?.label, row.rism?.label, row.vd16?.label, row.brown,
-          row.bibliography
+          row.printPlace?.label, row.rism?.label, row.vd16?.label, row.brown
         ];
         if (simpleFields.some(v => (v || '').toLowerCase().includes(value))) {
           return true;
         }
         // Check otherRism and otherVD16 (arrays of objects with .label)
         if (labelArrayMatches(row.otherRism, value) || labelArrayMatches(row.otherVD16, value)) {
+          return true;
+        }
+        // Check bibliography fields (including referencedBy and relatedResource)
+        if (checkBibliographyFields(row, value)) {
           return true;
         }
         // Check provenance (can be array)
