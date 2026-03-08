@@ -610,6 +610,8 @@ window.addEventListener('load', function () {
           const newInput = makeInput(newField);
           div.replaceChild(newInput, currentInput); currentInput = newInput;
           updateUI();
+          // Trigger search update since field changed (old input removed, new empty input created)
+          redrawTable();
         });
         fieldEl = select;
       }
@@ -1331,69 +1333,113 @@ window.addEventListener('load', function () {
       const rowData = this.data();
       if (!rowData) return;
       
-      // Check if any search term matches fields only visible in detail view
-      const hasDetailMatch = active.some(({ field, value, mode }) => {
+      // Track which subgroups contain matches and whether there are any detail matches
+      let hasDetailMatch = false;
+      const matchedSubgroups = new Set();
+      
+      active.forEach(({ field, value, mode }) => {
         // Skip Person field - person data is only in main table
-        if (field === 'Person') return false;
+        if (field === 'Person') return;
         
-        // For "Place" field, expand if there's a match in provenance (detail section)
+        // For "Place" field, check provenance (detail section, contextual subgroup)
         if (field === 'Place' && rowData.provenance) {
           const fieldToCheck = mode === 'list' ? 'normalizedName' : 'label';
           const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
-          if (provenances.some(prov => (prov?.[fieldToCheck] || '').toLowerCase().includes(value))) return true;
+          if (provenances.some(prov => (prov?.[fieldToCheck] || '').toLowerCase().includes(value))) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+          }
         }
         
-        // For "Title" field, expand if there's a match in alternativeTitle (detail section)
+        // For "Title" field, check alternativeTitle (detail section, no subgroup)
         if (field === 'Title' && rowData.alternativeTitle) {
-          if ((rowData.alternativeTitle || '').toLowerCase().includes(value)) return true;
+          if ((rowData.alternativeTitle || '').toLowerCase().includes(value)) {
+            hasDetailMatch = true;
+          }
         }
         
         // For "All fields", check all detail sections
         if (field === 'All fields') {
-          // Check alternativeTitle
-          if (rowData.alternativeTitle && (rowData.alternativeTitle || '').toLowerCase().includes(value)) return true;
+          // Check alternativeTitle (no subgroup)
+          if (rowData.alternativeTitle && (rowData.alternativeTitle || '').toLowerCase().includes(value)) {
+            hasDetailMatch = true;
+          }
           
-          // Check description/comment
-          if ((rowData.description || '').toLowerCase().includes(value)) return true;
-          if ((rowData.comment || '').toLowerCase().includes(value)) return true;
+          // Check description/comment (no subgroup)
+          if ((rowData.description || '').toLowerCase().includes(value)) hasDetailMatch = true;
+          if ((rowData.comment || '').toLowerCase().includes(value)) hasDetailMatch = true;
           
-          // Check bibliography
-          if (rowData.bibliography && (rowData.bibliography || '').toLowerCase().includes(value)) return true;
+          // Check bibliography (bibliography subgroup)
+          if (rowData.bibliography && (rowData.bibliography || '').toLowerCase().includes(value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('bibliography');
+          }
           
-          // Check provenance
+          // Check provenance (contextual subgroup)
           if (rowData.provenance) {
             const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
-            if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) return true;
+            if (provenances.some(prov => (prov?.label || '').toLowerCase().includes(value))) {
+              hasDetailMatch = true;
+              matchedSubgroups.add('contextual');
+            }
           }
         }
         
-        // For "Description / Comment", expand if there's a match (always in detail)
+        // For "Description / Comment", check (detail section, no subgroup)
         if (field === 'Description / Comment') {
-          if ((rowData.description || '').toLowerCase().includes(value)) return true;
-          if ((rowData.comment || '').toLowerCase().includes(value)) return true;
+          if ((rowData.description || '').toLowerCase().includes(value)) hasDetailMatch = true;
+          if ((rowData.comment || '').toLowerCase().includes(value)) hasDetailMatch = true;
         }
         
-        // For "Bibliography", expand if there's a match (always in detail)
+        // For "Bibliography", check (detail section, bibliography subgroup)
         if (field === 'Bibliography' && rowData.bibliography) {
-          if ((rowData.bibliography || '').toLowerCase().includes(value)) return true;
+          if ((rowData.bibliography || '').toLowerCase().includes(value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('bibliography');
+          }
         }
-        
-        return false;
       });
       
       const isShown = this.child.isShown();
+      const tr = $(this.node());
+      const row = this; // Keep reference to DataTables row object
       
       // Dynamically expand/collapse rows based on whether detail sections contain matches
       // This applies to all fields: Title, Place, Description/Comment, Bibliography, All fields
       // Expand if has detail match and not already shown
       if (hasDetailMatch && !isShown) {
         const chevron = this.node().cells[0];
-        if (chevron) chevron.click();
+        if (chevron) {
+          chevron.click();
+          // After expanding, show the matched subgroups
+          if (matchedSubgroups.size > 0) {
+            setTimeout(() => {
+              // Use DataTables API to get child row
+              const childRow = $(row.child());
+              if (childRow.length) {
+                matchedSubgroups.forEach(subgroup => {
+                  const subgroupElements = childRow.find(`.subgroup-content[data-subgroup="${subgroup}"]`);
+                  subgroupElements.show();
+                });
+              }
+            }, 150);
+          }
+        }
       }
       // Collapse if no detail match but currently shown (search term changed and no longer matches detail)
       else if (!hasDetailMatch && isShown) {
         const chevron = this.node().cells[0];
         if (chevron) chevron.click();
+      }
+      // Already shown - ensure matched subgroups are visible
+      else if (hasDetailMatch && isShown && matchedSubgroups.size > 0) {
+        const childRow = $(row.child());
+        if (childRow.length) {
+          matchedSubgroups.forEach(subgroup => {
+            const subgroupElements = childRow.find(`.subgroup-content[data-subgroup="${subgroup}"]`);
+            subgroupElements.show();
+          });
+        }
       }
     });
   }
@@ -1741,12 +1787,18 @@ window.addEventListener('load', function () {
           });
         }
         
-        // Expand detail-match rows first, then refresh highlights
+        // Expand detail-match rows first, then refresh highlights, then expand subgroups
         setTimeout(function() {
           if (hasActiveSearch) {
             expandAltTitleMatches();
           }
           refreshOpenAltTitleHighlights();
+          // After refreshing (which regenerates HTML), expand subgroups again
+          if (hasActiveSearch) {
+            setTimeout(function() {
+              expandAltTitleMatches();
+            }, 50);
+          }
         }, 0);
 
         const wasExpandAllActive = isExpandAllActive;
