@@ -899,8 +899,7 @@ window.addEventListener('load', function () {
     const item = document.createElement('div');
     item.className = 'e-item';
     item.innerHTML = `
-      <span class="e-item-label">${label}: <span class="e-item-value">${value}</span></span>
-      <button class="e-item-remove" type="button">${SVG_X}</button>
+      <span class="e-item-label">${label}: <span class="e-item-value">${value}</span><button class="e-item-remove" type="button">${SVG_X}</button></span>
     `;
     const removeBtn = item.querySelector('.e-item-remove');
     removeBtn.addEventListener('click', (e) => {
