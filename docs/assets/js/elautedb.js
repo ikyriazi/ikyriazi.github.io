@@ -673,6 +673,7 @@ window.addEventListener('load', function () {
 
     physTagX.addEventListener('click', () => { 
       setVal('Both'); 
+      updatePill();
       redrawTable();
     });
     return { setVal, resetSearch };
@@ -711,11 +712,13 @@ window.addEventListener('load', function () {
     minInput.addEventListener('input', () => { 
       if (parseInt(minInput.value) > parseInt(maxInput.value)) minInput.value = maxInput.value; 
       update(); 
+      updatePill();
       redrawTable();
     });
     maxInput.addEventListener('input', () => { 
       if (parseInt(maxInput.value) < parseInt(minInput.value)) maxInput.value = minInput.value; 
       update(); 
+      updatePill();
       redrawTable();
     });
     minLabel.addEventListener('focus', () => minLabel.select());
@@ -730,11 +733,11 @@ window.addEventListener('load', function () {
       update();
     }
 
-    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); redrawTable(); });
-    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); redrawTable(); });
-    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); redrawTable(); });
-    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); redrawTable(); });
-    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); redrawTable(); });
+    minLabel.addEventListener('change', () => { applyLabel(minLabel, true); updatePill(); redrawTable(); });
+    minLabel.addEventListener('blur',   () => { applyLabel(minLabel, true); updatePill(); redrawTable(); });
+    maxLabel.addEventListener('change', () => { applyLabel(maxLabel, false); updatePill(); redrawTable(); });
+    maxLabel.addEventListener('blur',   () => { applyLabel(maxLabel, false); updatePill(); redrawTable(); });
+    tagX.addEventListener('click', () => { minInput.value = minYear; maxInput.value = maxYear; update(); updatePill(); redrawTable(); });
     update();
     return () => { minInput.value = minYear; maxInput.value = maxYear; update(); };
   }
@@ -787,6 +790,7 @@ window.addEventListener('load', function () {
       if (!chip) return; 
       chip.classList.toggle('selected'); 
       updateTag(); 
+      updatePill();
       redrawTable();
     });
     
@@ -798,6 +802,7 @@ window.addEventListener('load', function () {
     if (!showValues) {
       tagX.addEventListener('click', () => { 
         resetChips(); 
+        updatePill();
         redrawTable();
       });
     }
@@ -840,10 +845,12 @@ window.addEventListener('load', function () {
 
     rows.forEach(r => r.addEventListener('click', () => { 
       setVal(r.dataset.val); 
+      updatePill();
       redrawTable();
     }));
     tagX.addEventListener('click', () => { 
       setVal('Both'); 
+      updatePill();
       redrawTable();
     });
     return () => setVal('Both');
@@ -1137,19 +1144,8 @@ window.addEventListener('load', function () {
   const builderRowsEl = document.getElementById('builderRows1');
 
   builderRowsEl.addEventListener('input', () => {
-    let count = 0;
-    builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const { value } = getBuilderRowData(row);
-      if (value) count++;
-    });
-    const previousCount = pillState.fields;
-    pillState.fields = count;
     updatePill();
-    
-    // Only redraw table if there are search terms or if we just cleared the last term
-    if (count > 0 || previousCount > 0) {
-      redrawTable();
-    }
+    redrawTable();
   });
 
   /* ─────────────────────────────────────────────
@@ -1166,24 +1162,11 @@ window.addEventListener('load', function () {
     CARD_CONFIGS.forEach(({ n, options }) => {
       const physRows = document.querySelectorAll(`#physRadioList${n} .phys-radio-row`);
 
-      let onFilterChange = null;
-      let clearFiltersBtn = null;
-      if (options.filterCount) {
-        clearFiltersBtn = document.getElementById(`clearFiltersBtn${n}`);
-        const activeFilters = new Set();
-        onFilterChange = (key, isActive) => {
-          if (isActive) activeFilters.add(key);
-          else activeFilters.delete(key);
-          const count = activeFilters.size;
-          clearFiltersBtn.style.display = count > 0 ? '' : 'none';
-          pillState.filters = count; updatePill();
-        };
-      }
+      const clearFiltersBtn = options.filterCount ? document.getElementById(`clearFiltersBtn${n}`) : null;
 
       const { setVal, resetSearch: rs } = setupSplitAccordion(n,
         val => {
           physRows.forEach(r => r.classList.toggle('active', r.dataset.val === val));
-          if (onFilterChange) onFilterChange('phys', val !== 'Both');
         },
         {
           'Person': (rowId) => createModeDropdownWidget(rowId, DYNAMIC_PERSONS),
@@ -1194,12 +1177,13 @@ window.addEventListener('load', function () {
       resetSearch = rs;
       physRows.forEach(r => r.addEventListener('click', () => { 
         setVal(r.dataset.val); 
+        updatePill();
         redrawTable();
       }));
-      const resetDate  = initDateAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('date', v) : null });
-      const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('shelf', v) : null });
-      const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues, onFilterChange: onFilterChange ? v => onFilterChange('fn', v) : null });
-      const resetFunda = initFundamentaAccordion({ n, onFilterChange: onFilterChange ? v => onFilterChange('funda', v) : null });
+      const resetDate  = initDateAccordion({ n });
+      const resetShelf = initChipShelfmarksAccordion({ n, showValues: !!options.showChipValues });
+      const resetFn    = initChipShelfmarksAccordion({ n, prefix: 'fn', showValues: !!options.showChipValues });
+      const resetFunda = initFundamentaAccordion({ n });
 
       if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
@@ -1208,6 +1192,7 @@ window.addEventListener('load', function () {
           document.getElementById(`filterPanel${n}`)
             .querySelectorAll('.phys-accordion.expanded')
             .forEach(a => a.classList.remove('expanded'));
+          updatePill();
           redrawTable();
         });
       }
@@ -1257,14 +1242,10 @@ window.addEventListener('load', function () {
       e.stopPropagation();
       // Clear all search fields
       resetSearch();
-      pillState.fields = 0;
       
       // Clear all filters
       const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
       if (clearFiltersBtn) clearFiltersBtn.click(); // This already calls table.draw()
-      
-      // Defensive: ensure filter count is fully reset
-      pillState.filters = 0;
       
       updatePill();
     });
@@ -1287,7 +1268,7 @@ window.addEventListener('load', function () {
 
     clearBtn.addEventListener('click', () => {
       resetSearch();
-      pillState.fields = 0; updatePill();
+      updatePill();
       updateClearBtn();
       redrawTable();
     });
