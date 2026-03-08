@@ -1174,10 +1174,10 @@ window.addEventListener('load', function () {
       case 'All fields': {
         // Simple fields
         const simpleFields = [
-          row.shelfmark?.label, row.title, row.alternativeTitle,
+          row.shelfmark?.label, row.title, row.shortTitle, row.alternativeTitle,
           row.date?.label, row.author?.label, row.publisher?.label,
           row.printPlace?.label, row.rism?.label, row.vd16?.label, row.brown,
-          row.description, row.comment, row.bibliography
+          row.bibliography
         ];
         if (simpleFields.some(v => (v || '').toLowerCase().includes(value))) {
           return true;
@@ -1188,12 +1188,6 @@ window.addEventListener('load', function () {
         }
         // Check provenance (can be array)
         if (provenanceMatches(row.provenance, value)) {
-          return true;
-        }
-        // Check nested description/comment in provenance, function, codicology
-        if (nestedDescriptionMatches(row.provenance, value) ||
-            nestedDescriptionMatches(row.function, value) ||
-            nestedDescriptionMatches(row.codicology, value)) {
           return true;
         }
         return false;
