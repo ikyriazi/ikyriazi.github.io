@@ -438,7 +438,7 @@ window.addEventListener('load', function () {
      P2c mode-dropdown widget (Person / Place fields)
      ───────────────────────────────────────────── */
   function initModeDropdownEl(tabs, input, list, wrap, items) {
-    let mode = 'free', highlighted = -1, listMemory = '';
+    let mode = 'free', highlighted = -1, listMemory = '', freeTextMemory = '';
     function showSelected(name) {
       input.value = name; 
       input.style.display = ''; 
@@ -469,17 +469,33 @@ window.addEventListener('load', function () {
       tab.addEventListener('click', () => {
         tabs.querySelectorAll('button').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+        const prevMode = mode;
         mode = tab.dataset.mode;
         if (mode === 'list') {
+          // Save free-text value before switching
+          if (prevMode === 'free') {
+            freeTextMemory = input.value.trim();
+          }
           input.readOnly = true; input.style.caretColor = 'transparent'; input.placeholder = '';
           if (listMemory) { showSelected(listMemory); } else { hideInput(); }
           renderList();
         } else {
-          list.classList.remove('open'); input.value = ''; input.style.fontWeight = '';
+          list.classList.remove('open'); input.style.fontWeight = '';
           input.style.display = ''; input.readOnly = false; input.style.caretColor = '';
           input.placeholder = 'Search...';
+          // Restore free-text value
+          input.value = freeTextMemory;
+          if (freeTextMemory) {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
         }
       });
+    });
+    // Update freeTextMemory as user types in free mode
+    input.addEventListener('input', () => {
+      if (mode === 'free') {
+        freeTextMemory = input.value.trim();
+      }
     });
     wrap.addEventListener('click', () => { if (mode === 'list') renderList(); });
     input.addEventListener('keydown', e => {
@@ -844,7 +860,15 @@ window.addEventListener('load', function () {
     const field = (row.querySelector('.field-select') || {}).value || 'All fields';
     const inp = row.querySelector('.builder-input, .p2b-text');
     const value = inp ? inp.value.trim() : '';
-    return { field, inp, value };
+    
+    // Detect mode for Person/Place fields (free-text vs list)
+    let mode = 'free'; // default
+    const activeTab = row.querySelector('.p2b-tab.active');
+    if (activeTab && activeTab.dataset.mode) {
+      mode = activeTab.dataset.mode;
+    }
+    
+    return { field, inp, value, mode };
   }
 
   function updatePill() {
@@ -1128,8 +1152,8 @@ window.addEventListener('load', function () {
   function getActiveRows() {
     const active = [];
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const { field, value } = getBuilderRowData(row);
-      if (value) active.push({ field, value: value.toLowerCase() });
+      const { field, value, mode } = getBuilderRowData(row);
+      if (value) active.push({ field, value: value.toLowerCase(), mode });
     });
     return active;
   }
@@ -1143,7 +1167,7 @@ window.addEventListener('load', function () {
     return term;
   }
 
-  function rowMatches(row, field, value) {
+  function rowMatches(row, field, value, mode = 'free') {
     switch (field) {
       case 'All fields': {
         // Simple fields
@@ -1169,17 +1193,36 @@ window.addEventListener('load', function () {
         return (row.title || '').toLowerCase().includes(value) ||
                (row.alternativeTitle || '').toLowerCase().includes(value);
       case 'Person':
-        return (row.author?.normalizedName || '').toLowerCase().includes(value) ||
-               (row.publisher?.normalizedName || '').toLowerCase().includes(value);
-      case 'Place': {
-        // Check printPlace
-        if ((row.printPlace?.normalizedName || '').toLowerCase().includes(value)) {
-          return true;
+        // List mode: search in normalizedName, Free-text mode: search in label
+        if (mode === 'list') {
+          return (row.author?.normalizedName || '').toLowerCase().includes(value) ||
+                 (row.publisher?.normalizedName || '').toLowerCase().includes(value);
+        } else {
+          return (row.author?.label || '').toLowerCase().includes(value) ||
+                 (row.publisher?.label || '').toLowerCase().includes(value);
         }
-        // Check provenance (can be array or single object)
-        if (row.provenance) {
-          const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
-          return provenances.some(prov => (prov?.normalizedName || '').toLowerCase().includes(value));
+      case 'Place': {
+        // List mode: search in normalizedName, Free-text mode: search in label
+        if (mode === 'list') {
+          // Check printPlace
+          if ((row.printPlace?.normalizedName || '').toLowerCase().includes(value)) {
+            return true;
+          }
+          // Check provenance (can be array or single object)
+          if (row.provenance) {
+            const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
+            return provenances.some(prov => (prov?.normalizedName || '').toLowerCase().includes(value));
+          }
+        } else {
+          // Check printPlace
+          if ((row.printPlace?.label || '').toLowerCase().includes(value)) {
+            return true;
+          }
+          // Check provenance (can be array or single object)
+          if (row.provenance) {
+            const provenances = Array.isArray(row.provenance) ? row.provenance : [row.provenance];
+            return provenances.some(prov => (prov?.label || '').toLowerCase().includes(value));
+          }
         }
         return false;
       }
@@ -1229,7 +1272,7 @@ window.addEventListener('load', function () {
     
     // Apply search field filters (AND logic)
     if (active.length > 0) {
-      const searchMatch = active.every(({ field, value }) => rowMatches(rowData, field, value));
+      const searchMatch = active.every(({ field, value, mode }) => rowMatches(rowData, field, value, mode));
       if (!searchMatch) return false;
     }
     
