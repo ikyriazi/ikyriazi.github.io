@@ -1182,19 +1182,9 @@ window.addEventListener('load', function () {
         if (simpleFields.some(v => (v || '').toLowerCase().includes(value))) {
           return true;
         }
-        // Check otherRism (array or single object with .label)
-        if (row.otherRism) {
-          const otherRisms = Array.isArray(row.otherRism) ? row.otherRism : [row.otherRism];
-          if (otherRisms.some(item => (item?.label || '').toLowerCase().includes(value))) {
-            return true;
-          }
-        }
-        // Check otherVD16 (array or single object with .label)
-        if (row.otherVD16) {
-          const otherVD16s = Array.isArray(row.otherVD16) ? row.otherVD16 : [row.otherVD16];
-          if (otherVD16s.some(item => (item?.label || '').toLowerCase().includes(value))) {
-            return true;
-          }
+        // Check otherRism and otherVD16 (arrays of objects with .label)
+        if (labelArrayMatches(row.otherRism, value) || labelArrayMatches(row.otherVD16, value)) {
+          return true;
         }
         // Check provenance (can be array)
         if (provenanceMatches(row.provenance, value)) {
@@ -1222,30 +1212,14 @@ window.addEventListener('load', function () {
         return provenanceMatches(row.provenance, value, fieldToCheck);
       }
       case 'RISM / VD16 / Brown ID': {
-        // Check rism.label
-        if ((row.rism?.label || '').toLowerCase().includes(value)) {
+        // Check rism, vd16, and brown
+        if ((row.rism?.label || '').toLowerCase().includes(value) ||
+            (row.vd16?.label || '').toLowerCase().includes(value) ||
+            (row.brown || '').toLowerCase().includes(value)) {
           return true;
         }
-        // Check otherRism (array or single object with .label)
-        if (row.otherRism) {
-          const otherRisms = Array.isArray(row.otherRism) ? row.otherRism : [row.otherRism];
-          if (otherRisms.some(item => (item?.label || '').toLowerCase().includes(value))) {
-            return true;
-          }
-        }
-        // Check vd16.label
-        if ((row.vd16?.label || '').toLowerCase().includes(value)) {
-          return true;
-        }
-        // Check otherVD16 (array or single object with .label)
-        if (row.otherVD16) {
-          const otherVD16s = Array.isArray(row.otherVD16) ? row.otherVD16 : [row.otherVD16];
-          if (otherVD16s.some(item => (item?.label || '').toLowerCase().includes(value))) {
-            return true;
-          }
-        }
-        // Check brown (plain string)
-        if ((row.brown || '').toLowerCase().includes(value)) {
+        // Check otherRism and otherVD16 (arrays of objects with .label)
+        if (labelArrayMatches(row.otherRism, value) || labelArrayMatches(row.otherVD16, value)) {
           return true;
         }
         return false;
@@ -1355,6 +1329,13 @@ window.addEventListener('load', function () {
     if (!provenance) return false;
     const provenances = Array.isArray(provenance) ? provenance : [provenance];
     return provenances.some(prov => (prov?.[fieldName] || '').toLowerCase().includes(value));
+  }
+
+  // Helper function to check if array of objects with .label property matches a search value
+  function labelArrayMatches(data, value) {
+    if (!data) return false;
+    const items = Array.isArray(data) ? data : [data];
+    return items.some(item => (item?.label || '').toLowerCase().includes(value));
   }
 
   // Uses a native DOM click on cells[0] (the dt-control chevron column) —
