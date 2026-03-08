@@ -1313,8 +1313,8 @@ window.addEventListener('load', function () {
           if (simpleFields.some(v => (v || '').toLowerCase().includes(word))) {
             return true;
           }
-          // Check otherRism and otherVD16 (arrays of objects with .label)
-          if (labelArrayMatches(row.otherRism, word) || labelArrayMatches(row.otherVD16, word)) {
+          // Check otherRism, otherVD16, and otherShelfmark (arrays of objects with .label)
+          if (labelArrayMatches(row.otherRism, word) || labelArrayMatches(row.otherVD16, word) || labelArrayMatches(row.otherShelfmark, word)) {
             return true;
           }
           // Check bibliography fields (including referencedBy and relatedResource)
@@ -1710,6 +1710,12 @@ window.addEventListener('load', function () {
             // Check Brown (identifiers subgroup)
             if (checkSimpleField(rowData, 'brown', word, matchedSubgroups, 'identifiers')) {
               hasDetailMatch = true;
+            }
+            
+            // Check otherShelfmark (identifiers subgroup)
+            if (labelArrayMatches(rowData.otherShelfmark, word)) {
+              hasDetailMatch = true;
+              matchedSubgroups.add('identifiers');
             }
           });
         }
