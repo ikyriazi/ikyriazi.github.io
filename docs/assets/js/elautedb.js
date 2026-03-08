@@ -1333,7 +1333,18 @@ window.addEventListener('load', function () {
       if (this.child.isShown()) return;
       
       // Check if any search term matches fields only visible in detail view
-      const hasDetailMatch = active.some(({ field, value }) => {
+      const hasDetailMatch = active.some(({ field, value, mode }) => {
+        // Skip Person field - person data is only in main table
+        if (field === 'Person') return false;
+        
+        // For "Place" field, check provenance (shown in detail contextual section)
+        if (field === 'Place' && rowData.provenance) {
+          const provenances = Array.isArray(rowData.provenance) ? rowData.provenance : [rowData.provenance];
+          // In list mode, check normalizedName; in free mode, check label
+          const fieldToCheck = mode === 'list' ? 'normalizedName' : 'label';
+          if (provenances.some(prov => (prov?.[fieldToCheck] || '').toLowerCase().includes(value))) return true;
+        }
+        
         // For "All fields" or "Title", check alternativeTitle
         if ((field === 'Title' || field === 'All fields') && rowData.alternativeTitle) {
           if ((rowData.alternativeTitle || '').toLowerCase().includes(value)) return true;
