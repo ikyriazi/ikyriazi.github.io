@@ -1190,6 +1190,10 @@ window.addEventListener('load', function () {
         if (provenanceMatches(row.provenance, value)) {
           return true;
         }
+        // Check function and codicology (arrays of objects with .label)
+        if (labelArrayMatches(row.function, value) || labelArrayMatches(row.codicology, value)) {
+          return true;
+        }
         return false;
       }
       case 'Title':
@@ -1498,16 +1502,6 @@ window.addEventListener('load', function () {
             hasDetailMatch = true;
           }
           
-          // Check main description/comment (no subgroup)
-          if (checkDescriptionComment(rowData, value)) {
-            hasDetailMatch = true;
-          }
-          
-          // Check nested description/comment in provenance, function, codicology (contextual subgroup)
-          if (checkNestedContextualFields(rowData, value, recordId, matchedSubgroups, badgesToActivate)) {
-            hasDetailMatch = true;
-          }
-          
           // Check bibliography and related resources (bibliography subgroup)
           if (checkBibliographyFields(rowData, value)) {
             hasDetailMatch = true;
@@ -1516,6 +1510,12 @@ window.addEventListener('load', function () {
           
           // Check provenance (contextual subgroup)
           if (provenanceMatches(rowData.provenance, value)) {
+            hasDetailMatch = true;
+            matchedSubgroups.add('contextual');
+          }
+          
+          // Check function and codicology labels (contextual subgroup)
+          if (labelArrayMatches(rowData.function, value) || labelArrayMatches(rowData.codicology, value)) {
             hasDetailMatch = true;
             matchedSubgroups.add('contextual');
           }
