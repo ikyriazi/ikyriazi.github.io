@@ -439,8 +439,21 @@ window.addEventListener('load', function () {
      ───────────────────────────────────────────── */
   function initModeDropdownEl(tabs, input, list, wrap, items) {
     let mode = 'free', highlighted = -1, listMemory = '';
-    function showSelected(name) { input.value = name; input.style.display = ''; input.style.fontWeight = '600'; }
-    function hideInput() { input.value = ''; input.style.display = 'none'; }
+    function showSelected(name) {
+      input.value = name; 
+      input.style.display = ''; 
+      input.style.fontWeight = '600';
+      // Trigger input event to update search results
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    function hideInput(triggerEvent = false) {
+      input.value = ''; 
+      input.style.display = 'none';
+      // Only trigger input event if explicitly requested (user cleared content)
+      if (triggerEvent) {
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
     function renderList() {
       list.innerHTML = ''; highlighted = -1;
       items.forEach(name => {
@@ -472,7 +485,7 @@ window.addEventListener('load', function () {
     input.addEventListener('keydown', e => {
       if (mode !== 'list') return;
       const its = list.querySelectorAll('.suggestion-item');
-      if (e.key === 'Backspace' || e.key === 'Delete') { listMemory = ''; hideInput(); renderList(); }
+      if (e.key === 'Backspace' || e.key === 'Delete') { listMemory = ''; hideInput(true); renderList(); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); highlighted = Math.min(highlighted + 1, its.length - 1); its.forEach((el, i) => el.classList.toggle('highlighted', i === highlighted)); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); highlighted = Math.max(highlighted - 1, 0); its.forEach((el, i) => el.classList.toggle('highlighted', i === highlighted)); }
       else if (e.key === 'Enter' && highlighted >= 0) { listMemory = its[highlighted].textContent; showSelected(listMemory); list.classList.remove('open'); }
@@ -958,11 +971,14 @@ window.addEventListener('load', function () {
       const { value } = getBuilderRowData(row);
       if (value) count++;
     });
+    const previousCount = pillState.fields;
     pillState.fields = count;
     updatePill();
     
-    // Reset expand-all state when search changes to prevent unwanted auto-expansion
-    redrawTable();
+    // Only redraw table if there are search terms or if we just cleared the last term
+    if (count > 0 || previousCount > 0) {
+      redrawTable();
+    }
   });
 
   /* ─────────────────────────────────────────────
