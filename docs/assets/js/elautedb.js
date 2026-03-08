@@ -840,8 +840,19 @@ window.addEventListener('load', function () {
     }
 
     list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); if (table) table.draw(); });
-    if (!showValues) tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); if (table) table.draw(); });
-    const resetChips = () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); };
+    
+    const resetChips = () => { 
+      list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); 
+      updateTag(); 
+    };
+    
+    if (!showValues) {
+      tagX.addEventListener('click', () => { 
+        resetChips(); 
+        if (table) table.draw(); 
+      });
+    }
+    
     searchInput.addEventListener('input', () => {
       const term = searchInput.value.toLowerCase();
       list.querySelectorAll('.sm-chip').forEach(chip => { chip.style.display = chip.textContent.toLowerCase().includes(term) ? '' : 'none'; });
@@ -898,6 +909,13 @@ window.addEventListener('load', function () {
   const toolboxFilterItems = document.getElementById('toolboxFilterItems');
   const toolboxFiltersSection = document.getElementById('toolboxFiltersSection');
 
+  function getBuilderRowData(row) {
+    const field = (row.querySelector('.field-select') || {}).value || 'All fields';
+    const inp = row.querySelector('.builder-input, .p2b-text');
+    const value = inp ? inp.value.trim() : '';
+    return { field, inp, value };
+  }
+
   function updatePill() {
     const f = pillState.fields, fi = pillState.filters;
     if (f === 0 && fi === 0) { 
@@ -920,28 +938,31 @@ window.addEventListener('load', function () {
     updateToolboxContent();
   }
   
+  function createToolboxItem(label, value, onRemove) {
+    const item = document.createElement('div');
+    item.className = 'e-item';
+    item.innerHTML = `
+      <span class="e-item-label">${label}: <span class="e-item-value">${value}</span></span>
+      <button class="e-item-remove" type="button">${SVG_X}</button>
+    `;
+    const removeBtn = item.querySelector('.e-item-remove');
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onRemove();
+    });
+    return item;
+  }
+
   function updateToolboxContent() {
     // Update search items
     toolboxSearchItems.innerHTML = '';
     let searchCount = 0;
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
+      const { field, inp, value } = getBuilderRowData(row);
       if (value) {
         searchCount++;
-        const item = document.createElement('div');
-        item.className = 'e-item';
-        item.innerHTML = `
-          <span class="e-item-label">${field}: <span class="e-item-value">${value}</span></span>
-          <button class="e-item-remove" type="button">${SVG_X}</button>
-        `;
-        const removeBtn = item.querySelector('.e-item-remove');
-        removeBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // Clear the input value
+        const item = createToolboxItem(field, value, () => {
           if (inp) inp.value = '';
-          // Trigger input event to update everything
           inp.dispatchEvent(new Event('input', { bubbles: true }));
         });
         toolboxSearchItems.appendChild(item);
@@ -956,21 +977,9 @@ window.addEventListener('load', function () {
     const physType = document.querySelector('#physRadioList1 .phys-radio-row.active');
     if (physType && physType.dataset.val !== 'Both') {
       filterCount++;
-      const item = document.createElement('div');
-      item.className = 'e-item';
-      item.innerHTML = `
-        <span class="e-item-label">Physical type: <span class="e-item-value">${physType.dataset.val}</span></span>
-        <button class="e-item-remove" type="button">${SVG_X}</button>
-      `;
-      const removeBtn = item.querySelector('.e-item-remove');
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Reset physical type to "Both"
+      const item = createToolboxItem('Physical type', physType.dataset.val, () => {
         const bothRow = document.querySelector('#physRadioList1 .phys-radio-row[data-val="Both"]');
         if (bothRow) bothRow.click();
-        // Ensure pill and toolbox are updated
-        updatePill();
-        if (table) table.draw();
       });
       toolboxFilterItems.appendChild(item);
     }
@@ -979,21 +988,9 @@ window.addEventListener('load', function () {
     const dateRange = getActiveDateRange();
     if (dateRange.min !== 1450 || dateRange.max !== 1620) {
       filterCount++;
-      const item = document.createElement('div');
-      item.className = 'e-item';
-      item.innerHTML = `
-        <span class="e-item-label">Date: <span class="e-item-value">${dateRange.min}–${dateRange.max}</span></span>
-        <button class="e-item-remove" type="button">${SVG_X}</button>
-      `;
-      const removeBtn = item.querySelector('.e-item-remove');
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Reset date range to default
+      const item = createToolboxItem('Date', `${dateRange.min}–${dateRange.max}`, () => {
         const dateTagX = document.getElementById('dateTagX1');
         if (dateTagX) dateTagX.click();
-        // Ensure pill and toolbox are updated
-        updatePill();
-        if (table) table.draw();
       });
       toolboxFilterItems.appendChild(item);
     }
@@ -1006,16 +1003,7 @@ window.addEventListener('load', function () {
       const selectedChips = shelfList ? shelfList.querySelectorAll('.sm-chip.selected') : [];
       
       selectedChips.forEach(chip => {
-        const item = document.createElement('div');
-        item.className = 'e-item';
-        item.innerHTML = `
-          <span class="e-item-label">Shelfmark: <span class="e-item-value">${chip.textContent}</span></span>
-          <button class="e-item-remove" type="button">${SVG_X}</button>
-        `;
-        const removeBtn = item.querySelector('.e-item-remove');
-        removeBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          
+        const item = createToolboxItem('Shelfmark', chip.textContent, () => {
           // Find and click the corresponding pill chip X in the accordion header
           // This will properly trigger updateTag() and onFilterChange callback
           const pillTagsRow = document.querySelector('#shelfAccordion1 .pill-tags-row');
@@ -1032,10 +1020,9 @@ window.addEventListener('load', function () {
             }
           }
           
-          // Fallback: if we couldn't find the pill chip, do it manually
-          chip.classList.remove('selected');
-          updatePill();
-          if (table) table.draw();
+          // Fallback: if we couldn't find the pill chip, click the chip itself to deselect it
+          // This will trigger updateTag() and table.draw() via the list click handler
+          chip.click();
         });
         toolboxFilterItems.appendChild(item);
       });
@@ -1050,8 +1037,8 @@ window.addEventListener('load', function () {
   builderRowsEl.addEventListener('input', () => {
     let count = 0;
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const inp = row.querySelector('.builder-input, .p2b-text');
-      if (inp && inp.value.trim()) count++;
+      const { value } = getBuilderRowData(row);
+      if (value) count++;
     });
     pillState.fields = count;
     updatePill();
@@ -1167,13 +1154,12 @@ window.addEventListener('load', function () {
       
       // Clear all filters
       const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
-      if (clearFiltersBtn) clearFiltersBtn.click();
+      if (clearFiltersBtn) clearFiltersBtn.click(); // This already calls table.draw()
       
-      // Ensure filter count is reset (should be handled by clearFiltersBtn, but set explicitly to be safe)
+      // Defensive: ensure filter count is fully reset
       pillState.filters = 0;
       
       updatePill();
-      if (table) table.draw();
     });
   }
 
@@ -1206,10 +1192,8 @@ window.addEventListener('load', function () {
   function getActiveRows() {
     const active = [];
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp   = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
-      if (value) active.push({ field, value: (value || '').toLowerCase() });
+      const { field, value } = getBuilderRowData(row);
+      if (value) active.push({ field, value: value.toLowerCase() });
     });
     return active;
   }
@@ -1217,9 +1201,7 @@ window.addEventListener('load', function () {
   function getActiveTitleTerm() {
     let term = '';
     builderRowsEl.querySelectorAll('.builder-row').forEach(row => {
-      const field = (row.querySelector('.field-select') || {}).value || 'All fields';
-      const inp   = row.querySelector('.builder-input, .p2b-text');
-      const value = inp ? inp.value.trim() : '';
+      const { field, value } = getBuilderRowData(row);
       if ((field === 'Title' || field === 'All fields') && value) term = value;
     });
     return term;
