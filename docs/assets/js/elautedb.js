@@ -473,17 +473,22 @@ window.addEventListener('load', function () {
             freeTextMemory = input.value.trim();
           }
           input.readOnly = true; input.style.caretColor = 'transparent'; input.placeholder = '';
-          if (listMemory) { showSelected(listMemory); } else { hideInput(); }
+          if (listMemory) { 
+            showSelected(listMemory); 
+          } else { 
+            hideInput(); 
+            input.value = ''; // Clear input value when no list selection
+          }
           renderList();
         } else {
+          // Switching to free-text mode
           list.classList.remove('open'); input.style.fontWeight = '';
           input.style.display = ''; input.readOnly = false; input.style.caretColor = '';
           input.placeholder = 'Search...';
           // Restore free-text value
           input.value = freeTextMemory;
-          if (freeTextMemory) {
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-          }
+          // Trigger input event to update search with current free-text value (may be empty)
+          input.dispatchEvent(new Event('input', { bubbles: true }));
         }
       });
     });
