@@ -1529,6 +1529,8 @@ window.addEventListener('load', function () {
           if (matchedSubgroups.size > 0) {
             setTimeout(() => {
               showSubgroupsInChildRow(row, matchedSubgroups);
+              // Ensure feather icons are converted to SVG before activating badges
+              feather.replace();
               // Activate badges for matched content
               if (badgesToActivate.length > 0) {
                 activateMatchedBadges(badgesToActivate);
@@ -1545,6 +1547,8 @@ window.addEventListener('load', function () {
       // Already shown - ensure matched subgroups are visible and badges activated
       else if (hasDetailMatch && isShown && matchedSubgroups.size > 0) {
         showSubgroupsInChildRow(row, matchedSubgroups);
+        // Ensure feather icons are converted to SVG before activating badges
+        feather.replace();
         // Activate badges for matched content
         if (badgesToActivate.length > 0) {
           activateMatchedBadges(badgesToActivate);
@@ -1564,11 +1568,14 @@ window.addEventListener('load', function () {
           $targetContent.show();
           // Add active class to badge
           $badge.addClass('active');
-          // Change icon from plus to minus
-          $badge.find('svg').replaceWith(feather.icons['minus-circle'].toSvg({ 
-            width: 12, height: 12, 
-            style: 'vertical-align: -2px; margin-right: 4px;' 
-          }));
+          // Change icon from plus to minus - handle both <i> and <svg> elements
+          const $icon = $badge.find('svg, i').first();
+          if ($icon.length) {
+            $icon.replaceWith(feather.icons['minus-circle'].toSvg({ 
+              width: 12, height: 12, 
+              style: 'vertical-align: -2px; margin-right: 4px;' 
+            }));
+          }
           // Add cd-expanded class to the row
           $badge.closest('tr').addClass('cd-expanded');
           // Remove from manually hidden content
