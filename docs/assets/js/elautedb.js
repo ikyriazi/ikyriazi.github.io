@@ -171,104 +171,8 @@ window.addEventListener('load', function () {
      DataTable rendering helpers
      ───────────────────────────────────────────── */
 
-  function highlightText(text, term) {
-    if (!text) return '';
-    const str = String(text);
-    const t = (term || '').trim();
-    if (!t) return str; // Return original HTML content without escaping
-
-    try {
-      // Create a temporary div to parse HTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = str;
-
-      // Get plain text content (without HTML tags)
-      const plainText = (tempDiv.textContent || tempDiv.innerText || '').toLowerCase();
-
-      // Check if the search term exists as a phrase in the plain text
-      if (!plainText.includes(t.toLowerCase())) {
-        return str; // Term not found, return original
-      }
-
-      // Find ALL occurrences of the search term in plain text
-      const searchLower = t.toLowerCase();
-      const matches = [];
-      let pos = 0;
-      while ((pos = plainText.indexOf(searchLower, pos)) !== -1) {
-        matches.push({ start: pos, end: pos + t.length });
-        pos += 1; // Move forward by 1 to find overlapping matches
-      }
-
-      if (matches.length === 0) return str;
-
-      // Now traverse the DOM and highlight all matching ranges
-      let currentPos = 0;
-      let matchIndex = 0;
-
-      function highlightNode(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const textContent = node.textContent;
-          const nodeStart = currentPos;
-          const nodeEnd = currentPos + textContent.length;
-
-          // Find all matches that overlap with this text node
-          const nodeMatches = [];
-          for (let i = matchIndex; i < matches.length; i++) {
-            const match = matches[i];
-            if (match.end <= nodeStart) {
-              matchIndex = i + 1;
-              continue;
-            }
-            if (match.start >= nodeEnd) break;
-            nodeMatches.push(match);
-          }
-
-          if (nodeMatches.length > 0) {
-            const span = document.createElement('span');
-            let lastIndex = 0;
-
-            nodeMatches.forEach(match => {
-              const highlightStart = Math.max(0, match.start - nodeStart);
-              const highlightEnd = Math.min(textContent.length, match.end - nodeStart);
-
-              // Add text before this highlight (if any)
-              if (highlightStart > lastIndex) {
-                span.appendChild(document.createTextNode(textContent.substring(lastIndex, highlightStart)));
-              }
-
-              // Add highlighted portion
-              const mark = document.createElement('mark');
-              mark.className = 'search-highlight';
-              mark.textContent = textContent.substring(highlightStart, highlightEnd);
-              span.appendChild(mark);
-
-              lastIndex = highlightEnd;
-            });
-
-            // Add remaining text after last highlight (if any)
-            if (lastIndex < textContent.length) {
-              span.appendChild(document.createTextNode(textContent.substring(lastIndex)));
-            }
-
-            node.parentNode.replaceChild(span, node);
-          }
-
-          currentPos = nodeEnd;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          // Recursively process child nodes
-          Array.from(node.childNodes).forEach(highlightNode);
-        }
-      }
-
-      highlightNode(tempDiv);
-      return tempDiv.innerHTML;
-    } catch (e) {
-      return str; // Return original on error
-    }
-  }
-
   function generateSimpleRow(labelText, value, skipHighlight = false) {
-    const displayValue = skipHighlight ? value : highlightText(value, getActiveTitleTerm());
+    const displayValue = value;
     return '<tr><td class="details-placeholder"></td><td class="details-label">' + labelText +
       '</td><td class="details-value">' + displayValue + '</td><td class="details-CD" colspan="7"></td></tr>';
   }
@@ -280,23 +184,20 @@ window.addEventListener('load', function () {
       if (!item.label) return;
       const labelCell = getFirstLabel(index, labelText);
       const parts = ['description', 'comment'].filter(type => item[type]);
-      const searchTerm = (getActiveTitleTerm() || '').toLowerCase().trim();
-      const hasSearchMatch = searchTerm && parts.some(type =>
-        stripHtml(item[type]).toLowerCase().includes(searchTerm)
-      );
+      const hasSearchMatch = false;
       const badges = parts.map(type => {
-        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
-        const iconName = isActive ? 'minus-circle' : 'plus-circle';
-        return `<span class="cd-badge${isActive ? ' active' : ''}" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
+        const isActive = false;
+        const iconName = 'plus-circle';
+        return `<span class="cd-badge" data-target="${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}"><i data-feather="${iconName}" style="width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px;"></i>${type}</span>`;
       }).join('');
-      const highlightedLabel = highlightText(item.label, getActiveTitleTerm());
-      const rowClass = hasSearchMatch ? ' class="cd-expanded"' : '';
+      const highlightedLabel = item.label;
+      const rowClass = '';
       rows += `<tr${rowClass}><td class="details-placeholder"></td><td class="details-label">${labelCell}</td><td class="details-value">${highlightedLabel}</td><td class="details-CD" colspan="7"><div class="cd-badges">${badges}</div>`;
       parts.forEach(type => {
         const contentId = `${recordId}-${idPrefix}-${getTypeSuffix(type)}-${index}`;
-        const isActive = searchTerm && stripHtml(item[type]).toLowerCase().includes(searchTerm);
-        const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : (isActive ? 'block' : 'none');
-        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${highlightText(item[type], getActiveTitleTerm())}</div></div>`;
+        const isActive = false;
+        const displayStyle = manuallyHiddenContent.has(contentId) ? 'none' : 'none';
+        rows += `<div class="CD-content" id="${contentId}" style="display: ${displayStyle};"><div class="CD-text">${item[type]}</div></div>`;
       });
       rows += '</td></tr>';
     });
@@ -413,7 +314,7 @@ window.addEventListener('load', function () {
 
   function renderWithHighlight(data, type, removeBracket = false) {
     if (type === 'sort') return (removeBracket && data) ? data.replace(/^\[/, '') : (data || '');
-    return (type === 'display') ? highlightText(data, getActiveTitleTerm()) : (data || '');
+    return (data || '');
   }
 
   function combineValues(row, primaryField, otherField) {
@@ -430,7 +331,7 @@ window.addEventListener('load', function () {
     if (type !== 'display') return '';
     const values = [];
     if (row[primaryField] && row[primaryField].label) {
-      const h = highlightText(row[primaryField].label, getActiveTitleTerm());
+      const h = row[primaryField].label;
       values.push(row[primaryField].url
         ? `<a href="${row[primaryField].url}" target="_blank" rel="noopener noreferrer">${h}</a>`
         : h);
@@ -439,7 +340,7 @@ window.addEventListener('load', function () {
       const items = Array.isArray(row[otherField]) ? row[otherField] : [row[otherField]];
       items.forEach(item => {
         if (item && item.label) {
-          const h = highlightText(item.label, getActiveTitleTerm());
+          const h = item.label;
           values.push(item.url
             ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer">${h}</a>`
             : h);
@@ -1530,11 +1431,10 @@ window.addEventListener('load', function () {
             defaultContent: '',
             render: function(data, type, row) {
               if (type === 'display') {
-                const highlighted = highlightText(data, getActiveTitleTerm());
                 if (row.shelfmark && row.shelfmark.url) {
-                  return `<a href="${row.shelfmark.url}" target="_blank" rel="noopener noreferrer">${highlighted}</a>`;
+                  return `<a href="${row.shelfmark.url}" target="_blank" rel="noopener noreferrer">${data}</a>`;
                 }
-                return highlighted;
+                return data || '';
               }
               return data || '';
             }
@@ -1563,7 +1463,7 @@ window.addEventListener('load', function () {
                 }
                 return 0;
               }
-              if (type === 'display') return highlightText(data, getActiveTitleTerm());
+              if (type === 'display') return data || '';
               return data || '';
             }
           },
