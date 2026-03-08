@@ -14,25 +14,8 @@ window.addEventListener('load', function () {
   // Dynamic places list - populated from data
   let DYNAMIC_PLACES = [];
 
-  const SHELFMARKS = [
-    { heading: 'A — Austria', chips: ['A-Imf','A-Wgm','A-Wgm 676/137','A-Wkm KK_5410','A-Wn 396116-A','A-Wn Cod. 9704','A-Wn MS47356-8°','A-Wn Mus.Hs. 18688','A-Wn Mus.Hs. 18827','A-Wn Mus.Hs. 41950','A-Wn SA.78.C.29 19','A-Wn SA.78.F.26/2-3 R/XVI/Oeglin/1'] },
-    { heading: 'B — Belgium', chips: ['B-Br','B-Br Fétis 2.884 b 9899 48','B-Br Fétis 4.014 A (RP)','B-Br Fétis 6.197 A (RP)'] },
-    { heading: 'CH — Switzerland', chips: ['CH-A AKB Mb 465','CH-BEsu Hospinian 141','CH-BEsu MUE Hospinian 141','CH-Bu F IX 23','CH-Bu F IX 56','CH-Bu F IX 63','CH-Bu F IX 70','CH-Bu F X','CH-Bu F X 1','CH-Bu F X 10','CH-Bu F X 11','CH-Bu F X 17','CH-Bu F X 18','CH-Bu F X 19','CH-Bu F X 2','CH-Bu F X 20','CH-Bu F X 21','CH-Bu F X 22','CH-Bu F X 23','CH-Bu F X 24','CH-Bu F X 25','CH-Bu F X 3','CH-Bu F X 4','CH-Bu F X 5','CH-Bu F X 6','CH-Bu F X 7','CH-Bu F X 8','CH-Bu kk II 27','CH-E','CH-SAM Ms. FP/M 1','CH-SAM Ms. FP/M 2','CH-SGs Cod. Sang. 463','CH-ZO','CH-Zz Mus. 908'] },
-    { heading: 'CZ — Czech Republic', chips: ['CZ-Bm','CZ-Bu','CZ-Pu Hs. 223-20'] },
-    { heading: 'D — Germany', chips: ['D-As Tonk Schl 549','D-B','D-B 1 an: Yd 5008','D-B 2 an: Yd 5008','D-B Ms.germ.qu. 719','D-B Ms.germ.qu.718','D-B Mus. ant. theor. V. 30','D-B Mus.ant.pract. A 180','D-B Mus.ant.pract. G 435','D-B Mus.ant.pract. O 65','D-B Mus.ant.pract. O120','D-B Mus.ant.theor G 60','D-B Mus.ant.theor. A 15','D-B Mus.ms. 40026','D-B Mus.ms. 40588','D-B Yd 5006','D-B Yd 5008 R','D-B Yd5041','D-B Yd9496','D-B Yd9503','D-Cl Rara/BIII 1/9(Beil 1)','D-DS Gü 13788','D-FLs KdM1 a/b','D-Gms','D-Gs 8 MUS IV, 4600','D-HAu Pon IIe 290 (1)','D-HAu Pon IIe 290 (2)','D-HEu cpg 343','D-HTd','D-Ju 4 Mus. 12a(1)','D-Ju 4 Mus. 12a(2)','D-Ju 4 Mus. 12b(1)','D-Ju 4 Mus. 12c(1)','D-Ju 4 Mus. 12d(1)','D-Ju 4 Mus.12b(2)','D-Ju 4 Mus.12c(2)','D-Ju 4 Mus.12d(2)','D-KA Don Mus.Autogr. 1','D-Kl 2° Ms.Math. 31','D-LEm','D-LEm I. 8° 191','D-LEm I.8°191','D-LEm II. 6. 13 / D-Dl II. 6. 13','D-LEm II. 6. 7','D-Mbs 2 Mus.pr. 156.16/20#16','D-Mbs 4 Mus.pr.167','D-Mbs 4 Mus.th. 1616','D-Mbs 4 Mus.th. 729','D-Mbs 4 Mus.th. 729#Beibd.1','D-Mbs 4° Mus pr 439','D-Mbs Einbl. I,6','D-Mbs Mus.ms. 1501','D-Mbs Mus.ms. 1511c','D-Mbs Mus.ms. 1511d','D-Mbs Mus.ms. 1512','D-Mbs Mus.ms. 266','D-Mbs Mus.ms. 267','D-Mbs Mus.ms. 268','D-Mbs Mus.ms. 269','D-Mbs Mus.ms. 270','D-Mbs Mus.ms. 271','D-Mbs Mus.ms. 2987','D-Mbs Mus.pr. 316','D-Mbs Mus.pr. 35','D-Mbs Mus.pr. 39#Beibd.2','D-Mbs Mus.pr. 46#Beibd.1','D-Mbs Mus.th. 49','D-Mbs Rar. 27','D-Mbs Rar. 567','D-Mu 4° Cod.ms. 718','D-Mu 8° Cod. 328-331','D-Ngm','D-Ngm 8° Postinc. M. 261','D-ROu Th A 1','D-Rp Ms.Th. 98 4°','D-Us Smr.misc 131b','D-Us Smr.misc 131b_copy','D-Usch Misc.235c','D-W 2.14 Musica','D-W 3 Musica','D-W 43 Musica Helmst.','D-W Musica 4.1.1','D-W Musica Helmst. (3)','D-WRZ 14,6:60e(n.1.)','D-Wa cod. VII B Hs Nr. 264','D-Z 2.8.10(5)','D-Z 30.5.20(1)','D-Z Mus. 115.3','D-Z Mus. 15.1','D-Z Mus. 15.1 b (Mu 94)','D-Z Mus. 82.1 (Mu 477)','D-Z Mus. 82.2'] },
-    { heading: 'DK — Denmark', chips: ['DK-Kk'] },
-    { heading: 'E — Spain', chips: ['E-Mn R/22789'] },
-    { heading: 'F — France', chips: ['F-Pc','F-Pn RES VM7-663','F-Pn Rés. 658','F-Ssp M 01 (f.k. IIII)','F-Ssp M 1'] },
-    { heading: 'GB — Great Britain', chips: ['GB-Eu','GB-Lbl','GB-Lbl C.125.CC.9.','GB-Lbl Hirsch I 594','GB-Lbl Hirsch IV 1603','GB-Lbl Hirsch IV 1604','GB-Lbl K.1.b.11.','GB-Lbl K.8.c.9','GB-Ob Mus. 156 e.25Music'] },
-    { heading: 'H — Hungary', chips: ['H-Ba K 53/II'] },
-    { heading: 'NL — Netherlands', chips: ['NL-DHgm','NL-HAN'] },
-    { heading: 'PL — Poland', chips: ['PL-Kj Mus.ant.pract. L 1150','PL-Kj Mus.ant.pract. N 175a','PL-Kj Mus.ms. 40154','PL-LEtpn (Lost acc. to Brown)','PL-WRk 352'] },
-    { heading: 'RISM', chips: ['RISM B/8 1534/06'] },
-    { heading: 'S — Sweden', chips: ['S-Uu Lq.XI.3. n. 663'] },
-    { heading: 'UKR — Ukraine', chips: ['UKR-LVu 1400/1'] },
-    { heading: 'US — United States', chips: ['US-Bp','US-CA','US-NHub Osborn Music MS 31','US-R','US-Wc','US-Wc MT640 .J9','US-Wc MT640 .N3'] },
-    { heading: 'olim', chips: ['olim CZ-Pu 59r 469'] },
-  ];
+  // Dynamic shelfmarks list - populated from data
+  let DYNAMIC_SHELFMARKS = [];
 
   const FUNCTIONS_DATA = [
     'broadsheet / Einblattdruck', 'leaflet / Liedflugschrift', 'part book / Stimmbuch',
@@ -533,7 +516,7 @@ window.addEventListener('load', function () {
 
   [1].forEach(n => {
     document.getElementById('filterPanel' + n).innerHTML = buildFilterPanel(n);
-    renderChipGrid(document.getElementById('shelfList' + n), SHELFMARKS);
+    // Shelfmarks will be rendered after data is loaded
     renderChipGrid(document.getElementById('fnList'    + n), FUNCTIONS_DATA);
     renderRadioList(document.getElementById('physRadioList'  + n), PHYS_RADIO_VALUES);
     renderRadioList(document.getElementById('fundaRadioList' + n), FUNDA_RADIO_VALUES);
@@ -847,7 +830,7 @@ window.addEventListener('load', function () {
           pill.className = 'pill-chip' + (chip.classList.contains('sm-chip--grey') ? ' pill-chip--grey' : '');
           pill.textContent = chip.textContent;
           const x = document.createElement('span'); x.className = 'pill-chip-x'; x.textContent = '×';
-          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); });
+          x.addEventListener('click', () => { chip.classList.remove('selected'); updateTag(); if (table) table.draw(); });
           pill.appendChild(x); pillRow.appendChild(pill);
         });
       } else {
@@ -856,8 +839,8 @@ window.addEventListener('load', function () {
       }
     }
 
-    list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); });
-    if (!showValues) tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); });
+    list.addEventListener('click', e => { const chip = e.target.closest('.sm-chip'); if (!chip) return; chip.classList.toggle('selected'); updateTag(); if (table) table.draw(); });
+    if (!showValues) tagX.addEventListener('click', () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); if (table) table.draw(); });
     const resetChips = () => { list.querySelectorAll('.sm-chip.selected').forEach(c => c.classList.remove('selected')); updateTag(); };
     searchInput.addEventListener('input', () => {
       const term = searchInput.value.toLowerCase();
@@ -895,8 +878,14 @@ window.addEventListener('load', function () {
       if (onFilterChange) onFilterChange(val !== 'Both');
     }
 
-    rows.forEach(r => r.addEventListener('click', () => setVal(r.dataset.val)));
-    tagX.addEventListener('click', () => setVal('Both'));
+    rows.forEach(r => r.addEventListener('click', () => { 
+      setVal(r.dataset.val); 
+      if (table) table.draw(); 
+    }));
+    tagX.addEventListener('click', () => { 
+      setVal('Both'); 
+      if (table) table.draw(); 
+    });
     return () => setVal('Both');
   }
 
@@ -911,7 +900,15 @@ window.addEventListener('load', function () {
 
   function updatePill() {
     const f = pillState.fields, fi = pillState.filters;
-    if (f === 0 && fi === 0) { pill.classList.remove('visible'); return; }
+    if (f === 0 && fi === 0) { 
+      pill.classList.remove('visible'); 
+      // Close the toolbox when there's nothing to show
+      const toolbox = document.getElementById('searchToolbox');
+      const chevron = document.getElementById('pillChevron');
+      if (toolbox) toolbox.classList.remove('visible');
+      if (chevron) chevron.classList.remove('open');
+      return; 
+    }
     const parts = [];
     if (f  > 0) parts.push(f  === 1 ? '1 search field'  : `${f} search fields`);
     if (fi > 0) parts.push(fi === 1 ? '1 filter' : `${fi} filters`);
@@ -940,7 +937,8 @@ window.addEventListener('load', function () {
           <button class="e-item-remove" type="button">${SVG_X}</button>
         `;
         const removeBtn = item.querySelector('.e-item-remove');
-        removeBtn.addEventListener('click', () => {
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
           // Clear the input value
           if (inp) inp.value = '';
           // Trigger input event to update everything
@@ -965,10 +963,14 @@ window.addEventListener('load', function () {
         <button class="e-item-remove" type="button">${SVG_X}</button>
       `;
       const removeBtn = item.querySelector('.e-item-remove');
-      removeBtn.addEventListener('click', () => {
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         // Reset physical type to "Both"
         const bothRow = document.querySelector('#physRadioList1 .phys-radio-row[data-val="Both"]');
         if (bothRow) bothRow.click();
+        // Ensure pill and toolbox are updated
+        updatePill();
+        if (table) table.draw();
       });
       toolboxFilterItems.appendChild(item);
     }
@@ -984,12 +986,59 @@ window.addEventListener('load', function () {
         <button class="e-item-remove" type="button">${SVG_X}</button>
       `;
       const removeBtn = item.querySelector('.e-item-remove');
-      removeBtn.addEventListener('click', () => {
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         // Reset date range to default
         const dateTagX = document.getElementById('dateTagX1');
         if (dateTagX) dateTagX.click();
+        // Ensure pill and toolbox are updated
+        updatePill();
+        if (table) table.draw();
       });
       toolboxFilterItems.appendChild(item);
+    }
+    
+    // Shelfmarks filter
+    const activeShelfmarks = getActiveShelfmarks();
+    if (activeShelfmarks.length > 0) {
+      filterCount++;
+      const shelfList = document.getElementById('shelfList1');
+      const selectedChips = shelfList ? shelfList.querySelectorAll('.sm-chip.selected') : [];
+      
+      selectedChips.forEach(chip => {
+        const item = document.createElement('div');
+        item.className = 'e-item';
+        item.innerHTML = `
+          <span class="e-item-label">Shelfmark: <span class="e-item-value">${chip.textContent}</span></span>
+          <button class="e-item-remove" type="button">${SVG_X}</button>
+        `;
+        const removeBtn = item.querySelector('.e-item-remove');
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          
+          // Find and click the corresponding pill chip X in the accordion header
+          // This will properly trigger updateTag() and onFilterChange callback
+          const pillTagsRow = document.querySelector('#shelfAccordion1 .pill-tags-row');
+          if (pillTagsRow) {
+            const pillChips = pillTagsRow.querySelectorAll('.pill-chip');
+            for (let pillChip of pillChips) {
+              if (pillChip.textContent.replace('×', '').trim() === chip.textContent.trim()) {
+                const xButton = pillChip.querySelector('.pill-chip-x');
+                if (xButton) {
+                  xButton.click();
+                  return; // Exit early, the pill chip X handler will update everything
+                }
+              }
+            }
+          }
+          
+          // Fallback: if we couldn't find the pill chip, do it manually
+          chip.classList.remove('selected');
+          updatePill();
+          if (table) table.draw();
+        });
+        toolboxFilterItems.appendChild(item);
+      });
     }
     
     // Show/hide sections based on content
@@ -1006,6 +1055,7 @@ window.addEventListener('load', function () {
     });
     pillState.fields = count;
     updatePill();
+    if (table) table.draw();
   });
 
   /* ─────────────────────────────────────────────
@@ -1109,7 +1159,8 @@ window.addEventListener('load', function () {
   // Toolbox "Clear all" button
   const toolboxClearBtn = document.getElementById('toolboxClearBtn');
   if (toolboxClearBtn) {
-    toolboxClearBtn.addEventListener('click', function() {
+    toolboxClearBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
       // Clear all search fields
       resetSearch();
       pillState.fields = 0;
@@ -1117,6 +1168,9 @@ window.addEventListener('load', function () {
       // Clear all filters
       const clearFiltersBtn = document.getElementById('clearFiltersBtn1');
       if (clearFiltersBtn) clearFiltersBtn.click();
+      
+      // Ensure filter count is reset (should be handled by clearFiltersBtn, but set explicitly to be safe)
+      pillState.filters = 0;
       
       updatePill();
       if (table) table.draw();
@@ -1241,6 +1295,13 @@ window.addEventListener('load', function () {
     };
   }
 
+  function getActiveShelfmarks() {
+    const list = document.getElementById('shelfList1');
+    if (!list) return [];
+    const selected = list.querySelectorAll('.sm-chip.selected');
+    return Array.from(selected).map(chip => chip.textContent.toLowerCase());
+  }
+
   $.fn.dataTable.ext.search.push(function (settings, _data, dataIndex) {
     if (settings.nTable.id !== 'sourcesTable') return true;
     if (!table) return true;
@@ -1269,6 +1330,25 @@ window.addEventListener('load', function () {
       if (earliestDate < dateRange.min || earliestDate > dateRange.max) {
         return false;
       }
+    }
+    
+    // Apply shelfmarks filter (OR logic - match if any selected shelfmark matches)
+    const activeShelfmarks = getActiveShelfmarks();
+    if (activeShelfmarks.length > 0) {
+      const rowShelfmarks = [];
+      if (rowData.shelfmark && rowData.shelfmark.label) {
+        rowShelfmarks.push(rowData.shelfmark.label.toLowerCase());
+      }
+      if (rowData.otherShelfmark) {
+        const otherShelfmarks = Array.isArray(rowData.otherShelfmark) ? rowData.otherShelfmark : [rowData.otherShelfmark];
+        otherShelfmarks.forEach(shelf => {
+          if (shelf && shelf.label) rowShelfmarks.push(shelf.label.toLowerCase());
+        });
+      }
+      const hasMatch = activeShelfmarks.some(activeShelf => 
+        rowShelfmarks.some(rowShelf => rowShelf === activeShelf)
+      );
+      if (!hasMatch) return false;
     }
     
     return true;
@@ -1365,7 +1445,64 @@ window.addEventListener('load', function () {
       });
       DYNAMIC_PLACES = Array.from(placesSet).sort((a, b) => a.localeCompare(b));
 
-      // Initialize search interface now that we have the persons and places lists
+      // Generate dynamic shelfmarks list from data
+      // Helper function to process a single shelfmark
+      const processShelfmark = (shelf, shelfmarksMap) => {
+        if (!shelf || !shelf.label) return;
+        
+        let heading;
+        if (shelf.holdingInstitution) {
+          const countryCode = shelf.holdingInstitution.countryCode;
+          const country = shelf.holdingInstitution.country;
+          const siglum = shelf.holdingInstitution.siglum;
+          
+          if (countryCode && country) {
+            heading = `${countryCode} — ${country}`;
+          } else if (siglum) {
+            heading = siglum;
+          } else {
+            heading = 'Other';
+          }
+        } else {
+          heading = 'Other';
+        }
+        
+        if (!shelfmarksMap.has(heading)) {
+          shelfmarksMap.set(heading, []);
+        }
+        shelfmarksMap.get(heading).push(shelf.label);
+      };
+      
+      const shelfmarksMap = new Map();
+      data.forEach(row => {
+        // Process main shelfmark
+        if (row.shelfmark) {
+          processShelfmark(row.shelfmark, shelfmarksMap);
+        }
+        // Process otherShelfmark (can be array or single object)
+        if (row.otherShelfmark) {
+          const otherShelfmarks = Array.isArray(row.otherShelfmark) ? row.otherShelfmark : [row.otherShelfmark];
+          otherShelfmarks.forEach(shelf => processShelfmark(shelf, shelfmarksMap));
+        }
+      });
+      
+      // Convert map to array format and sort
+      DYNAMIC_SHELFMARKS = Array.from(shelfmarksMap.entries())
+        .map(([heading, chips]) => ({
+          heading,
+          chips: [...new Set(chips)].sort((a, b) => a.localeCompare(b))
+        }))
+        .sort((a, b) => {
+          // Sort with 'Other' at the end
+          if (a.heading === 'Other') return 1;
+          if (b.heading === 'Other') return -1;
+          return a.heading.localeCompare(b.heading);
+        });
+      
+      // Render shelfmarks after generation
+      renderChipGrid(document.getElementById('shelfList1'), DYNAMIC_SHELFMARKS);
+
+      // Initialize search interface now that we have the persons, places, and shelfmarks lists
       initializeSearchInterface();
 
       table = $('#sourcesTable').DataTable({
