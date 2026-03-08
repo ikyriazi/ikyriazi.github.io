@@ -901,6 +901,9 @@ window.addEventListener('load', function () {
     // Update toolbox content first to recalculate pillState values
     updateToolboxContent();
     
+    // Don't show pill while the search panel is open
+    if (dropdown.classList.contains('open')) return;
+
     const f = pillState.fields, fi = pillState.filters;
     if (f === 0 && fi === 0) { 
       pill.classList.remove('visible'); 
@@ -1223,8 +1226,24 @@ window.addEventListener('load', function () {
   const dropdown = document.getElementById('searchDropdown');
   const overlay  = document.getElementById('searchOverlay');
 
-  function openDropdown()  { dropdown.classList.add('open');    icon.classList.add('drawer-open');    overlay.classList.add('show'); }
-  function closeDropdown() { dropdown.classList.remove('open'); icon.classList.remove('drawer-open'); overlay.classList.remove('show'); }
+  function openDropdown()  { 
+    dropdown.classList.add('open');    
+    icon.classList.add('drawer-open');    
+    overlay.classList.add('show'); 
+    // Hide pill and toolbox when panel opens
+    pill.classList.remove('visible');
+    const toolbox = document.getElementById('searchToolbox');
+    const chevron = document.getElementById('pillChevron');
+    if (toolbox) toolbox.classList.remove('visible');
+    if (chevron) chevron.classList.remove('open');
+  }
+  function closeDropdown() { 
+    dropdown.classList.remove('open'); 
+    icon.classList.remove('drawer-open'); 
+    overlay.classList.remove('show'); 
+    // Show pill when panel closes (if there's something to show)
+    updatePill();
+  }
 
   icon.addEventListener('click', () => dropdown.classList.contains('open') ? closeDropdown() : openDropdown());
   overlay.addEventListener('click', closeDropdown);
