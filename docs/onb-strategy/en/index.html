@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>ÖNB Strategy</title>
+<meta name="description" content="Ideas for AI-supported analysis, semantic integration and access to the ÖNB collections.">
+<link rel="alternate" hreflang="de" href="../index.html">
+<link rel="alternate" hreflang="en" href="index.html">
+<link rel="alternate" hreflang="x-default" href="../index.html">
+<link rel="stylesheet" href="../css/fonts.css">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol><symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m21 16-5-5-9 9"/></symbol><symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/><g transform="translate(7.46 6.16) scale(0.42)" stroke-width="3.57"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22M17.5 15H9"/></g></symbol><symbol id="i-score" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M6 9h12M6 12h12M6 15h12M6 18h12" stroke-width="1.25"/><circle cx="9" cy="15" r="1.5"/><path d="M10.5 15V7"/><circle cx="15" cy="12" r="1.5"/><path d="M16.5 12V6"/></symbol><symbol id="i-audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></symbol><symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></symbol><symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></symbol><symbol id="i-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></symbol><symbol id="i-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="m8.4 6.4 7.2 1.2M7 8.3l4 7.4M16.9 10.2l-3.8 5.6"/></symbol><symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol><symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol><symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V7M17 16v-8"/></symbol><symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol><symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-9-2v14c4 0 7 .5 9 2 2-1.5 5-2 9-2V4c-4 0-7 .5-9 2z"/><path d="M12 6v14"/></symbol><symbol id="i-film" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol><symbol id="i-musicsearch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 15V5l8-2v6"/><circle cx="5.5" cy="15" r="2.5"/><circle cx="16" cy="16" r="3"/><path d="m21 21-3-3"/></symbol><symbol id="i-headphones" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H10l-4 4v-4H4z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/></symbol><symbol id="i-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol><symbol id="i-notes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(0 1)"><path d="M5.5 13A2.4 2.4 0 0 1 4.8 9.5 2.4 2.4 0 0 1 6.5 6 2.4 2.4 0 0 1 10 4 2.4 2.4 0 0 1 14 4 2.4 2.4 0 0 1 17.5 6 2.4 2.4 0 0 1 19.2 9.5 2.4 2.4 0 0 1 18.5 13"/><path d="M7.5 10C8 8 10 7.2 12 7.6 14 7.2 16 8 16.5 10V13c0 3-2 5-4.5 5s-4.5-2-4.5-5z"/><path d="M9 12.8q1 .9 2 0M13 12.8q1 .9 2 0"/></g></symbol><symbol id="i-cube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></symbol></defs></svg>
+<a class="skip" href="#top">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">ÖNB Strategy · Innovation in Cultural Heritage</a>
+    <nav aria-label="Sections">
+      <a href="#extraction">01 Corpus Analysis</a>
+      <a href="#semantic">02 Semantics</a>
+      <a href="#experience">03 Experience</a>
+      <a href="#collaboration">04 Collaboration</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language"><a href="../index.html" lang="de" hreflang="de">DE</a><span aria-hidden="true">/</span><a href="index.html" lang="en" hreflang="en" aria-current="true">EN</a></div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <p class="kicker">Ideas</p>
+      <h1>Robust architecture and discovery in AI-driven times</h1>
+      <p class="lede">From digitised material to semantic access: a multitude of possibilities for extracting data, connecting information, designing experience, and collaborating with national and international partners.</p>
+    </div>
+  </section>
+
+  <section id="extraction" class="band b1" aria-labelledby="h-extraction">
+    <div class="wrap">
+      <header class="sechead"><span class="num">01</span><h2 id="h-extraction">Corpus Analysis and Data Extraction</h2></header>
+      <div class="items">
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-text"/></svg><span>Printed text</span></h3><p>Optical Character Recognition (OCR); document structure extraction; Named Entity Recognition (NER); metadata and relationships extraction</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-image"/></svg><span>Images</span></h3><p>Computer Vision (CV) → image extraction and classification; object and face detection</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pen"/></svg><span>Manuscripts</span></h3><p>Handwritten Text Recognition (HTR)</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-score"/></svg><span>Score images</span></h3><p>Optical Music Recognition (OMR) → symbolic music data</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-audio"/></svg><span>Audio</span></h3><p>Acoustic feature extraction → pitch and tempo estimation; Automatic Music Transcription (AMT); instrument recognition; audio fingerprints</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-map"/></svg><span>Maps</span></h3><p>Georeferencing; toponym recognition</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-mic"/></svg><span>Spoken word</span></h3><p>Automatic Speech Recognition (ASR); Voice Activity Detection (VAD) → transcription; speaker and language identification</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-video"/></svg><span>Video</span></h3><p>Frame extraction and sampling; scene segmentation; object and face detection; action recognition</p></article>
+        <article><h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-cube"/></svg><span>Physical objects</span></h3><p>3D capture / digitization; structured-light scanning; laser scanning (LiDAR); photogrammetry → surface curvature analysis; inscription detection; fragment reassembly</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="semantic" class="band b2" aria-labelledby="h-semantic">
+    <div class="wrap">
+      <header class="sechead"><span class="num">02</span><h2 id="h-semantic">Semantic Knowledge Integration, Reasoning, and Access</h2></header>
+      <div class="items">
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-graph"/></svg><span>Knowledge Representation &amp; Integration</span></h3>
+          <p>Knowledge graph (KG) construction; connecting objects, people, events, and places across ÖNB collections and museums; linking to external datasets (Linked Open Data principles); metadata enrichment</p>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bulb"/></svg><span>Knowledge Reasoning</span></h3>
+          <p>Relationship inference; discovery of previously unknown or implicit relationships; graph-based reasoning</p>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-search"/></svg><span>Information Retrieval &amp; Access</span></h3>
+          <p>Discovery systems; semantic search; answering specialized competency questions through complex graph-pattern matching and multi-hop traversals</p>
+        </article>
+      </div>
+      <nav class="examples" aria-label="Examples">
+        <span class="examples-label">Examples</span>
+        <ul>
+          <li><a href="https://engineering.q42.nl/rijksmuseum-collection-online/" target="_blank" rel="noopener noreferrer">Searching @ Rijksmuseum</a></li>
+          <li><a href="https://lux.collections.yale.edu/content/about-lux-data" target="_blank" rel="noopener noreferrer">LUX @ Yale</a></li>
+          <li><a href="https://collex.lib.harvard.edu/how-system-works" target="_blank" rel="noopener noreferrer">Collections Explorer @ Harvard</a></li>
+          <li><a href="https://kompass.stabikat.de/" target="_blank" rel="noopener noreferrer">Recherche-Kompass @ SBB</a></li>
+          <li><a href="https://researchspace.org/knowledge-graph-and-patterns/" target="_blank" rel="noopener noreferrer">ResearchSpace</a></li>
+        </ul>
+      </nav>
+    </div>
+  </section>
+
+  <section id="experience" class="band b3" aria-labelledby="h-experience">
+    <div class="wrap">
+      <header class="sechead"><span class="num">03</span><h2 id="h-experience">Digital Experience</h2></header>
+      <div class="items wide">
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg><span>Information Visualization</span></h3>
+          <figure><img src="../img/visualization.png" alt="Selected visualization glyphs" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://jx2b3d.github.io/ds-essentials/dataviz.html" target="_blank" rel="noopener noreferrer">Data Visualization</a></li></ul>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-layers"/></svg><span>Objects in Context</span></h3>
+          <figure><img src="../img/okeeffe.png" alt="Screenshot of the O'Keeffe in Context prototype" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://gok-in-context-prototype.netlify.app/" target="_blank" rel="noopener noreferrer">O'Keeffe in Context</a></li></ul>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><span>Data Stories</span></h3>
+          <figure><img src="../img/restaging-fashion.png" alt="Screenshot of Restaging Fashion" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://uclab.fh-potsdam.de/refa/" target="_blank" rel="noopener noreferrer">Restaging Fashion</a></li></ul>
+        </article>
+        <div class="stack">
+          <article>
+            <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-film"/></svg><span>AV-Media Search</span></h3>
+            <figure><img src="../img/open-images.png" alt="Screenshot of the Open Images Browser" loading="lazy"></figure>
+            <ul class="links"><li><a href="https://open-images-browser.vercel.app/" target="_blank" rel="noopener noreferrer">Open Images Browser</a></li></ul>
+          </article>
+          <article>
+            <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-chat"/></svg><span>Other Features</span></h3>
+            <p>Conversational or natural-language queries; recommendation systems; similarity search</p>
+          </article>
+        </div>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-musicsearch"/></svg><span>Music Search</span></h3>
+          <figure><img src="../img/scoresearch.png" alt="Screenshot of musiconn ScoreSearch" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://scoresearch.musiconn.de/ScoreSearch/" target="_blank" rel="noopener noreferrer">ScoreSearch @ BSB</a></li></ul>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-headphones"/></svg><span>Audio Navigation</span></h3>
+          <figure><img src="../img/bird-sounds.png" alt="Screenshot of Bird Sounds" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://experiments.withgoogle.com/ai/bird-sounds/view/" target="_blank" rel="noopener noreferrer">Bird Sounds</a></li></ul>
+          <figure><img src="../img/citizenDJ.png" alt="Screenshot of Citizen DJ" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://citizen-dj.labs.loc.gov/loc-fma/explore/" target="_blank" rel="noopener noreferrer">Citizen DJ</a></li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="collaboration" class="band b4" aria-labelledby="h-collaboration">
+    <div class="wrap">
+      <header class="sechead"><span class="num">04</span><h2 id="h-collaboration">International Collaborations</h2></header>
+      <div class="items wide">
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-users"/></svg><span>Become an institutional member of AI4LAM</span></h3>
+          <figure><img src="../img/ai4lam.png" alt="Screenshot of the AI4LAM membership page" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://ai4lam.org/membership-for-organizations/" target="_blank" rel="noopener noreferrer">AI4LAM membership</a></li></ul>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-database"/></svg><span>Publish in-house trained models and datasets</span></h3>
+          <p>On international, openly accessible platforms (e.g. Hugging Face, Zenodo).</p>
+          <figure><img src="../img/huggingface.png" alt="Screenshot of the Hugging Face homepage" loading="lazy"></figure>
+          <ul class="links">
+            <li><a href="https://huggingface.co/Riksarkivet" target="_blank" rel="noopener noreferrer">Swedish National Archives</a></li>
+            <li><a href="https://huggingface.co/NbAiLab" target="_blank" rel="noopener noreferrer">National Library of Norway</a></li>
+          </ul>
+        </article>
+        <article>
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-notes"/></svg><span>Beethoven 2027</span></h3>
+          <p>Expansion of the ÖNB's digital collection on Beethoven with text and music encodings; collaboration with the project "Beethovens Werkstatt" on the occasion of his 200th death anniversary.</p>
+          <figure><img src="../img/beethoven.png" alt="Screenshot of the case study Beethovens Werkstatt" loading="lazy"></figure>
+          <ul class="links"><li><a href="https://www.beethovens-werkstatt.de/" target="_blank" rel="noopener noreferrer">Beethovens Werkstatt</a></li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap"><span>ÖNB Strategy</span><span>Ilias Kyriazis · November 2026</span></div></footer>
+</body>
+</html>
