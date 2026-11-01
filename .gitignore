@@ -3,3 +3,6 @@ ikyriazi.github.io - OLD 2/
 assets_original/
 # macOS
 .DS_Store
+
+# Claude Code
+.claude/
